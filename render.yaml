@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: smash-club-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore # Close proximity to India (Asia/Kolkata timezone)
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: MONGODB_URI
+        sync: false # Set in Render Dashboard: mongodb+srv://<username>:<password>@cluster0.mongodb.net/smashclub?retryWrites=true&w=majority
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://smash-club.vercel.app,http://localhost:4200

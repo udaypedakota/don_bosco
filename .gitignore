@@ -1,0 +1,30 @@
+# Environment and Secrets
+.env
+.env.local
+*.env
+
+# Java & Maven
+target/
+*.class
+*.jar
+*.war
+.m2/
+
+# Node & Angular
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs & System
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
