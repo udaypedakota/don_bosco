@@ -1,0 +1,372 @@
+import { Component, inject, signal, computed, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ClubService } from './services/club.service';
+import { Player, Game } from './models/club.models';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
+})
+export class App {
+  clubService = inject(ClubService);
+
+  constructor() {
+    effect(() => {
+      const players = this.clubService.players();
+      if (players.length > 0) {
+        if (!this.gamePaidBy() || !players.some(p => p.id === this.gamePaidBy())) {
+          const phani = players.find(p => p.name.toLowerCase() === 'phani') || 
+                        players.find(p => p.role === 'admin') || 
+                        players[0];
+          this.gamePaidBy.set(phani.id);
+        }
+        if (this.gameAttendees().length === 0) {
+          this.gameAttendees.set(players.map(p => p.id));
+        }
+      }
+    });
+  }
+
+  // Login Form State
+  loginRole = signal<'admin' | 'player'>('admin');
+  loginIdentifier = signal<string>('Phani');
+  loginPassword = signal<string>('admin');
+  loginError = signal<string | null>(null);
+
+  // Dynamic Add Player Form
+  newPlayerName = signal<string>('');
+  newPlayerPhone = signal<string>('');
+  newPlayerRole = signal<'player' | 'admin'>('player');
+  playerFormError = signal<string | null>(null);
+
+  // Dynamic Game Session (Today / Tomorrow / Custom Date)
+  gameDate = signal<string>(new Date().toISOString().split('T')[0]);
+  gameVenue = signal<string>('Smash Arena Court 1');
+  gameCourtRent = signal<number>(1200);
+  gameShuttleCost = signal<number>(0);
+  gamePaidBy = signal<string>('p-phani');
+  gameAttendees = signal<string[]>([]);
+  gameNotes = signal<string>('');
+
+  // Payment Recording Form
+  payPlayerId = signal<string>('');
+  payAmount = signal<number>(300);
+  payMode = signal<'UPI' | 'Cash'>('UPI');
+
+  // Modals & Panels
+  showAddPlayerModal = signal<boolean>(false);
+  showPaymentModal = signal<boolean>(false);
+  showAtlasModal = signal<boolean>(false);
+  showUpiModal = signal<boolean>(false);
+  showClaimModal = signal<boolean>(false);
+  claimUtr = signal<string>('');
+  toastMessage = signal<string | null>(null);
+
+  // Atlas Password input
+  atlasPassword = signal<string>('');
+  atlasConnecting = signal<boolean>(false);
+  atlasFeedback = signal<{ success: boolean; message: string } | null>(null);
+
+  // Computed Values
+  currentUser = computed(() => this.clubService.currentUser());
+  isAdmin = computed(() => this.currentUser()?.role === 'admin');
+
+  totalGameExpense = computed(() => {
+    return (Number(this.gameCourtRent()) || 0) + (Number(this.gameShuttleCost()) || 0);
+  });
+
+  perPlayerShare = computed(() => {
+    const total = this.totalGameExpense();
+    const count = this.gameAttendees().length;
+    return count > 0 ? (total / count).toFixed(2) : '0.00';
+  });
+
+  // Current logged in player's personal details
+  myPlayerRecord = computed(() => {
+    const u = this.currentUser();
+    if (!u) return null;
+    return this.clubService.players().find(p => p.id === u.id || p.phone === u.phone) || null;
+  });
+
+  myPendingPayment = computed(() => {
+    const u = this.currentUser();
+    if (!u) return null;
+    return this.clubService.payments().find(p => p.playerId === u.id && p.status === 'pending') || null;
+  });
+
+  pendingClaimsCount = computed(() => this.clubService.pendingPayments().length);
+
+  myAttendedGames = computed(() => {
+    const u = this.currentUser();
+    if (!u) return [];
+    return this.clubService.games().filter(g => g.attendees.includes(u.id));
+  });
+
+  // ==========================================================================
+  // AUTHENTICATION
+  // ==========================================================================
+  submitLogin(): void {
+    this.loginError.set(null);
+    const id = this.loginIdentifier().trim();
+    if (!id) {
+      this.loginError.set('Please enter your Name or Phone number');
+      return;
+    }
+
+    this.clubService.login(id, this.loginPassword().trim(), this.loginRole()).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.showToast(`✨ Welcome, ${res.user.name}!`);
+          // Auto select all players as attendees by default for convenience
+          this.gameAttendees.set(this.clubService.players().map(p => p.id));
+          const adminP = this.clubService.players().find(p => p.role === 'admin');
+          if (adminP) {
+            this.gamePaidBy.set(adminP.id);
+          }
+        }
+      },
+      error: (err: any) => {
+        this.loginError.set(err.error?.error || 'Login failed. Check name or phone.');
+      }
+    });
+  }
+
+  logout(): void {
+    this.clubService.logout();
+    this.showToast('Logged out successfully');
+  }
+
+  // ==========================================================================
+  // DYNAMIC GAME SCHEDULING (Today, Tomorrow, Any Date)
+  // ==========================================================================
+  setToday(): void {
+    this.gameDate.set(new Date().toISOString().split('T')[0]);
+  }
+
+  setTomorrow(): void {
+    const tom = new Date();
+    tom.setDate(tom.getDate() + 1);
+    this.gameDate.set(tom.toISOString().split('T')[0]);
+  }
+
+  setCourtPreset(amount: number): void {
+    this.gameCourtRent.set(amount);
+  }
+
+  toggleAttendee(playerId: string): void {
+    const current = this.gameAttendees();
+    if (current.includes(playerId)) {
+      if (current.length > 1) {
+        this.gameAttendees.set(current.filter(id => id !== playerId));
+      } else {
+        this.showToast('Select at least 1 attendee to split the court.');
+      }
+    } else {
+      this.gameAttendees.set([...current, playerId]);
+    }
+  }
+
+  isAttendeeSelected(playerId: string): boolean {
+    return this.gameAttendees().includes(playerId);
+  }
+
+  // Save game to MongoDB Atlas and split amongst attendees
+  saveGameAndSplit(): void {
+    const total = this.totalGameExpense();
+    const count = this.gameAttendees().length;
+    if (total <= 0) {
+      this.showToast('Please enter a valid court booking fee');
+      return;
+    }
+    if (count === 0) {
+      this.showToast('Please select at least 1 player who played');
+      return;
+    }
+
+    const payer = this.clubService.players().find(p => p.id === this.gamePaidBy());
+
+    this.clubService.addGame({
+      venue: this.gameVenue(),
+      date: this.gameDate(),
+      courtRent: Number(this.gameCourtRent()),
+      shuttleCost: Number(this.gameShuttleCost()),
+      paidByPlayerId: this.gamePaidBy() || this.currentUser()?.id || 'p-admin',
+      paidByPlayerName: payer ? payer.name : (this.currentUser()?.name || 'Phani'),
+      attendees: this.gameAttendees(),
+      notes: this.gameNotes() || `Court ₹${this.gameCourtRent()} on ${this.gameDate()}`
+    }).subscribe(() => {
+      this.showToast(`✨ Saved to Database! Each attendee owes ₹${this.perPlayerShare()}`);
+    });
+  }
+
+  // ==========================================================================
+  // DYNAMIC PLAYERS (Add, Delete)
+  // ==========================================================================
+  submitAddPlayer(): void {
+    this.playerFormError.set(null);
+    const name = this.newPlayerName().trim();
+    const phone = this.newPlayerPhone().trim().replace(/\D/g, '');
+
+    if (!name) {
+      this.playerFormError.set('Player name is required');
+      return;
+    }
+    if (phone.length !== 10) {
+      this.playerFormError.set('Phone must be exactly 10 digits');
+      return;
+    }
+
+    this.clubService.addPlayer({
+      name,
+      phone,
+      role: this.newPlayerRole()
+    }).subscribe({
+      next: (newP) => {
+        this.showAddPlayerModal.set(false);
+        this.newPlayerName.set('');
+        this.newPlayerPhone.set('');
+        // Add to attendees list automatically
+        this.gameAttendees.update(list => [...list, newP.id]);
+        this.showToast(`👤 ${name} added to Database!`);
+      },
+      error: (err) => {
+        this.playerFormError.set(err.error?.error || 'Failed to add player');
+      }
+    });
+  }
+
+  deletePlayer(id: string, name: string): void {
+    if (confirm(`Remove ${name} from Smash Club?`)) {
+      this.clubService.deletePlayer(id).subscribe(() => {
+        this.gameAttendees.update(list => list.filter(pId => pId !== id));
+        this.showToast(`Removed ${name}`);
+      });
+    }
+  }
+
+  // ==========================================================================
+  // PAYMENTS & SETTLEMENTS
+  // ==========================================================================
+  openPaymentFor(player: Player): void {
+    this.payPlayerId.set(player.id);
+    this.payAmount.set(player.balance < 0 ? Math.abs(player.balance) : 300);
+    this.showPaymentModal.set(true);
+  }
+
+  submitPayment(): void {
+    const amount = Number(this.payAmount());
+    if (amount <= 0) {
+      this.showToast('Please enter a valid amount');
+      return;
+    }
+
+    this.clubService.recordPayment({
+      playerId: this.payPlayerId(),
+      amount,
+      mode: this.payMode()
+    }).subscribe(() => {
+      this.showPaymentModal.set(false);
+      this.showToast(`✅ Payment of ₹${amount} saved and balance updated!`);
+    });
+  }
+
+  openMyUpiQr(): void {
+    const p = this.myPlayerRecord();
+    this.payAmount.set(p && p.balance < 0 ? Math.abs(p.balance) : 300);
+    this.showUpiModal.set(true);
+  }
+
+  submitPaymentClaim(): void {
+    const p = this.myPlayerRecord();
+    if (!p || p.balance >= 0) {
+      this.showToast('You do not have any pending dues!');
+      return;
+    }
+    const dueAmt = Math.abs(p.balance);
+    this.clubService.claimPayment({
+      playerId: p.id,
+      amount: dueAmt,
+      utr: this.claimUtr().trim(),
+      mode: 'UPI'
+    }).subscribe({
+      next: () => {
+        this.showClaimModal.set(false);
+        this.showUpiModal.set(false);
+        this.claimUtr.set('');
+        this.showToast('✅ Payment reported! Phani will verify and approve.');
+      },
+      error: () => {
+        this.showToast('Failed to submit claim. Please try again.');
+      }
+    });
+  }
+
+  approveClaim(paymentId: string): void {
+    this.clubService.approvePayment(paymentId).subscribe({
+      next: () => {
+        this.showToast('✅ Payment approved! Player dues settled in MongoDB Atlas.');
+      },
+      error: () => {
+        this.showToast('Error approving payment.');
+      }
+    });
+  }
+
+  rejectClaim(paymentId: string): void {
+    this.clubService.rejectPayment(paymentId).subscribe({
+      next: () => {
+        this.showToast('Payment claim rejected.');
+      },
+      error: () => {
+        this.showToast('Error rejecting payment.');
+      }
+    });
+  }
+
+  // ==========================================================================
+  // MONGODB ATLAS PASSWORD SAVE
+  // ==========================================================================
+  saveAtlasPassword(): void {
+    const pwd = this.atlasPassword().trim();
+    if (!pwd) {
+      this.atlasFeedback.set({ success: false, message: 'Please enter your MongoDB Atlas password' });
+      return;
+    }
+
+    this.atlasConnecting.set(true);
+    this.atlasFeedback.set(null);
+
+    this.clubService.setAtlasPassword(pwd).subscribe({
+      next: (res) => {
+        this.atlasConnecting.set(false);
+        this.atlasFeedback.set(res);
+        if (res.success) {
+          this.showToast('⚡ Connected to badmintiondatabase MongoDB Atlas!');
+        }
+      },
+      error: (err) => {
+        this.atlasConnecting.set(false);
+        this.atlasFeedback.set({
+          success: false,
+          message: err.error?.message || 'Connection failed. Check password & Atlas IP Access (0.0.0.0/0).'
+        });
+      }
+    });
+  }
+
+  showToast(msg: string): void {
+    this.toastMessage.set(msg);
+    setTimeout(() => {
+      this.toastMessage.set(null);
+    }, 3500);
+  }
+
+  getPlayerName(id: string): string {
+    const p = this.clubService.players().find(pl => pl.id === id);
+    return p ? p.name : id;
+  }
+}

@@ -1,0 +1,773 @@
+<!-- ==========================================================================
+     SMASH CLUB — VIBRANT ATHLETIC SPORTS THEME
+     Bright Blue, Sunshine Yellow, Crisp White · 100% Dynamic MongoDB Atlas
+     ========================================================================== -->
+
+<div class="app-wrapper">
+  
+  <!-- ========================================================================
+       TOP HEADER (Clean, Bright, Athletic)
+       ======================================================================== -->
+  <header class="bright-header">
+    <div class="container header-inner">
+      <!-- Brand Logo -->
+      <div class="brand-group">
+        <div class="brand-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            <circle cx="12" cy="19" r="2.5" fill="#F59E0B" stroke="#F59E0B"/>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <span class="brand-title">SMASH<span class="text-blue">CLUB</span></span>
+          <span class="brand-sub">Dynamic Cloud Court Splitter</span>
+        </div>
+      </div>
+
+      <!-- Header Right: MongoDB Atlas Status & User Session -->
+      <div class="header-right">
+        <!-- Live MongoDB Atlas Cluster Status Pill -->
+        <div class="atlas-cloud-badge" [class.is-connected]="clubService.atlasStatus().connected" (click)="showAtlasModal.set(true)">
+          <div class="pulse-circle" [class.online]="clubService.atlasStatus().connected" [class.pending]="!clubService.atlasStatus().connected"></div>
+          <div class="atlas-badge-text">
+            <span class="atlas-host-title">{{ clubService.atlasStatus().connected ? 'Atlas: badmintiondatabase' : 'MongoDB Atlas' }}</span>
+            <span class="atlas-host-sub">{{ clubService.atlasStatus().connected ? 'Live Connected' : 'Checking connection...' }}</span>
+          </div>
+          <span class="cloud-ico">☁️</span>
+        </div>
+
+        <!-- User Session Indicator & Logout -->
+        @if (currentUser()) {
+          <div class="user-pill">
+            <div class="user-avatar-tag" [class.admin-bg]="isAdmin()">
+              {{ currentUser()?.name?.slice(0, 2)?.toUpperCase() }}
+            </div>
+            <div class="user-details">
+              <strong class="user-display-name">{{ currentUser()?.name }}</strong>
+              <span class="user-role-label">{{ isAdmin() ? '👑 Admin (Court Booker)' : '👤 Player' }}</span>
+            </div>
+            <button class="btn-logout" (click)="logout()" title="Sign Out" aria-label="Sign Out">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="logout-icon-svg">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       SCREEN 1: VIBRANT ANIMATED LOGIN PAGE (When NOT Logged In)
+       Inspired by Chrome for Developers & Vector Sports Smash Illustration
+       ======================================================================== -->
+  @if (!currentUser()) {
+    <main class="login-page-wrapper animate-fade">
+      <div class="login-split-card">
+        
+        <!-- Left Side: Vibrant Blue & Yellow Sports Illustration Panel -->
+        <div class="login-art-panel">
+          <!-- Geometric Yellow Arc Background -->
+          <div class="yellow-half-circle"></div>
+          <div class="blue-accent-shape"></div>
+
+          <!-- Floating Badminton Racket Badge (Image 2 Style) -->
+          <div class="floating-mini-badge float-anim-delayed">
+            <img src="assets/smash-badge.jpg" alt="Badminton Badge" class="badge-img">
+          </div>
+
+          <!-- Hero Jumping Smash Illustration (Image 1 Style) -->
+          <div class="hero-image-wrap float-anim">
+            <img src="assets/smash-player.jpg" alt="Badminton Jump Smash" class="hero-player-img">
+            <div class="speed-lines"></div>
+          </div>
+
+          <!-- Bottom Art Captions -->
+          <div class="art-captions">
+            <span class="badge badge-yellow">⚡ MongoDB Atlas Cloud</span>
+            <h2 class="art-title">Court Booking & <br>Smart Expense Split</h2>
+            <p class="art-desc">Phani books the court. Siva, Uday, Nani & everyone track their dues and pay via UPI!</p>
+          </div>
+        </div>
+
+        <!-- Right Side: Clean White Login Form Card -->
+        <div class="login-form-panel">
+          <div class="form-header">
+            <span class="badge badge-blue">Welcome Back</span>
+            <h1 class="welcome-heading">Sign In to Smash Club</h1>
+            <p class="welcome-sub">Choose your login role below to access your account:</p>
+          </div>
+
+          <!-- Role Toggle: Admin vs Player -->
+          <div class="role-tabs">
+            <button type="button" class="role-tab-btn" [class.active]="loginRole() === 'admin'" (click)="loginRole.set('admin'); loginIdentifier.set('Phani')">
+              <span class="tab-emoji">👑</span>
+              <div class="tab-text-wrap">
+                <strong>Admin Login</strong>
+                <small>Court Booker (Phani)</small>
+              </div>
+            </button>
+            <button type="button" class="role-tab-btn" [class.active]="loginRole() === 'player'" (click)="loginRole.set('player'); loginIdentifier.set('')">
+              <span class="tab-emoji">👤</span>
+              <div class="tab-text-wrap">
+                <strong>Player Login</strong>
+                <small>View Dues & Pay UPI</small>
+              </div>
+            </button>
+          </div>
+
+          @if (loginError()) {
+            <div class="banner banner-error animate-fade">{{ loginError() }}</div>
+          }
+
+          <form (ngSubmit)="submitLogin()" class="auth-form">
+            <div class="form-field">
+              <label class="field-label">
+                {{ loginRole() === 'admin' ? 'Admin Username or Phone' : 'Your Name or 10-Digit Phone' }}
+              </label>
+              <input type="text" class="form-input" [placeholder]="loginRole() === 'admin' ? 'Phani' : 'e.g. Siva or 9848012346'" [ngModel]="loginIdentifier()" (ngModelChange)="loginIdentifier.set($event)" name="identifier">
+            </div>
+
+            @if (loginRole() === 'admin') {
+              <div class="form-field">
+                <label class="field-label">Admin Password</label>
+                <input type="password" class="form-input mono" placeholder="admin" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="password">
+                <span class="field-hint">Phani's default password is <code>admin</code></span>
+              </div>
+            }
+
+            <!-- 1-Click Quick Player Select Pills (For Player Login) -->
+            @if (loginRole() === 'player') {
+              <div class="quick-player-picks">
+                <span class="pick-label">Quick select registered players:</span>
+                <div class="picks-grid">
+                  @for (player of clubService.players(); track player.id) {
+                    <button type="button" class="pick-pill" [class.selected-pill]="loginIdentifier() === player.name" (click)="loginIdentifier.set(player.name)">
+                      <span>🏸</span> {{ player.name }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 14px;">
+              <span>⚡</span> Sign In as {{ loginRole() === 'admin' ? 'Admin (Phani)' : 'Player' }}
+            </button>
+          </form>
+
+          <div class="form-footer-note">
+            <p>
+              @if (loginRole() === 'admin') {
+                Logged in as Admin? You can add/delete players and schedule games for today, tomorrow, or any date!
+              } @else {
+                Not listed? Ask Phani (Admin) to add your name to the court roster.
+              }
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  }
+
+  <!-- ========================================================================
+       SCREEN 2: ADMIN DASHBOARD (Logged in as Phani / Admin)
+       ======================================================================== -->
+  @if (currentUser() && isAdmin()) {
+    <main class="container main-layout animate-fade">
+      
+      <!-- 0. PENDING PAYMENT APPROVALS (Claims submitted by players) -->
+      @if (clubService.pendingPayments().length > 0) {
+        <section class="bright-card pending-approvals-card animate-fade">
+          <div class="card-title-row" style="margin-bottom: 16px;">
+            <div>
+              <span class="badge badge-yellow">🔔 Action Needed</span>
+              <h3 class="card-title" style="margin-top: 4px;">Pending Payment Claims ({{ clubService.pendingPayments().length }})</h3>
+              <p class="card-caption">Players reported that they transferred court dues via UPI. Verify on your PhonePe / GPay and approve:</p>
+            </div>
+          </div>
+
+          <div class="pending-claims-grid">
+            @for (claim of clubService.pendingPayments(); track claim.id) {
+              <div class="pending-claim-item">
+                <div class="claim-left">
+                  <div class="player-avatar-circle">{{ claim.playerName.slice(0, 2).toUpperCase() }}</div>
+                  <div class="claim-details">
+                    <strong class="claim-name">{{ claim.playerName }}</strong>
+                    <div class="mono muted-text" style="font-size: 0.8rem;">
+                      {{ claim.date }} · Mode: {{ claim.mode }} · UTR: {{ claim.utr }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="claim-amount mono text-blue">
+                  ₹{{ claim.amount }}
+                </div>
+
+                <div class="claim-actions">
+                  <button class="btn btn-primary btn-sm" (click)="approveClaim(claim.id)">
+                    <span>✓</span> Approve & Settle Due
+                  </button>
+                  <button class="btn btn-secondary btn-sm" (click)="rejectClaim(claim.id)">
+                    ✕ Reject
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- 1. DYNAMIC COURT SPLIT HERO (Today, Tomorrow, Any Date) -->
+      <section class="bright-card hero-split-card">
+        <div class="card-title-row">
+          <div>
+            <span class="badge badge-yellow">🏸 Court Session Booking</span>
+            <h2 class="card-heading">Schedule & Split Court Game</h2>
+            <p class="card-caption">All recorded games and player shares save directly to MongoDB Atlas cloud database!</p>
+          </div>
+
+          <!-- Date Selector Buttons -->
+          <div class="date-selector-bar">
+            <button type="button" class="date-chip" [class.active-chip]="gameDate() === (gameDate())" (click)="setToday()">
+              Today's Game
+            </button>
+            <button type="button" class="date-chip" (click)="setTomorrow()">
+              Tomorrow's Game
+            </button>
+            <input type="date" class="date-input mono" [ngModel]="gameDate()" (ngModelChange)="gameDate.set($event)">
+          </div>
+        </div>
+
+        <!-- Court Booking Amounts & Presets -->
+        <div class="court-inputs-grid">
+          <div class="court-fee-panel">
+            <label class="field-label">Court Booking Fee (INR)</label>
+            <div class="big-currency-box">
+              <span class="cur-symbol">₹</span>
+              <input type="number" class="big-input mono" [ngModel]="gameCourtRent()" (ngModelChange)="gameCourtRent.set(+$event)">
+            </div>
+            
+            <!-- Quick Preset Pills -->
+            <div class="presets-row">
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 800" (click)="setCourtPreset(800)">₹800</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 1000" (click)="setCourtPreset(1000)">₹1000</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 1200" (click)="setCourtPreset(1200)">₹1200</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 1500" (click)="setCourtPreset(1500)">₹1500</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 2000" (click)="setCourtPreset(2000)">₹2000</button>
+            </div>
+          </div>
+
+          <div class="court-sub-panel">
+            <div class="form-field">
+              <label class="field-label">Venue / Court Name</label>
+              <input type="text" class="form-input" placeholder="Smash Arena Court 1" [ngModel]="gameVenue()" (ngModelChange)="gameVenue.set($event)">
+            </div>
+
+            <div class="form-field" style="margin-top: 10px;">
+              <label class="field-label">Paid Upfront By</label>
+              <select class="form-select" [ngModel]="gamePaidBy()" (ngModelChange)="gamePaidBy.set($event)">
+                @for (p of clubService.players(); track p.id) {
+                  <option [value]="p.id">{{ p.name }} ({{ p.role }})</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Who is Playing? (Attendees Selector from Dynamic Database) -->
+        <div class="attendees-box">
+          <div class="attendees-top">
+            <label class="field-label">
+              Who is Playing? ({{ gameAttendees().length }} Selected)
+            </label>
+            <span class="field-hint">Tap players who attended today to calculate equal split</span>
+          </div>
+
+          <div class="players-toggle-grid">
+            @for (player of clubService.players(); track player.id) {
+              <div class="player-toggle-btn" [class.is-selected]="isAttendeeSelected(player.id)" (click)="toggleAttendee(player.id)">
+                <div class="player-avatar-circle" [class.admin-circle]="player.role === 'admin'">
+                  {{ player.name.slice(0, 2).toUpperCase() }}
+                </div>
+                <div class="player-btn-name">{{ player.name }}</div>
+                <div class="check-bubble">
+                  {{ isAttendeeSelected(player.id) ? '✓' : '+' }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Live Split Formula & Save Button -->
+        <div class="split-footer-bar">
+          <div class="formula-display">
+            <div class="formula-box">
+              <span class="form-lbl">Court Cost</span>
+              <span class="form-val mono text-blue">₹{{ totalGameExpense() }}</span>
+            </div>
+            <span class="math-op">÷</span>
+            <div class="formula-box">
+              <span class="form-lbl">Players</span>
+              <span class="form-val mono">{{ gameAttendees().length }} Attendees</span>
+            </div>
+            <span class="math-op">=</span>
+            <div class="formula-box highlight-share">
+              <span class="form-lbl">Per Player Share</span>
+              <span class="form-val mono result-share">₹{{ perPlayerShare() }}</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg" (click)="saveGameAndSplit()">
+            <span>💾</span> Save Game to MongoDB & Split
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. DYNAMIC PLAYERS ROSTER & BALANCES TABLE -->
+      <section class="bright-card roster-card">
+        <div class="card-title-row">
+          <div>
+            <h3 class="card-title">Club Players Roster & Balances</h3>
+            <p class="card-caption">Manage registered players and view real-time dues stored in MongoDB Atlas</p>
+          </div>
+          <button class="btn btn-yellow btn-sm" (click)="showAddPlayerModal.set(true)">
+            <span>+</span> Add New Player
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="bright-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Current Balance</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (player of clubService.players(); track player.id) {
+                <tr>
+                  <td>
+                    <div class="table-user-cell">
+                      <div class="table-avatar" [class.admin-avatar]="player.role === 'admin'">
+                        {{ player.name.slice(0, 2).toUpperCase() }}
+                      </div>
+                      <div>
+                        <strong>{{ player.name }}</strong>
+                        <div class="table-sub">{{ player.totalGames }} games played</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="mono muted-text">+91 {{ player.phone }}</td>
+                  <td>
+                    <span class="badge" [class.badge-blue]="player.role === 'admin'" [class.badge-yellow]="player.role !== 'admin'">
+                      {{ player.role }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="balance-figure mono" [class.is-due]="player.balance < 0" [class.is-settled]="player.balance >= 0">
+                      {{ player.balance >= 0 ? '+' : '' }}₹{{ player.balance }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (player.balance < 0) {
+                      <span class="badge badge-red">Owes ₹{{ -player.balance }}</span>
+                    } @else if (player.balance > 0) {
+                      <span class="badge badge-green">Credit +₹{{ player.balance }}</span>
+                    } @else {
+                      <span class="badge" style="background: #F1F5F9; color: #64748B;">Settled</span>
+                    }
+                  </td>
+                  <td style="text-align: right;">
+                    <button class="btn btn-sm btn-secondary" (click)="openPaymentFor(player)">
+                      Record Payment
+                    </button>
+                    @if (player.role !== 'admin') {
+                      <button class="btn btn-sm btn-secondary" style="margin-left: 6px; color: #EF4444;" (click)="deletePlayer(player.id, player.name)">
+                        ✕
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. DATABASE SAVED GAMES -->
+      <section class="bright-card games-history-card">
+        <div class="card-title-row">
+          <div>
+            <h3 class="card-title">Recorded Game Sessions (MongoDB Atlas)</h3>
+            <p class="card-caption">All court sessions recorded in your cloud database</p>
+          </div>
+        </div>
+
+        <div class="games-feed">
+          @for (game of clubService.games(); track game.id) {
+            <div class="game-feed-item">
+              <div class="feed-left">
+                <span class="venue-name">{{ game.venue }}</span>
+                <span class="date-tag mono">📅 {{ game.date }} · Paid upfront by {{ game.paidByPlayerName }}</span>
+              </div>
+              <div class="feed-chips">
+                @for (pId of game.attendees; track pId) {
+                  <span class="attendee-tag">{{ getPlayerName(pId) }}</span>
+                }
+              </div>
+              <div class="feed-total mono">
+                Total: ₹{{ game.totalExpense }}
+                <span class="split-each">({{ game.attendees.length }} players · ₹{{ game.perPlayerShare }}/each)</span>
+              </div>
+            </div>
+          }
+          @if (clubService.games().length === 0) {
+            <p class="muted-text" style="padding: 16px;">No games recorded yet. Schedule a session above!</p>
+          }
+        </div>
+      </section>
+    </main>
+  }
+
+  <!-- ========================================================================
+       SCREEN 3: PLAYER PORTAL (Logged in as Player: Siva, Uday, Nani...)
+       ======================================================================== -->
+  @if (currentUser() && !isAdmin()) {
+    <main class="container main-layout animate-fade">
+      <section class="bright-card player-hero-card">
+        
+        <!-- Welcome Banner & Dues -->
+        <div class="player-top-row">
+          <div class="player-welcome-box">
+            <div class="welcome-avatar">
+              {{ currentUser()?.name?.slice(0, 2)?.toUpperCase() }}
+            </div>
+            <div>
+              <h1 class="welcome-title">Hello, {{ currentUser()?.name }}!</h1>
+              <div class="welcome-meta mono">📱 +91 {{ currentUser()?.phone }} · Smash Club Player Account</div>
+            </div>
+          </div>
+
+          <div class="due-banner-box" [class.has-debt]="(myPlayerRecord()?.balance || 0) < 0">
+            @if (myPendingPayment()) {
+              <div class="due-info">
+                <span class="due-lbl">Payment Status</span>
+                <span class="due-val mono text-yellow">Pending Phani's Approval</span>
+              </div>
+              <div class="badge badge-yellow" style="padding: 10px 16px; font-weight: 700; font-size: 0.9rem;">
+                ⏳ ₹{{ myPendingPayment()?.amount }} Reported via UPI
+              </div>
+            } @else if ((myPlayerRecord()?.balance || 0) < 0) {
+              <div class="due-info">
+                <span class="due-lbl">Current Amount You Owe</span>
+                <span class="due-val mono text-red">₹{{ -(myPlayerRecord()?.balance || 0) }}</span>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-lg" (click)="openMyUpiQr()">
+                  <span>⚡</span> Pay via UPI QR
+                </button>
+                <button class="btn btn-yellow btn-lg" (click)="showClaimModal.set(true)">
+                  <span>✓</span> I Have Paid
+                </button>
+              </div>
+            } @else {
+              <div class="due-info">
+                <span class="due-lbl">Account Standing</span>
+                <span class="due-val mono text-green">All Settled (₹0)</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- UPI QR Scanner & Attended Sessions -->
+        <div class="player-content-grid">
+          <div class="upi-box">
+            <div class="upi-card-head">
+              <span class="badge badge-blue">Official Club UPI</span>
+              <span class="vpa-text mono">smashclub@okhdfcbank</span>
+            </div>
+
+            <!-- Stylized Athletic QR Code -->
+            <div class="qr-box">
+              <svg viewBox="0 0 160 160" class="qr-svg-bright">
+                <rect width="160" height="160" rx="16" fill="#F8FAFC" stroke="#BFDBFE" stroke-width="2"/>
+                <rect x="20" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
+                <rect x="25" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
+                <rect x="29" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
+
+                <rect x="106" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
+                <rect x="111" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
+                <rect x="115" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
+
+                <rect x="20" y="106" width="34" height="34" rx="6" fill="#2563EB"/>
+                <rect x="25" y="111" width="24" height="24" rx="3" fill="#FFFFFF"/>
+                <rect x="29" y="115" width="16" height="16" rx="2" fill="#2563EB"/>
+
+                <circle cx="70" cy="35" r="4" fill="#2563EB"/>
+                <circle cx="85" cy="40" r="3" fill="#F59E0B"/>
+                <circle cx="75" cy="70" r="5" fill="#2563EB"/>
+                <circle cx="95" cy="80" r="4" fill="#3B82F6"/>
+                <circle cx="70" cy="115" r="4" fill="#F59E0B"/>
+                <circle cx="85" cy="120" r="5" fill="#2563EB"/>
+                <circle cx="120" cy="95" r="4" fill="#2563EB"/>
+                <circle cx="110" cy="115" r="3" fill="#3B82F6"/>
+                <circle cx="125" cy="125" r="4" fill="#F59E0B"/>
+              </svg>
+            </div>
+            <p class="qr-hint">Scan with GPay, PhonePe, or Paytm</p>
+
+            @if ((myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
+              <button class="btn btn-yellow btn-block" style="margin-top: 14px;" (click)="showClaimModal.set(true)">
+                <span>✓</span> I Have Paid ₹{{ -(myPlayerRecord()?.balance || 0) }} via UPI
+              </button>
+            }
+          </div>
+
+          <!-- Sessions Attended by this player -->
+          <div class="my-sessions-panel">
+            <h3 class="panel-heading">Sessions You Attended ({{ myAttendedGames().length }})</h3>
+            <div class="sessions-feed">
+              @for (game of myAttendedGames(); track game.id) {
+                <div class="session-card">
+                  <div>
+                    <strong>{{ game.venue }}</strong>
+                    <div class="muted-text mono">{{ game.date }} · Total Court Fee: ₹{{ game.totalExpense }}</div>
+                  </div>
+                  <div class="share-badge mono">
+                    Your Share: ₹{{ game.perPlayerShare }}
+                  </div>
+                </div>
+              }
+              @if (myAttendedGames().length === 0) {
+                <p class="muted-text">You haven't attended any recorded games yet.</p>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  }
+
+  <!-- ========================================================================
+       MODAL 1: ADD NEW PLAYER (Direct MongoDB Save)
+       ======================================================================== -->
+  @if (showAddPlayerModal()) {
+    <div class="modal-overlay" (click)="showAddPlayerModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Add New Player to MongoDB</h3>
+          <button class="modal-close" (click)="showAddPlayerModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          @if (playerFormError()) {
+            <div class="banner banner-error">{{ playerFormError() }}</div>
+          }
+
+          <div class="form-field">
+            <label class="field-label">Player Full Name</label>
+            <input type="text" class="form-input" placeholder="e.g. Ramesh" [ngModel]="newPlayerName()" (ngModelChange)="newPlayerName.set($event)">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Phone Number (10 Digits)</label>
+            <input type="text" class="form-input mono" placeholder="9848012345" maxlength="10" [ngModel]="newPlayerPhone()" (ngModelChange)="newPlayerPhone.set($event)">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Role</label>
+            <select class="form-select" [ngModel]="newPlayerRole()" (ngModelChange)="newPlayerRole.set($event)">
+              <option value="player">Player (Standard Account)</option>
+              <option value="admin">Admin (Court Booker)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="showAddPlayerModal.set(false)">Cancel</button>
+          <button class="btn btn-primary" (click)="submitAddPlayer()">Save Player to MongoDB</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL 2: RECORD PAYMENT
+       ======================================================================== -->
+  @if (showPaymentModal()) {
+    <div class="modal-overlay" (click)="showPaymentModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Record Payment Received</h3>
+          <button class="modal-close" (click)="showPaymentModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-field">
+            <label class="field-label">Player</label>
+            <select class="form-select" [ngModel]="payPlayerId()" (ngModelChange)="payPlayerId.set($event)">
+              @for (p of clubService.players(); track p.id) {
+                <option [value]="p.id">{{ p.name }} (Balance: ₹{{ p.balance }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Amount Received (INR)</label>
+            <input type="number" class="form-input mono" [ngModel]="payAmount()" (ngModelChange)="payAmount.set(+$event)">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Payment Mode</label>
+            <select class="form-select" [ngModel]="payMode()" (ngModelChange)="payMode.set($event)">
+              <option value="UPI">UPI (GPay / PhonePe / Paytm)</option>
+              <option value="Cash">Cash Handover</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="showPaymentModal.set(false)">Cancel</button>
+          <button class="btn btn-primary" (click)="submitPayment()">Record & Clear Debt</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL 3: MONGODB ATLAS CLUSTER STATUS
+       ======================================================================== -->
+  @if (showAtlasModal()) {
+    <div class="modal-overlay" (click)="showAtlasModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">MongoDB Atlas Cloud Connection</h3>
+          <button class="modal-close" (click)="showAtlasModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="atlas-status-card" [class.connected]="clubService.atlasStatus().connected">
+            <div class="pulse-circle" [class.online]="clubService.atlasStatus().connected" [class.pending]="!clubService.atlasStatus().connected"></div>
+            <div>
+              <strong>{{ clubService.atlasStatus().connected ? 'Connected to badmintiondatabase!' : 'Connecting to Atlas...' }}</strong>
+              <div class="mono muted-text">Cluster: badmintiondatabase.vizmqp0.mongodb.net</div>
+              <div class="mono muted-text">User: ramukorla3_db_user</div>
+            </div>
+          </div>
+          <p class="muted-text" style="margin-top: 14px; font-size: 0.88rem;">
+            All player accounts and game sessions are synced live to MongoDB Atlas cloud database.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" (click)="showAtlasModal.set(false)">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL 4: UPI QR CODE
+       ======================================================================== -->
+  @if (showUpiModal()) {
+    <div class="modal-overlay" (click)="showUpiModal.set(false)">
+      <div class="modal-card qr-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Pay via UPI</h3>
+          <button class="modal-close" (click)="showUpiModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body" style="text-align: center;">
+          <div class="upi-pay-figure mono">₹{{ payAmount() }}</div>
+          <p class="muted-text">Scan with GPay or PhonePe to pay <strong>smashclub@okhdfcbank</strong></p>
+
+          <div class="qr-wrapper-center">
+            <svg viewBox="0 0 160 160" class="qr-svg-bright">
+              <rect width="160" height="160" rx="16" fill="#F8FAFC" stroke="#BFDBFE" stroke-width="2"/>
+              <rect x="20" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
+              <rect x="25" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
+              <rect x="29" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
+
+              <rect x="106" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
+              <rect x="111" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
+              <rect x="115" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
+
+              <rect x="20" y="106" width="34" height="34" rx="6" fill="#2563EB"/>
+              <rect x="25" y="111" width="24" height="24" rx="3" fill="#FFFFFF"/>
+              <rect x="29" y="115" width="16" height="16" rx="2" fill="#2563EB"/>
+
+              <circle cx="70" cy="35" r="4" fill="#2563EB"/>
+              <circle cx="85" cy="40" r="3" fill="#F59E0B"/>
+              <circle cx="75" cy="70" r="5" fill="#2563EB"/>
+              <circle cx="95" cy="80" r="4" fill="#3B82F6"/>
+              <circle cx="70" cy="115" r="4" fill="#F59E0B"/>
+              <circle cx="85" cy="120" r="5" fill="#2563EB"/>
+              <circle cx="120" cy="95" r="4" fill="#2563EB"/>
+              <circle cx="110" cy="115" r="3" fill="#3B82F6"/>
+              <circle cx="125" cy="125" r="4" fill="#F59E0B"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="justify-content: center;">
+          <button class="btn btn-secondary" (click)="showUpiModal.set(false)">Done</button>
+          <button class="btn btn-yellow" (click)="showUpiModal.set(false); showClaimModal.set(true)">
+            <span>✓</span> I Have Paid via UPI
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL 5: PLAYER UPI CONFIRMATION CLAIM
+       ======================================================================== -->
+  @if (showClaimModal()) {
+    <div class="modal-overlay" (click)="showClaimModal.set(false)">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Confirm Your UPI Payment</h3>
+          <button class="modal-close" (click)="showClaimModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p style="margin-bottom: 16px; font-size: 0.95rem; line-height: 1.5;">
+            Did you transfer <strong class="mono text-blue" style="font-size: 1.15rem;">₹{{ -(myPlayerRecord()?.balance || 0) }}</strong> to <strong>Phani</strong> via PhonePe, Google Pay, or Paytm?
+          </p>
+
+          <div class="form-field">
+            <label class="field-label">UPI Reference / UTR Number (Optional)</label>
+            <input type="text" class="form-input mono" placeholder="e.g. 428192837192" [ngModel]="claimUtr()" (ngModelChange)="claimUtr.set($event)">
+            <span class="field-hint">You can find the 12-digit UTR in your GPay / PhonePe receipt.</span>
+          </div>
+
+          <p class="muted-text" style="margin-top: 12px; font-size: 0.82rem;">
+            Once you submit, Phani will see a notification on his Admin dashboard to verify and approve your settlement.
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="showClaimModal.set(false)">Cancel</button>
+          <button class="btn btn-primary" (click)="submitPaymentClaim()">
+            <span>✓</span> Send Confirmation to Phani
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Toast Notification -->
+  @if (toastMessage()) {
+    <div class="bright-toast animate-fade">
+      <span class="toast-ico">🏸</span>
+      <span>{{ toastMessage() }}</span>
+    </div>
+  }
+</div>

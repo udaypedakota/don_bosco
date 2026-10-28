@@ -1,0 +1,66 @@
+{
+  "players": [
+    {
+      "id": "p-admin",
+      "name": "Phani",
+      "phone": "9848012345",
+      "role": "admin",
+      "password": "admin",
+      "balance": 0,
+      "totalGames": 0,
+      "createdAt": "2026-10-28T12:04:34.269Z"
+    },
+    {
+      "id": "p-1793189193996",
+      "name": "Siva",
+      "phone": "9848012346",
+      "role": "player",
+      "password": "1234",
+      "balance": 0,
+      "totalGames": 0,
+      "createdAt": "2026-10-28T12:06:33.996Z"
+    },
+    {
+      "id": "p-1793189217248",
+      "name": "Uday",
+      "phone": "9848012347",
+      "role": "player",
+      "password": "1234",
+      "balance": 0,
+      "totalGames": 0,
+      "createdAt": "2026-10-28T12:06:57.248Z"
+    },
+    {
+      "id": "p-1793189217311",
+      "name": "Nani",
+      "phone": "9848012348",
+      "role": "player",
+      "password": "1234",
+      "balance": 0,
+      "totalGames": 0,
+      "createdAt": "2026-10-28T12:06:57.311Z"
+    },
+    {
+      "id": "p-1793189217315",
+      "name": "Rajesh",
+      "phone": "9848012349",
+      "role": "player",
+      "password": "1234",
+      "balance": 0,
+      "totalGames": 0,
+      "createdAt": "2026-10-28T12:06:57.315Z"
+    },
+    {
+      "id": "p-1793189217319",
+      "name": "Srinvas",
+      "phone": "9848012350",
+      "role": "player",
+      "password": "1234",
+      "balance": 0,
+      "totalGames": 0,
+      "createdAt": "2026-10-28T12:06:57.319Z"
+    }
+  ],
+  "games": [],
+  "payments": []
+}

@@ -1,0 +1,382 @@
+/* ==========================================================================
+   SMASH CLUB — VIBRANT ATHLETIC SPORTS DESIGN SYSTEM
+   Bright, Energetic, Animated (Royal Blue, Sunshine Yellow, Crisp White)
+   Inspired by Vector Sports Illustration & Modern Chrome UI
+   ========================================================================== */
+
+:root {
+  /* Vibrant Bright Sports Palette */
+  --bg-app: #F0F6FE;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F8FAFC;
+  --bg-surface-tint: #EFF6FF;
+
+  /* Royal Cobalt & Electric Blue */
+  --blue-primary: #2563EB;
+  --blue-hover: #1D4ED8;
+  --blue-dark: #1E40AF;
+  --blue-light: #60A5FA;
+  --blue-soft: #DBEAFE;
+  --blue-border: #BFDBFE;
+
+  /* Sunshine Gold & Yellow */
+  --yellow-primary: #F59E0B;
+  --yellow-hover: #D97706;
+  --yellow-light: #FBBF24;
+  --yellow-soft: #FEF3C7;
+  --yellow-border: #FDE68A;
+
+  /* Sports Crimson Red */
+  --red-accent: #EF4444;
+  --red-soft: #FEE2E2;
+  --red-border: #FECACA;
+
+  /* Mint Emerald Green */
+  --green-accent: #10B981;
+  --green-soft: #D1FAE5;
+  --green-border: #A7F3D0;
+
+  /* Typography Colors */
+  --text-main: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-on-blue: #FFFFFF;
+
+  /* Borders & Shadows */
+  --border-light: #E2E8F0;
+  --border-blue: rgba(37, 99, 235, 0.2);
+  --shadow-sm: 0 2px 8px rgba(37, 99, 235, 0.06);
+  --shadow-md: 0 10px 25px -5px rgba(37, 99, 235, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 20px 45px -10px rgba(30, 58, 138, 0.18);
+  --shadow-float: 0 25px 60px -12px rgba(37, 99, 235, 0.25);
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  /* Fonts */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Space Grotesk', monospace;
+}
+
+/* Base Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: #F1F6FD;
+  background-image: 
+    radial-gradient(at 10% 8%, rgba(37, 99, 235, 0.18) 0px, transparent 40%),
+    radial-gradient(at 92% 10%, rgba(245, 158, 11, 0.20) 0px, transparent 38%),
+    radial-gradient(at 50% 50%, rgba(96, 165, 250, 0.12) 0px, transparent 55%),
+    radial-gradient(at 12% 90%, rgba(16, 185, 129, 0.12) 0px, transparent 40%),
+    radial-gradient(at 88% 85%, rgba(239, 68, 68, 0.09) 0px, transparent 35%),
+    radial-gradient(rgba(37, 99, 235, 0.08) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 28px 28px;
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient Frosted Glass Orbs */
+body::before {
+  content: '';
+  position: fixed;
+  top: -100px;
+  right: -80px;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, rgba(96, 165, 250, 0.06) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(50px);
+  animation: orbPulse 12s ease-in-out infinite alternate;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -120px;
+  left: -90px;
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, rgba(254, 240, 138, 0.06) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(50px);
+  animation: orbPulse 15s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes orbPulse {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.08) translate(15px, -15px); }
+  100% { transform: scale(0.96) translate(-10px, 10px); }
+}
+
+/* Headings */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.blue-gradient-text {
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #38BDF8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+  .form-input, .form-select {
+    font-size: 16px; /* Prevents auto zoom in iOS */
+    padding: 11px 14px;
+  }
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.94rem;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  color: #FFFFFF;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.45);
+  transform: translateY(-2px);
+}
+
+.btn-yellow {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+  color: #78350F;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+}
+
+.btn-yellow:hover {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #FFFFFF;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-surface-tint);
+  border-color: var(--blue-border);
+  color: var(--blue-primary);
+}
+
+.btn-sm {
+  padding: 7px 16px;
+  font-size: 0.84rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Frosted Glass Cards */
+.bright-card {
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    0 18px 45px -10px rgba(37, 99, 235, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.02),
+    0 1px 0 rgba(255, 255, 255, 1) inset;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.bright-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.4), rgba(245, 158, 11, 0.4), rgba(96, 165, 250, 0.2));
+  opacity: 0.6;
+}
+
+.bright-card:hover {
+  box-shadow: 
+    0 26px 55px -10px rgba(37, 99, 235, 0.18),
+    0 6px 16px rgba(0, 0, 0, 0.04),
+    0 1px 0 rgba(255, 255, 255, 1) inset;
+  border-color: rgba(191, 219, 254, 0.95);
+}
+
+/* Form Controls */
+.form-input, .form-select {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1.5px solid #CBD5E1;
+  border-radius: var(--radius-md);
+  padding: 13px 18px;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  background: #FFFFFF;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.badge-blue {
+  background: var(--blue-soft);
+  color: var(--blue-dark);
+  border: 1px solid var(--blue-border);
+}
+
+.badge-yellow {
+  background: var(--yellow-soft);
+  color: #92400E;
+  border: 1px solid var(--yellow-border);
+}
+
+.badge-green {
+  background: var(--green-soft);
+  color: #065F46;
+  border: 1px solid var(--green-border);
+}
+
+.badge-red {
+  background: var(--red-soft);
+  color: #991B1B;
+  border: 1px solid var(--red-border);
+}
+
+/* Pulsing Status Dot */
+.pulse-circle {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.pulse-circle.online {
+  background-color: var(--green-accent);
+  box-shadow: 0 0 10px var(--green-accent);
+}
+
+.pulse-circle.online::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background-color: var(--green-accent);
+  opacity: 0.5;
+  animation: pulsePing 2s infinite;
+}
+
+.pulse-circle.pending {
+  background-color: var(--yellow-primary);
+  box-shadow: 0 0 10px var(--yellow-primary);
+}
+
+/* Animations */
+@keyframes pulsePing {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes floatShuttle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(6deg); }
+}
+
+@keyframes heroSmash {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.02); }
+}
+
+@keyframes cardTilt {
+  0%, 100% { transform: perspective(1000px) rotateY(-4deg) rotateX(2deg); }
+  50% { transform: perspective(1000px) rotateY(4deg) rotateX(-2deg); }
+}
+
+.animate-fade {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
