@@ -327,6 +327,19 @@ async function connectAtlas(uri) {
 // Auto-connect on startup
 connectAtlas(MONGODB_URI);
 
+// Middleware to ensure Atlas connection & normalize path for Vercel Serverless
+app.use(async (req, res, next) => {
+  if (!isConnected) {
+    try {
+      await connectAtlas(MONGODB_URI);
+    } catch (e) {}
+  }
+  if (!req.url.startsWith('/api')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // Status Endpoint
 app.get('/api/status', async (req, res) => {
   let stats = {
@@ -727,7 +740,11 @@ app.post('/api/payments/:id/reject', async (req, res) => {
   res.json({ success: true, message: 'Payment claim rejected' });
 });
 
-app.listen(PORT, () => {
-  console.log(`[Smash Club Backend] Server running on http://localhost:${PORT}`);
-  console.log(`[Smash Club Backend] Database: ${mongoDb ? 'MongoDB Atlas (Connected)' : 'Local File Persistence (Active)'}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`[Smash Club Backend] Server running on http://localhost:${PORT}`);
+    console.log(`[Smash Club Backend] Database: ${mongoDb ? 'MongoDB Atlas (Connected)' : 'Local File Persistence (Active)'}`);
+  });
+}
+
+module.exports = app;

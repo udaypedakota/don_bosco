@@ -8,7 +8,9 @@ import { Player, Game, Payment, AtlasStatus } from '../models/club.models';
 })
 export class ClubService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = (typeof window !== 'undefined' && window.location.port === '4200')
+    ? 'http://localhost:5000/api'
+    : '/api';
 
   // Active Authenticated User
   currentUser = signal<{ id: string; name: string; phone: string; role: 'admin' | 'player' } | null>(
@@ -49,7 +51,13 @@ export class ClubService {
 
   checkAtlasStatus(): void {
     this.http.get<AtlasStatus>(`${this.apiUrl}/status`).pipe(
-      catchError(() => of(this.atlasStatus()))
+      catchError(() => of({
+        connected: false,
+        database: 'Backend Server Offline',
+        maskedUri: '',
+        stats: { players: 0, games: 0, payments: 0 },
+        mode: 'Offline'
+      }))
     ).subscribe(status => {
       this.atlasStatus.set(status);
     });

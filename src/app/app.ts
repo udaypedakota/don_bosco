@@ -130,7 +130,11 @@ export class App {
         }
       },
       error: (err: any) => {
-        this.loginError.set(err.error?.error || 'Login failed. Check name or phone.');
+        if (err.status === 0) {
+          this.loginError.set('Backend server (port 5000) is not reachable. Ensure "node server.js" is running.');
+        } else {
+          this.loginError.set(err.error?.error || 'Login failed. Check name or phone.');
+        }
       }
     });
   }

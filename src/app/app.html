@@ -31,7 +31,7 @@
           <div class="pulse-circle" [class.online]="clubService.atlasStatus().connected" [class.pending]="!clubService.atlasStatus().connected"></div>
           <div class="atlas-badge-text">
             <span class="atlas-host-title">{{ clubService.atlasStatus().connected ? 'Atlas: badmintiondatabase' : 'MongoDB Atlas' }}</span>
-            <span class="atlas-host-sub">{{ clubService.atlasStatus().connected ? 'Live Connected' : 'Checking connection...' }}</span>
+            <span class="atlas-host-sub">{{ clubService.atlasStatus().connected ? 'Live Connected' : (clubService.atlasStatus().mode === 'Offline' ? 'Server Offline (Port 5000)' : 'Checking connection...') }}</span>
           </div>
           <span class="cloud-ico">☁️</span>
         </div>
@@ -656,7 +656,7 @@
           <div class="atlas-status-card" [class.connected]="clubService.atlasStatus().connected">
             <div class="pulse-circle" [class.online]="clubService.atlasStatus().connected" [class.pending]="!clubService.atlasStatus().connected"></div>
             <div>
-              <strong>{{ clubService.atlasStatus().connected ? 'Connected to badmintiondatabase!' : 'Connecting to Atlas...' }}</strong>
+              <strong>{{ clubService.atlasStatus().connected ? 'Connected to badmintiondatabase!' : (clubService.atlasStatus().mode === 'Offline' ? 'Backend Offline (Run node server.js)' : 'Connecting to Atlas...') }}</strong>
               <div class="mono muted-text">Cluster: badmintiondatabase.vizmqp0.mongodb.net</div>
               <div class="mono muted-text">User: ramukorla3_db_user</div>
             </div>
