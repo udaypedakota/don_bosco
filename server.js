@@ -532,6 +532,36 @@ app.delete('/api/players/:id', async (req, res) => {
   res.json({ success: true, message: 'Player removed' });
 });
 
+// PUT /api/players/:id (Update Profile Details & Avatar)
+app.put('/api/players/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, phone, avatar, skill, hand, upiId, password } = req.body;
+
+  const updates = {};
+  if (name && name.trim()) updates.name = name.trim();
+  if (phone) {
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length === 10) updates.phone = cleanPhone;
+  }
+  if (avatar !== undefined) updates.avatar = avatar;
+  if (skill) updates.skill = skill;
+  if (hand) updates.hand = hand;
+  if (upiId !== undefined) updates.upiId = upiId.trim();
+  if (password) updates.password = password;
+
+  if (mongoDb) {
+    await mongoDb.collection('players').updateOne({ id }, { $set: updates });
+    const updated = await mongoDb.collection('players').findOne({ id });
+    return res.json(updated);
+  } else {
+    const p = localStore.players.find(pl => pl.id === id);
+    if (!p) return res.status(404).json({ error: 'Player not found' });
+    Object.assign(p, updates);
+    saveLocalDb(localStore);
+    return res.json(p);
+  }
+});
+
 // ============================================================================
 // GAMES ROUTES (Dynamic for Today, Tomorrow, or Any Custom Date)
 // ============================================================================

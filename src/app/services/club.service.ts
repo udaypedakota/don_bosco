@@ -13,7 +13,7 @@ export class ClubService {
     : '/api';
 
   // Active Authenticated User
-  currentUser = signal<{ id: string; name: string; phone: string; role: 'admin' | 'player' } | null>(
+  currentUser = signal<{ id: string; name: string; phone: string; role: 'admin' | 'player'; avatar?: string } | null>(
     (() => {
       try {
         const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('smash_user') : null;
@@ -97,7 +97,47 @@ export class ClubService {
       catchError(() => of([]))
     ).subscribe(data => {
       this.players.set(data || []);
+      // Automatically refresh currentUser from fresh database data!
+      const cur = this.currentUser();
+      if (cur) {
+        const fresh = (data || []).find(p => p.id === cur.id);
+        if (fresh) {
+          const updatedUser = {
+            ...cur,
+            name: fresh.name,
+            phone: fresh.phone,
+            role: fresh.role,
+            avatar: fresh.avatar
+          };
+          this.currentUser.set(updatedUser);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('smash_user', JSON.stringify(updatedUser));
+          }
+        }
+      }
     });
+  }
+
+  updatePlayer(id: string, updates: Partial<Player>): Observable<Player> {
+    return this.http.put<Player>(`${this.apiUrl}/players/${id}`, updates).pipe(
+      tap(updatedPlayer => {
+        this.players.update(list => list.map(p => p.id === id ? { ...p, ...updatedPlayer } : p));
+        const cur = this.currentUser();
+        if (cur && cur.id === id) {
+          const updatedUser = {
+            ...cur,
+            name: updatedPlayer.name,
+            phone: updatedPlayer.phone,
+            role: updatedPlayer.role,
+            avatar: updatedPlayer.avatar
+          };
+          this.currentUser.set(updatedUser);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('smash_user', JSON.stringify(updatedUser));
+          }
+        }
+      })
+    );
   }
 
   addPlayer(player: { name: string; phone: string; role: string; password?: string }): Observable<Player> {

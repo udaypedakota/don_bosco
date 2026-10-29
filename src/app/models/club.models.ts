@@ -2,12 +2,17 @@ export interface Player {
   id: string;
   name: string;
   phone: string;
-  email: string;
   role: 'admin' | 'player';
-  skill: 'Advanced' | 'Intermediate' | 'Beginner';
   balance: number; // positive = credit (owed money back), negative = owes group
   totalGames: number;
-  joinedDate: string;
+  email?: string;
+  avatar?: string;
+  skill?: 'Advanced' | 'Intermediate' | 'Beginner';
+  hand?: 'Right-handed' | 'Left-handed';
+  upiId?: string;
+  password?: string;
+  createdAt?: string;
+  joinedDate?: string;
 }
 
 export interface Game {

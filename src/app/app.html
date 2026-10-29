@@ -36,17 +36,27 @@
           <span class="cloud-ico">☁️</span>
         </div>
 
-        <!-- User Session Indicator & Logout -->
+        <!-- User Session Indicator & Profile Modal Trigger -->
         @if (currentUser()) {
-          <div class="user-pill">
-            <div class="user-avatar-tag" [class.admin-bg]="isAdmin()">
-              {{ currentUser()?.name?.slice(0, 2)?.toUpperCase() }}
-            </div>
+          <div class="user-pill clickable-profile" (click)="openProfileModal()" title="Click to view & edit your profile details">
+            @if (myPlayerRecord()?.avatar) {
+              @if (myPlayerRecord()?.avatar?.startsWith('data:') || myPlayerRecord()?.avatar?.startsWith('http')) {
+                <img [src]="myPlayerRecord()?.avatar" alt="Avatar" class="user-avatar-photo">
+              } @else {
+                <div class="user-avatar-tag emoji-avatar" [class.admin-bg]="isAdmin()">
+                  {{ myPlayerRecord()?.avatar }}
+                </div>
+              }
+            } @else {
+              <div class="user-avatar-tag" [class.admin-bg]="isAdmin()">
+                {{ (myPlayerRecord()?.name || currentUser()?.name)?.slice(0, 2)?.toUpperCase() }}
+              </div>
+            }
             <div class="user-details">
-              <strong class="user-display-name">{{ currentUser()?.name }}</strong>
-              <span class="user-role-label">{{ isAdmin() ? '👑 Admin (Court Booker)' : '👤 Player' }}</span>
+              <strong class="user-display-name">{{ myPlayerRecord()?.name || currentUser()?.name }}</strong>
+              <span class="user-role-label">{{ isAdmin() ? '👑 Admin' : '👤 Player' }} · 📱 {{ myPlayerRecord()?.phone || currentUser()?.phone }}</span>
             </div>
-            <button class="btn-logout" (click)="logout()" title="Sign Out" aria-label="Sign Out">
+            <button class="btn-logout" (click)="logout(); $event.stopPropagation()" title="Sign Out" aria-label="Sign Out">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="logout-icon-svg">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                 <polyline points="16 17 21 12 16 7"></polyline>
@@ -446,12 +456,29 @@
         <!-- Welcome Banner & Dues -->
         <div class="player-top-row">
           <div class="player-welcome-box">
-            <div class="welcome-avatar">
-              {{ currentUser()?.name?.slice(0, 2)?.toUpperCase() }}
-            </div>
+            @if (myPlayerRecord()?.avatar) {
+              @if (myPlayerRecord()?.avatar?.startsWith('data:') || myPlayerRecord()?.avatar?.startsWith('http')) {
+                <img [src]="myPlayerRecord()?.avatar" alt="Avatar" class="welcome-avatar-img clickable" (click)="openProfileModal()" title="Edit Profile Photo">
+              } @else {
+                <div class="welcome-avatar emoji-avatar clickable" (click)="openProfileModal()" title="Edit Profile Photo">
+                  {{ myPlayerRecord()?.avatar }}
+                </div>
+              }
+            } @else {
+              <div class="welcome-avatar clickable" (click)="openProfileModal()" title="Edit Profile Photo">
+                {{ (myPlayerRecord()?.name || currentUser()?.name)?.slice(0, 2)?.toUpperCase() }}
+              </div>
+            }
             <div>
-              <h1 class="welcome-title">Hello, {{ currentUser()?.name }}!</h1>
-              <div class="welcome-meta mono">📱 +91 {{ currentUser()?.phone }} · Smash Club Player Account</div>
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <h1 class="welcome-title">Hello, {{ myPlayerRecord()?.name || currentUser()?.name }}!</h1>
+                <button class="btn btn-sm btn-edit-profile" (click)="openProfileModal()">
+                  <span>✏️</span> Edit Profile
+                </button>
+              </div>
+              <div class="welcome-meta mono">
+                📱 +91 {{ myPlayerRecord()?.phone || currentUser()?.phone }} · Smash Club Player Account · 🏸 {{ myPlayerRecord()?.skill || 'Intermediate' }}
+              </div>
             </div>
           </div>
 
@@ -873,6 +900,129 @@
           <button class="btn btn-secondary" (click)="showGamePayModal.set(false)">Cancel</button>
           <button class="btn btn-yellow" (click)="submitGamePayment()">
             <span>✓</span> I Have Paid ₹{{ selectedGameForPayment()?.perPlayerShare }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL 7: PLAYER PROFILE DETAILS & AVATAR EDIT
+       ======================================================================== -->
+  @if (showProfileModal()) {
+    <div class="modal-overlay" (click)="showProfileModal.set(false)">
+      <div class="modal-card profile-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="badge badge-blue">👤 Account Profile</span>
+            <h3 class="modal-title">Player Profile Details</h3>
+          </div>
+          <button class="modal-close" (click)="showProfileModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          @if (profileError()) {
+            <div class="banner banner-error animate-fade">{{ profileError() }}</div>
+          }
+
+          <!-- Avatar Section -->
+          <div class="profile-avatar-section">
+            <div class="avatar-preview-box">
+              @if (profileAvatar()) {
+                @if (profileAvatar().startsWith('data:') || profileAvatar().startsWith('http')) {
+                  <img [src]="profileAvatar()" alt="Profile Avatar" class="profile-avatar-large">
+                } @else {
+                  <div class="profile-avatar-emoji-large">{{ profileAvatar() }}</div>
+                }
+              } @else {
+                <div class="profile-avatar-monogram-large">
+                  {{ (profileName() || currentUser()?.name || 'PL')?.slice(0, 2)?.toUpperCase() }}
+                </div>
+              }
+              <label class="btn-avatar-upload" title="Upload Custom Photo">
+                <input type="file" accept="image/*" (change)="handleAvatarUpload($event)" style="display: none;">
+                📷 Upload Photo
+              </label>
+            </div>
+
+            <!-- Avatar Presets -->
+            <div class="avatar-presets-wrap">
+              <span class="presets-label">Or choose an athletic badge:</span>
+              <div class="presets-chips">
+                @for (preset of avatarPresets; track preset) {
+                  <button type="button" class="preset-chip-btn" [class.selected]="profileAvatar() === preset" (click)="selectAvatar(preset)">
+                    {{ preset }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Profile Form -->
+          <form (ngSubmit)="saveProfile()" class="profile-form">
+            <div class="profile-form-grid">
+              <div class="form-field">
+                <label class="field-label">Full Name</label>
+                <input type="text" class="form-input" placeholder="Your Name" [ngModel]="profileName()" (ngModelChange)="profileName.set($event)" name="name">
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Mobile Phone Number</label>
+                <div class="phone-input-wrap">
+                  <span class="phone-prefix mono">+91</span>
+                  <input type="tel" maxlength="10" class="form-input mono" placeholder="10-digit number" [ngModel]="profilePhone()" (ngModelChange)="profilePhone.set($event)" name="phone">
+                </div>
+                <span class="field-hint">Used for SMS alerts, WhatsApp group, and login</span>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Badminton Skill Level</label>
+                <select class="form-input" [ngModel]="profileSkill()" (ngModelChange)="profileSkill.set($event)" name="skill">
+                  <option value="Advanced">Advanced (Power Smashing & Fast)</option>
+                  <option value="Intermediate">Intermediate (Consistent Rallies)</option>
+                  <option value="Beginner">Beginner (Learning the game)</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Preferred Playing Hand</label>
+                <select class="form-input" [ngModel]="profileHand()" (ngModelChange)="profileHand.set($event)" name="hand">
+                  <option value="Right-handed">Right-Handed 🏸</option>
+                  <option value="Left-handed">Left-Handed 🏸</option>
+                </select>
+              </div>
+
+              <div class="form-field full-width">
+                <label class="field-label">Personal UPI ID (Optional - For Court Refunds)</label>
+                <input type="text" class="form-input mono" placeholder="e.g. yourname@okhdfcbank" [ngModel]="profileUpiId()" (ngModelChange)="profileUpiId.set($event)" name="upiId">
+                <span class="field-hint">Used by Admin when settling credit or refund balances</span>
+              </div>
+            </div>
+
+            <!-- Profile Summary & Stats Card -->
+            <div class="profile-stats-card">
+              <div class="pstat-item">
+                <span class="pstat-lbl">Role</span>
+                <strong class="pstat-val">{{ isAdmin() ? '👑 Admin (Court Booker)' : '👤 Club Member' }}</strong>
+              </div>
+              <div class="pstat-item">
+                <span class="pstat-lbl">Total Matches</span>
+                <strong class="pstat-val mono">{{ myPlayerRecord()?.totalGames || 0 }} Games</strong>
+              </div>
+              <div class="pstat-item">
+                <span class="pstat-lbl">Account Balance</span>
+                <strong class="pstat-val mono" [class.text-red]="(myPlayerRecord()?.balance || 0) < 0" [class.text-green]="(myPlayerRecord()?.balance || 0) >= 0">
+                  {{ (myPlayerRecord()?.balance || 0) < 0 ? 'Owes ₹' + -(myPlayerRecord()?.balance || 0) : 'Clear (₹0)' }}
+                </strong>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer" style="justify-content: space-between;">
+          <button type="button" class="btn btn-secondary" (click)="showProfileModal.set(false)">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="profileSaving()" (click)="saveProfile()">
+            <span>💾</span> {{ profileSaving() ? 'Saving to Cloud...' : 'Save Profile to MongoDB' }}
           </button>
         </div>
       </div>

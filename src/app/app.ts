@@ -71,6 +71,20 @@ export class App {
   showGamePayModal = signal<boolean>(false);
   gamePayUtr = signal<string>('');
 
+  // Profile Signals & Modal
+  showProfileModal = signal<boolean>(false);
+  profileName = signal<string>('');
+  profilePhone = signal<string>('');
+  profileAvatar = signal<string>('');
+  profileSkill = signal<'Advanced' | 'Intermediate' | 'Beginner'>('Intermediate');
+  profileHand = signal<'Right-handed' | 'Left-handed'>('Right-handed');
+  profileUpiId = signal<string>('');
+  profilePassword = signal<string>('');
+  profileSaving = signal<boolean>(false);
+  profileError = signal<string | null>(null);
+
+  avatarPresets = ['🏸', '⚡', '🔥', '👑', '🦅', '🦁', '🌟', '🎯', '🥇', '🚀'];
+
   // Atlas Password input
   atlasPassword = signal<string>('');
   atlasConnecting = signal<boolean>(false);
@@ -183,6 +197,87 @@ export class App {
     const u = this.currentUser();
     const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
     return `upi://pay?pa=smashclub@okhdfcbank&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+  }
+
+  // ==========================================================================
+  // PROFILE DETAILS & AVATAR
+  // ==========================================================================
+  openProfileModal(): void {
+    const p = this.myPlayerRecord();
+    const u = this.currentUser();
+    if (!p && !u) return;
+
+    this.profileName.set(p?.name || u?.name || '');
+    this.profilePhone.set(p?.phone || u?.phone || '');
+    this.profileAvatar.set(p?.avatar || u?.avatar || '');
+    this.profileSkill.set(p?.skill || 'Intermediate');
+    this.profileHand.set(p?.hand || 'Right-handed');
+    this.profileUpiId.set(p?.upiId || '');
+    this.profilePassword.set(p?.password || '');
+    this.profileError.set(null);
+    this.showProfileModal.set(true);
+  }
+
+  selectAvatar(preset: string): void {
+    this.profileAvatar.set(preset);
+  }
+
+  handleAvatarUpload(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.size > 2 * 1024 * 1024) {
+        this.profileError.set('Photo must be smaller than 2MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.profileAvatar.set(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  saveProfile(): void {
+    this.profileError.set(null);
+    const u = this.currentUser();
+    const p = this.myPlayerRecord();
+    const id = p?.id || u?.id;
+    if (!id) return;
+
+    const name = this.profileName().trim();
+    const phone = this.profilePhone().trim().replace(/\D/g, '');
+
+    if (!name) {
+      this.profileError.set('Player name cannot be empty');
+      return;
+    }
+    if (phone.length !== 10) {
+      this.profileError.set('Please enter a valid 10-digit mobile number');
+      return;
+    }
+
+    this.profileSaving.set(true);
+
+    this.clubService.updatePlayer(id, {
+      name,
+      phone,
+      avatar: this.profileAvatar(),
+      skill: this.profileSkill(),
+      hand: this.profileHand(),
+      upiId: this.profileUpiId(),
+      password: this.profilePassword() || undefined
+    }).subscribe({
+      next: (updated) => {
+        this.profileSaving.set(false);
+        this.showProfileModal.set(false);
+        this.showToast('✨ Profile updated in MongoDB Atlas cloud!');
+      },
+      error: (err) => {
+        this.profileSaving.set(false);
+        this.profileError.set(err.error?.error || 'Failed to save profile. Try again.');
+      }
+    });
   }
 
   // ==========================================================================
