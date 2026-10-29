@@ -558,9 +558,21 @@ export class App {
       paidByPlayerName: payer ? payer.name : (this.currentUser()?.name || 'Phani'),
       attendees: this.gameAttendees(),
       notes: this.gameNotes() || `Court ₹${this.gameCourtRent()} on ${this.gameDate()}`
-    }).subscribe(() => {
-      this.showToast(`✨ Saved to Database! Each attendee owes ₹${this.perPlayerShare()}`);
+    }).subscribe({
+      next: () => {
+        this.showToast(`✨ Saved to Database! Each attendee owes ₹${this.perPlayerShare()}`);
+      },
+      error: (err) => {
+        this.showToast('Failed to save game: ' + (err.error?.error || err.message));
+      }
     });
+  }
+
+  scrollToBooking(): void {
+    const el = document.getElementById('courtBookingSection');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   // ==========================================================================

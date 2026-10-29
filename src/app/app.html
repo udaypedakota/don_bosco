@@ -333,12 +333,15 @@
             </div>
 
             <div class="form-field" style="margin-top: 10px;">
-              <label class="field-label">Paid Upfront By</label>
+              <label class="field-label">Paid Upfront By (Split Amount Receiver)</label>
               <select class="form-select" [ngModel]="gamePaidBy()" (ngModelChange)="gamePaidBy.set($event)">
                 @for (p of clubService.players(); track p.id) {
-                  <option [value]="p.id">{{ p.name }} ({{ p.role }})</option>
+                  <option [value]="p.id">{{ p.name }} ({{ p.role }}) {{ p.id === 'p-admin' ? '— (Default Club Treasurer)' : '' }}</option>
                 }
               </select>
+              <span class="field-hint" style="font-size: 0.76rem; color: #64748B; margin-top: 4px; display: block;">
+                💡 Leave as Phani (admin) so attendee dues go to Phani, or select whoever paid at the court counter.
+              </span>
             </div>
           </div>
         </div>
@@ -613,6 +616,9 @@
                 <button class="btn btn-sm btn-edit-profile" (click)="openProfileModal()">
                   <span>✏️</span> Edit Profile
                 </button>
+                <button class="btn btn-sm btn-booking-shortcut" (click)="scrollToBooking()">
+                  <span>🏸</span> Book / Split Court Session
+                </button>
               </div>
               <div class="welcome-meta mono">
                 📱 +91 {{ myPlayerRecord()?.phone || currentUser()?.phone }} · Smash Club Player Account · 🏸 {{ myPlayerRecord()?.skill || 'Intermediate' }}
@@ -744,6 +750,128 @@
               }
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- 2. FULL COURT BOOKING & SPLIT SYSTEM FOR PLAYERS (Direct Access) -->
+      <section id="courtBookingSection" class="bright-card hero-split-card" style="margin-top: 24px;">
+        <div class="card-title-row">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span class="badge badge-yellow">🏸 Court Session Booking</span>
+              <span class="badge badge-blue">⚡ Direct Player Access</span>
+            </div>
+            <h2 class="card-heading">Schedule & Split Court Game</h2>
+            <p class="card-caption">Booked a court at Donbosco or AG Sports Club? Record the session here and the fee will be split automatically across all attendees!</p>
+          </div>
+
+          <!-- Date Selector Buttons -->
+          <div class="date-selector-bar">
+            <button type="button" class="date-chip" (click)="setToday()">
+              Today
+            </button>
+            <button type="button" class="date-chip" (click)="setTomorrow()">
+              Tomorrow
+            </button>
+            <input type="date" class="date-input mono" [ngModel]="gameDate()" (ngModelChange)="gameDate.set($event)">
+          </div>
+        </div>
+
+        <!-- Court Booking Amounts & Presets -->
+        <div class="court-inputs-grid">
+          <div class="court-fee-panel">
+            <label class="field-label">Court Booking Fee (INR)</label>
+            <div class="big-currency-box">
+              <span class="cur-symbol">₹</span>
+              <input type="number" class="big-input mono" [ngModel]="gameCourtRent()" (ngModelChange)="gameCourtRent.set(+$event)">
+            </div>
+            
+            <!-- Quick Preset Pills -->
+            <div class="presets-row">
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 800" (click)="setCourtPreset(800)">₹800</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 1000" (click)="setCourtPreset(1000)">₹1000</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 1200" (click)="setCourtPreset(1200)">₹1200</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 1500" (click)="setCourtPreset(1500)">₹1500</button>
+              <button type="button" class="preset-tag mono" [class.active]="gameCourtRent() === 2000" (click)="setCourtPreset(2000)">₹2000</button>
+            </div>
+          </div>
+
+          <div class="court-sub-panel">
+            <div class="form-field">
+              <label class="field-label">Venue / Court Name</label>
+              
+              <!-- Quick 1-Click Court Presets -->
+              <div class="venue-presets-chips">
+                @for (v of courtVenues; track v) {
+                  <button type="button" class="venue-preset-chip" [class.active]="gameVenue() === v" (click)="setVenue(v)">
+                    🏸 {{ v }}
+                  </button>
+                }
+              </div>
+
+              <input type="text" class="form-input" placeholder="e.g. Donbosco (Moti Nagar)" [ngModel]="gameVenue()" (ngModelChange)="gameVenue.set($event)">
+            </div>
+
+            <div class="form-field" style="margin-top: 10px;">
+              <label class="field-label">Paid Upfront By (Split Amount Receiver)</label>
+              <select class="form-select" [ngModel]="gamePaidBy()" (ngModelChange)="gamePaidBy.set($event)">
+                @for (p of clubService.players(); track p.id) {
+                  <option [value]="p.id">{{ p.name }} ({{ p.role }}) {{ p.id === 'p-admin' ? '— (Default Club Treasurer)' : '' }}</option>
+                }
+              </select>
+              <span class="field-hint" style="font-size: 0.76rem; color: #64748B; margin-top: 4px; display: block;">
+                💡 Leave as Phani (admin) so attendee dues go to Phani, or select yourself if you paid at the court counter.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Who is Playing? (Attendees Selector from Dynamic Database) -->
+        <div class="attendees-box">
+          <div class="attendees-top">
+            <label class="field-label">
+              Who Played Today? ({{ gameAttendees().length }} Selected)
+            </label>
+            <span class="field-hint">Tap players who attended to split equally</span>
+          </div>
+
+          <div class="players-toggle-grid">
+            @for (player of clubService.players(); track player.id) {
+              <div class="player-toggle-btn" [class.is-selected]="isAttendeeSelected(player.id)" (click)="toggleAttendee(player.id)">
+                <div class="player-avatar-circle" [class.admin-circle]="player.role === 'admin'">
+                  {{ player.name.slice(0, 2).toUpperCase() }}
+                </div>
+                <div class="player-btn-name">{{ player.name }}</div>
+                <div class="check-bubble">
+                  {{ isAttendeeSelected(player.id) ? '✓' : '+' }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Live Split Formula & Save Button -->
+        <div class="split-footer-bar">
+          <div class="formula-display">
+            <div class="formula-box">
+              <span class="form-lbl">Court Cost</span>
+              <span class="form-val mono text-blue">₹{{ totalGameExpense() }}</span>
+            </div>
+            <span class="math-op">÷</span>
+            <div class="formula-box">
+              <span class="form-lbl">Players</span>
+              <span class="form-val mono">{{ gameAttendees().length }} Attendees</span>
+            </div>
+            <span class="math-op">=</span>
+            <div class="formula-box highlight-share">
+              <span class="form-lbl">Per Player Share</span>
+              <span class="form-val mono result-share">₹{{ perPlayerShare() }}</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg" (click)="saveGameAndSplit()">
+            <span>💾</span> Save Game to MongoDB & Split
+          </button>
         </div>
       </section>
     </main>
