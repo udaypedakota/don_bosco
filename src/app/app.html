@@ -36,6 +36,12 @@
           <span class="cloud-ico">☁️</span>
         </div>
 
+        @if (currentUser() && isAdmin() && pendingClaimsCount() > 0) {
+          <span class="badge badge-yellow header-alert-chip" title="Pending player payment claims awaiting your approval">
+            🔔 {{ pendingClaimsCount() }} New Request{{ pendingClaimsCount() > 1 ? 's' : '' }}
+          </span>
+        }
+
         <!-- User Session Indicator & Profile Modal Trigger -->
         @if (currentUser()) {
           <div class="user-pill clickable-profile" (click)="openProfileModal()" title="Click to view & edit your profile details">
@@ -206,7 +212,12 @@
                   <div class="player-avatar-circle">{{ claim.playerName.slice(0, 2).toUpperCase() }}</div>
                   <div class="claim-details">
                     <strong class="claim-name">{{ claim.playerName }}</strong>
-                    <div class="mono muted-text" style="font-size: 0.8rem;">
+                    @if (claim.notes) {
+                      <div style="font-size: 0.82rem; color: var(--blue-primary); font-weight: 700; margin: 2px 0;">
+                        🏸 {{ claim.notes }}
+                      </div>
+                    }
+                    <div class="mono muted-text" style="font-size: 0.78rem;">
                       {{ claim.date }} · Mode: {{ claim.mode }} · UTR: {{ claim.utr }}
                     </div>
                   </div>
