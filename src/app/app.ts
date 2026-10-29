@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClubService } from './services/club.service';
-import { Player, Game } from './models/club.models';
+import { Player, Game, Payment } from './models/club.models';
 
 @Component({
   selector: 'app-root',
@@ -66,6 +66,11 @@ export class App {
   claimUtr = signal<string>('');
   toastMessage = signal<string | null>(null);
 
+  // Game-by-game Payment Signals
+  selectedGameForPayment = signal<Game | null>(null);
+  showGamePayModal = signal<boolean>(false);
+  gamePayUtr = signal<string>('');
+
   // Atlas Password input
   atlasPassword = signal<string>('');
   atlasConnecting = signal<boolean>(false);
@@ -105,6 +110,80 @@ export class App {
     if (!u) return [];
     return this.clubService.games().filter(g => g.attendees.includes(u.id));
   });
+
+  unpaidGamesList = computed(() => {
+    return this.myAttendedGames().filter(g => this.getGameStatusForPlayer(g).status === 'unpaid');
+  });
+
+  // Game-by-game Payment Status Checker
+  getGameStatusForPlayer(game: Game, playerId?: string): { status: 'paid' | 'pending' | 'unpaid'; claim?: Payment } {
+    const pId = playerId || this.currentUser()?.id;
+    if (!pId) return { status: 'unpaid' };
+
+    // 1. Initial 3 paid games (19-Sep, 22-Sep, 24-Sep)
+    if (['2026-09-19', '2026-09-22', '2026-09-24'].includes(game.date) || game.status === 'paid') {
+      return { status: 'paid' };
+    }
+
+    // 2. Check for approved completed payment in database
+    const completed = this.clubService.payments().find(p =>
+      p.playerId === pId &&
+      p.status === 'completed' &&
+      (p.gameId === game.id || (p.notes && p.notes.includes(game.date)) || (p.date === game.date && Math.abs(p.amount - game.perPlayerShare) < 1))
+    );
+    if (completed) {
+      return { status: 'paid', claim: completed };
+    }
+
+    // 3. Check for pending payment claim awaiting approval
+    const pending = this.clubService.payments().find(p =>
+      p.playerId === pId &&
+      p.status === 'pending' &&
+      (p.gameId === game.id || (p.notes && p.notes.includes(game.date)))
+    );
+    if (pending) {
+      return { status: 'pending', claim: pending };
+    }
+
+    return { status: 'unpaid' };
+  }
+
+  openGamePayment(game: Game): void {
+    this.selectedGameForPayment.set(game);
+    this.payAmount.set(game.perPlayerShare);
+    this.gamePayUtr.set('');
+    this.showGamePayModal.set(true);
+  }
+
+  submitGamePayment(): void {
+    const game = this.selectedGameForPayment();
+    const u = this.currentUser();
+    if (!game || !u) return;
+
+    this.clubService.claimPayment({
+      playerId: u.id,
+      amount: game.perPlayerShare,
+      gameId: game.id,
+      utr: this.gamePayUtr().trim(),
+      mode: 'UPI',
+      notes: `Court share ₹${game.perPlayerShare} for game on ${game.date} (${game.venue})`
+    }).subscribe({
+      next: () => {
+        this.showGamePayModal.set(false);
+        this.gamePayUtr.set('');
+        this.showToast(`✅ Payment of ₹${game.perPlayerShare} reported for ${game.date}! Awaiting Phani's approval.`);
+      },
+      error: () => {
+        this.showToast('Failed to report payment. Please try again.');
+      }
+    });
+  }
+
+  getUpiIntentUrl(amount: number, game?: Game | null): string {
+    const u = this.currentUser();
+    const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
+    return `upi://pay?pa=smashclub@okhdfcbank&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+  }
 
   // ==========================================================================
   // AUTHENTICATION

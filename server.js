@@ -8,7 +8,7 @@ const dns = require('dns');
 if (!process.env.VERCEL && process.platform === 'win32') {
   try {
     dns.setServers(['8.8.8.8', '1.1.1.1']);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 require('dotenv').config();
@@ -29,12 +29,12 @@ let lastConnectionError = null;
 
 // Initial 6 players cohort
 const DEFAULT_PLAYERS = [
-  { id: 'p-phani', name: 'Phani', phone: '9848012345', role: 'admin', password: 'admin', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-siva', name: 'Siva', phone: '9848012346', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-uday', name: 'Uday', phone: '9848012347', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-nani', name: 'Nani', phone: '9848012348', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-rajesh', name: 'Rajesh', phone: '9848012349', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-srinvas', name: 'Srinvas', phone: '9848012350', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() }
+  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'admin', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() }
 ];
 
 const ALL_MEMBERS = ['p-phani', 'p-siva', 'p-uday', 'p-nani', 'p-rajesh', 'p-srinvas'];
@@ -194,7 +194,7 @@ function loadLocalDb() {
   if (fs.existsSync(LOCAL_DB_FILE)) {
     try {
       return JSON.parse(fs.readFileSync(LOCAL_DB_FILE, 'utf8'));
-    } catch (e) {}
+    } catch (e) { }
   }
   const defaultDb = {
     players: DEFAULT_PLAYERS,
@@ -233,7 +233,7 @@ async function connectAtlas(uri) {
     try {
       console.log('[MongoDB Atlas] Connecting to badmintiondatabase.vizmqp0.mongodb.net...');
       if (mongoClient) {
-        await mongoClient.close().catch(() => {});
+        await mongoClient.close().catch(() => { });
       }
       mongoClient = new MongoClient(uri, {
         serverApi: {
@@ -251,93 +251,93 @@ async function connectAtlas(uri) {
       isConnected = true;
       console.log('[MongoDB Atlas] SUCCESS! Connected live to badmintiondatabase cloud database.');
 
-    // Ensure all 3 collections (players, games, payments) exist in Atlas
-    const existingCollections = await mongoDb.listCollections().toArray();
-    const existingNames = existingCollections.map(c => c.name);
+      // Ensure all 3 collections (players, games, payments) exist in Atlas
+      const existingCollections = await mongoDb.listCollections().toArray();
+      const existingNames = existingCollections.map(c => c.name);
 
-    if (!existingNames.includes('players')) {
-      await mongoDb.createCollection('players');
-    }
-    if (!existingNames.includes('games')) {
-      await mongoDb.createCollection('games');
-      console.log('[MongoDB Atlas] Created games collection in Atlas.');
-    }
-    if (!existingNames.includes('payments')) {
-      await mongoDb.createCollection('payments');
-      console.log('[MongoDB Atlas] Created payments collection in Atlas.');
-    }
-
-    // Sync screenshot games and accurate balances to MongoDB Atlas
-    const gamesCol = mongoDb.collection('games');
-    const playersCol = mongoDb.collection('players');
-    const paymentsCol = mongoDb.collection('payments');
-    const count = await gamesCol.countDocuments();
-
-    if (count < 9) {
-      console.log('[MongoDB Atlas] Syncing all 9 real games from Excel into Atlas...');
-      await gamesCol.deleteMany({});
-      await gamesCol.insertMany(SCREENSHOT_GAMES);
-
-      // Seed completed payments for 3 paid games (19-Sep, 22-Sep, 24-Sep)
-      await paymentsCol.deleteMany({});
-      const paidDates = [
-        { date: '2026-09-19', share: 201.33 },
-        { date: '2026-09-22', share: 201.33 },
-        { date: '2026-09-24', share: 103.83 }
-      ];
-      const otherPlayers = [
-        { id: 'p-siva', name: 'Siva' },
-        { id: 'p-uday', name: 'Uday' },
-        { id: 'p-nani', name: 'Nani' },
-        { id: 'p-rajesh', name: 'Rajesh' },
-        { id: 'p-srinvas', name: 'Srinvas' }
-      ];
-
-      const initialPayments = [];
-      for (const item of paidDates) {
-        for (const p of otherPlayers) {
-          initialPayments.push({
-            id: `pay-${item.date}-${p.id}`,
-            date: item.date,
-            playerId: p.id,
-            playerName: p.name,
-            amount: item.share,
-            mode: 'UPI',
-            utr: `UPI/${item.date.replace(/-/g, '')}/${p.name.slice(0, 3).toUpperCase()}`,
-            status: 'completed',
-            notes: `Paid and settled for court on ${item.date}`,
-            createdAt: new Date(`${item.date}T18:00:00Z`).toISOString()
-          });
-        }
+      if (!existingNames.includes('players')) {
+        await mongoDb.createCollection('players');
       }
-      await paymentsCol.insertMany(initialPayments);
+      if (!existingNames.includes('games')) {
+        await mongoDb.createCollection('games');
+        console.log('[MongoDB Atlas] Created games collection in Atlas.');
+      }
+      if (!existingNames.includes('payments')) {
+        await mongoDb.createCollection('payments');
+        console.log('[MongoDB Atlas] Created payments collection in Atlas.');
+      }
 
-      // Total unpaid due per player = 201.33 + 337.17 + 201.33 + 124.50 + 124.50 + 151.00 = 1139.83
-      const totalDuePerPlayer = 1139.83;
-      const totalPhaniReceivable = 5 * totalDuePerPlayer; // 5699.15
+      // Sync screenshot games and accurate balances to MongoDB Atlas
+      const gamesCol = mongoDb.collection('games');
+      const playersCol = mongoDb.collection('players');
+      const paymentsCol = mongoDb.collection('payments');
+      const count = await gamesCol.countDocuments();
 
-      await playersCol.deleteMany({});
-      const realPlayers = [
-        { id: 'p-phani', name: 'Phani', phone: '9848012345', role: 'admin', password: 'admin', balance: totalPhaniReceivable, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
-        { id: 'p-siva', name: 'Siva', phone: '9848012346', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
-        { id: 'p-uday', name: 'Uday', phone: '9848012347', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
-        { id: 'p-nani', name: 'Nani', phone: '9848012348', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
-        { id: 'p-rajesh', name: 'Rajesh', phone: '9848012349', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
-        { id: 'p-srinvas', name: 'Srinvas', phone: '9848012350', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() }
-      ];
-      await playersCol.insertMany(realPlayers);
-      console.log('[MongoDB Atlas] ALL 9 REAL GAMES, PAYMENTS & BALANCES SYNCED LIVE TO ATLAS!');
+      if (count < 9) {
+        console.log('[MongoDB Atlas] Syncing all 9 real games from Excel into Atlas...');
+        await gamesCol.deleteMany({});
+        await gamesCol.insertMany(SCREENSHOT_GAMES);
+
+        // Seed completed payments for 3 paid games (19-Sep, 22-Sep, 24-Sep)
+        await paymentsCol.deleteMany({});
+        const paidDates = [
+          { date: '2026-09-19', share: 201.33 },
+          { date: '2026-09-22', share: 201.33 },
+          { date: '2026-09-24', share: 103.83 }
+        ];
+        const otherPlayers = [
+          { id: 'p-siva', name: 'Siva' },
+          { id: 'p-uday', name: 'Uday' },
+          { id: 'p-nani', name: 'Nani' },
+          { id: 'p-rajesh', name: 'Rajesh' },
+          { id: 'p-srinvas', name: 'Srinvas' }
+        ];
+
+        const initialPayments = [];
+        for (const item of paidDates) {
+          for (const p of otherPlayers) {
+            initialPayments.push({
+              id: `pay-${item.date}-${p.id}`,
+              date: item.date,
+              playerId: p.id,
+              playerName: p.name,
+              amount: item.share,
+              mode: 'UPI',
+              utr: `UPI/${item.date.replace(/-/g, '')}/${p.name.slice(0, 3).toUpperCase()}`,
+              status: 'completed',
+              notes: `Paid and settled for court on ${item.date}`,
+              createdAt: new Date(`${item.date}T18:00:00Z`).toISOString()
+            });
+          }
+        }
+        await paymentsCol.insertMany(initialPayments);
+
+        // Total unpaid due per player = 201.33 + 337.17 + 201.33 + 124.50 + 124.50 + 151.00 = 1139.83
+        const totalDuePerPlayer = 1139.83;
+        const totalPhaniReceivable = 5 * totalDuePerPlayer; // 5699.15
+
+        await playersCol.deleteMany({});
+        const realPlayers = [
+          { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'admin', balance: totalPhaniReceivable, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
+          { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
+          { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
+          { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
+          { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
+          { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() }
+        ];
+        await playersCol.insertMany(realPlayers);
+        console.log('[MongoDB Atlas] ALL 9 REAL GAMES, PAYMENTS & BALANCES SYNCED LIVE TO ATLAS!');
+      }
+      return true;
+    } catch (err) {
+      console.error('[MongoDB Atlas] Connection failed:', err.message);
+      lastConnectionError = err.message;
+      isConnected = false;
+      mongoDb = null;
+      return false;
+    } finally {
+      connectingPromise = null;
     }
-    return true;
-  } catch (err) {
-    console.error('[MongoDB Atlas] Connection failed:', err.message);
-    lastConnectionError = err.message;
-    isConnected = false;
-    mongoDb = null;
-    return false;
-  } finally {
-    connectingPromise = null;
-  }
   })();
   return connectingPromise;
 }
@@ -350,7 +350,7 @@ app.use(async (req, res, next) => {
   if (!isConnected) {
     try {
       await connectAtlas(MONGODB_URI);
-    } catch (e) {}
+    } catch (e) { }
   }
   if (!req.url.startsWith('/api')) {
     req.url = '/api' + req.url;
@@ -371,7 +371,7 @@ app.get('/api/status', async (req, res) => {
       stats.players = await mongoDb.collection('players').countDocuments();
       stats.games = await mongoDb.collection('games').countDocuments();
       stats.payments = await mongoDb.collection('payments').countDocuments();
-    } catch (e) {}
+    } catch (e) { }
   }
 
   res.json({
@@ -632,7 +632,7 @@ app.get('/api/payments', async (req, res) => {
 
 // POST /api/payments (Admin records direct payment)
 app.post('/api/payments', async (req, res) => {
-  const { playerId, amount, mode, utr, notes } = req.body;
+  const { playerId, amount, mode, utr, notes, gameId } = req.body;
   const payAmt = parseFloat(amount);
   if (!playerId || !payAmt || payAmt <= 0) {
     return res.status(400).json({ error: 'Valid player and amount are required' });
@@ -652,6 +652,7 @@ app.post('/api/payments', async (req, res) => {
     date: new Date().toISOString().split('T')[0],
     playerId,
     playerName,
+    gameId: gameId || null,
     amount: payAmt,
     mode: mode || 'UPI',
     utr: utr || `UPI/${Date.now().toString().slice(-6)}`,
@@ -675,7 +676,7 @@ app.post('/api/payments', async (req, res) => {
 
 // POST /api/payments/claim (Player reports they paid via UPI)
 app.post('/api/payments/claim', async (req, res) => {
-  const { playerId, amount, utr, mode } = req.body;
+  const { playerId, amount, utr, mode, gameId, notes } = req.body;
   const payAmt = parseFloat(amount);
   if (!playerId || !payAmt || payAmt <= 0) {
     return res.status(400).json({ error: 'Valid player and amount are required' });
@@ -695,11 +696,12 @@ app.post('/api/payments/claim', async (req, res) => {
     date: new Date().toISOString().split('T')[0],
     playerId,
     playerName,
+    gameId: gameId || null,
     amount: payAmt,
     mode: mode || 'UPI',
     utr: utr || `UPI-CLAIM-${Date.now().toString().slice(-6)}`,
     status: 'pending',
-    notes: `Player reported payment of ₹${payAmt} via UPI. Awaiting Admin verification.`,
+    notes: notes || `Player reported payment of ₹${payAmt} via UPI. Awaiting Admin verification.`,
     createdAt: new Date().toISOString()
   };
 

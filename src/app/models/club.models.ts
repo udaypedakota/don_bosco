@@ -23,6 +23,7 @@ export interface Game {
   splitType: 'equal' | 'fixed' | 'percentage';
   attendees: string[]; // player IDs
   perPlayerShare: number;
+  status?: 'paid' | 'unpaid';
   notes?: string;
 }
 
@@ -32,6 +33,7 @@ export interface Payment {
   playerId: string;
   playerName: string;
   amount: number;
+  gameId?: string;
   mode: 'UPI' | 'Cash' | 'Bank Transfer';
   utr: string;
   status?: 'pending' | 'completed' | 'rejected';

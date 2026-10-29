@@ -1130,20 +1130,217 @@
   gap: 10px;
 }
 
+.panel-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.unpaid-badge-chip {
+  background: var(--red-soft);
+  color: #DC2626;
+  border: 1px solid var(--red-border);
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
 .session-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
-  background: var(--bg-surface-subtle);
+  padding: 16px 20px;
+  background: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.share-badge {
-  font-weight: 800;
+.session-card:hover {
+  border-color: var(--blue-light);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.06);
+}
+
+.session-card.is-paid {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+}
+
+.session-card.is-pending {
+  background: #FEFCE8;
+  border-color: #FEF08A;
+}
+
+.session-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.session-venue {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.session-date {
+  font-size: 0.84rem;
+}
+
+.session-action-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.status-paid {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.status-pending {
+  background: #FEF9C3;
+  color: #A16207;
+  border: 1px solid #FDE047;
+}
+
+.unpaid-action-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.share-badge-unpaid {
+  font-size: 0.95rem;
   color: #DC2626;
-  font-size: 1rem;
+}
+
+.share-badge-unpaid strong {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.btn-pay-game {
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  color: #FFFFFF;
+  border: none;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+}
+
+.btn-pay-game:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, #1D4ED8, #1E40AF);
+}
+
+/* Game Pay Modal styles */
+.game-pay-modal {
+  max-width: 480px;
+}
+
+.game-pay-summary {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.summary-venue {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--text-main);
+  margin-bottom: 2px;
+}
+
+.summary-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.summary-share-card {
+  background: #EFF6FF;
+  border: 1px dashed var(--blue-primary);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.share-title {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--blue-primary);
+}
+
+.share-figure {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #1E40AF;
+  line-height: 1.2;
+}
+
+.upi-recipient-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #F1F5F9;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.84rem;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.recipient-vpa {
+  background: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 6px;
+  color: var(--blue-primary);
+  font-weight: 700;
+  border: 1px solid #CBD5E1;
+}
+
+.upi-intent-btn {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  padding: 12px 18px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* --------------------------------------------------------------------------

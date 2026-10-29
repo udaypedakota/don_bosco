@@ -143,7 +143,7 @@ export class ClubService {
     });
   }
 
-  recordPayment(payment: { playerId: string; amount: number; mode: string; notes?: string }): Observable<Payment> {
+  recordPayment(payment: { playerId: string; amount: number; mode: string; gameId?: string; notes?: string }): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/payments`, payment).pipe(
       tap(newPay => {
         this.payments.update(list => [newPay, ...list]);
@@ -152,7 +152,7 @@ export class ClubService {
     );
   }
 
-  claimPayment(claim: { playerId: string; amount: number; utr?: string; mode?: string }): Observable<Payment> {
+  claimPayment(claim: { playerId: string; amount: number; gameId?: string; utr?: string; mode?: string; notes?: string }): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/payments/claim`, claim).pipe(
       tap(newClaim => {
         this.payments.update(list => [newClaim, ...list]);
