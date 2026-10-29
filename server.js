@@ -25,6 +25,7 @@ let MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ramukorla3_db_user:U
 let mongoClient = null;
 let mongoDb = null;
 let isConnected = false;
+let lastConnectionError = null;
 
 // Initial 6 players cohort
 const DEFAULT_PLAYERS = [
@@ -330,6 +331,7 @@ async function connectAtlas(uri) {
     return true;
   } catch (err) {
     console.error('[MongoDB Atlas] Connection failed:', err.message);
+    lastConnectionError = err.message;
     isConnected = false;
     mongoDb = null;
     return false;
@@ -376,7 +378,8 @@ app.get('/api/status', async (req, res) => {
     connected: isConnected,
     database: isConnected ? 'badmintiondatabase (smashclub)' : 'Local File Storage (Pending Atlas Password)',
     stats,
-    mode: isConnected ? 'MongoDB Atlas Cloud' : 'Local Storage Mode'
+    mode: isConnected ? 'MongoDB Atlas Cloud' : 'Local Storage Mode',
+    error: lastConnectionError
   });
 });
 
