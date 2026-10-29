@@ -241,11 +241,11 @@
 
           <!-- Date Selector Buttons -->
           <div class="date-selector-bar">
-            <button type="button" class="date-chip" [class.active-chip]="gameDate() === (gameDate())" (click)="setToday()">
-              Today's Game
+            <button type="button" class="date-chip" (click)="setToday()">
+              Today
             </button>
             <button type="button" class="date-chip" (click)="setTomorrow()">
-              Tomorrow's Game
+              Tomorrow
             </button>
             <input type="date" class="date-input mono" [ngModel]="gameDate()" (ngModelChange)="gameDate.set($event)">
           </div>
