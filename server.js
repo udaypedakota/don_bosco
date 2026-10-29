@@ -44,7 +44,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-09-19',
     date: '2026-09-19',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'Donbosco (Moti Nagar)',
     courtRent: 1208,
     shuttleCost: 0,
     totalExpense: 1208,
@@ -60,7 +60,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-09-22',
     date: '2026-09-22',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'Donbosco (Moti Nagar)',
     courtRent: 1208,
     shuttleCost: 0,
     totalExpense: 1208,
@@ -76,7 +76,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-09-24',
     date: '2026-09-24',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'Donbosco (Moti Nagar)',
     courtRent: 623,
     shuttleCost: 0,
     totalExpense: 623,
@@ -92,7 +92,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-10-05',
     date: '2026-10-05',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'Donbosco (Moti Nagar)',
     courtRent: 1208,
     shuttleCost: 0,
     totalExpense: 1208,
@@ -108,7 +108,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-10-09',
     date: '2026-10-09',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'AG Sports Club (Miyapur)',
     courtRent: 2023,
     shuttleCost: 0,
     totalExpense: 2023,
@@ -124,7 +124,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-10-15',
     date: '2026-10-15',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'Donbosco (Moti Nagar)',
     courtRent: 1208,
     shuttleCost: 0,
     totalExpense: 1208,
@@ -140,7 +140,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-10-19',
     date: '2026-10-19',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'AG Sports Club (Miyapur)',
     courtRent: 747,
     shuttleCost: 0,
     totalExpense: 747,
@@ -156,7 +156,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-10-26',
     date: '2026-10-26',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'Donbosco (Moti Nagar)',
     courtRent: 747,
     shuttleCost: 0,
     totalExpense: 747,
@@ -172,7 +172,7 @@ const SCREENSHOT_GAMES = [
   {
     id: 'g-2026-10-28',
     date: '2026-10-28',
-    venue: 'Smash Arena (Badminton)',
+    venue: 'Donbosco (Moti Nagar)',
     courtRent: 1208,
     shuttleCost: 0,
     totalExpense: 1208,
@@ -271,6 +271,13 @@ async function connectAtlas(uri) {
       const gamesCol = mongoDb.collection('games');
       const playersCol = mongoDb.collection('players');
       const paymentsCol = mongoDb.collection('payments');
+
+      // Update legacy "Smash Arena" venues in MongoDB Atlas to Donbosco (Moti Nagar)
+      await gamesCol.updateMany(
+        { venue: { $regex: /Smash Arena/i } },
+        { $set: { venue: 'Donbosco (Moti Nagar)' } }
+      ).catch(() => {});
+
       const count = await gamesCol.countDocuments();
 
       if (count < 9) {
@@ -605,7 +612,7 @@ app.post('/api/games', async (req, res) => {
   const newGame = {
     id: 'g-' + Date.now(),
     date: date || new Date().toISOString().split('T')[0],
-    venue: venue || 'Smash Arena',
+    venue: venue || 'Donbosco (Moti Nagar)',
     courtRent: cRent,
     shuttleCost: sCost,
     totalExpense: total,

@@ -273,7 +273,17 @@
           <div class="court-sub-panel">
             <div class="form-field">
               <label class="field-label">Venue / Court Name</label>
-              <input type="text" class="form-input" placeholder="Smash Arena Court 1" [ngModel]="gameVenue()" (ngModelChange)="gameVenue.set($event)">
+              
+              <!-- Quick 1-Click Court Presets -->
+              <div class="venue-presets-chips">
+                @for (v of courtVenues; track v) {
+                  <button type="button" class="venue-preset-chip" [class.active]="gameVenue() === v" (click)="setVenue(v)">
+                    🏸 {{ v }}
+                  </button>
+                }
+              </div>
+
+              <input type="text" class="form-input" placeholder="e.g. Donbosco (Moti Nagar)" [ngModel]="gameVenue()" (ngModelChange)="gameVenue.set($event)">
             </div>
 
             <div class="form-field" style="margin-top: 10px;">

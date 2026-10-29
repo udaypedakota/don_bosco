@@ -45,7 +45,8 @@ export class App {
 
   // Dynamic Game Session (Today / Tomorrow / Custom Date)
   gameDate = signal<string>(new Date().toISOString().split('T')[0]);
-  gameVenue = signal<string>('Smash Arena Court 1');
+  gameVenue = signal<string>('Donbosco (Moti Nagar)');
+  courtVenues = ['Donbosco (Moti Nagar)', 'AG Sports Club (Miyapur)'];
   gameCourtRent = signal<number>(1200);
   gameShuttleCost = signal<number>(0);
   gamePaidBy = signal<string>('p-phani');
@@ -456,6 +457,10 @@ export class App {
 
   setCourtPreset(amount: number): void {
     this.gameCourtRent.set(amount);
+  }
+
+  setVenue(venue: string): void {
+    this.gameVenue.set(venue);
   }
 
   toggleAttendee(playerId: string): void {

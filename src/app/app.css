@@ -763,6 +763,43 @@
   border-color: var(--blue-primary);
 }
 
+/* Venue Presets Chips */
+.venue-presets-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.venue-preset-chip {
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-light);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.venue-preset-chip:hover {
+  border-color: var(--blue-primary);
+  color: var(--blue-primary);
+  background: var(--blue-soft);
+}
+
+.venue-preset-chip.active {
+  background: var(--blue-primary);
+  color: #FFFFFF;
+  border-color: var(--blue-primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
 /* Attendees Selector Grid */
 .attendees-box {
   margin-bottom: 28px;
@@ -2205,6 +2242,24 @@
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+  }
+
+  /* Venue Presets Chips on Mobile */
+  .venue-presets-chips {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+  .venue-preset-chip {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 7px 4px !important;
+    font-size: 0.72rem !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
   }
 
   /* Attendees Box & Players Selection Grid */
