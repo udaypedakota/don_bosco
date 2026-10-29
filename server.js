@@ -379,7 +379,7 @@ app.get('/api/status', async (req, res) => {
     database: isConnected ? 'badmintiondatabase (smashclub)' : 'Local File Storage (Pending Atlas Password)',
     stats,
     mode: isConnected ? 'MongoDB Atlas Cloud' : 'Local Storage Mode',
-    error: lastConnectionError
+    error: isConnected ? null : lastConnectionError
   });
 });
 
