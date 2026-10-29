@@ -526,6 +526,49 @@
   border-radius: 4px;
 }
 
+/* Password Input with Show/Hide Eye Toggle */
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrap .form-input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.btn-toggle-eye {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, transform 0.15s ease;
+  outline: none;
+  border-radius: var(--radius-sm);
+}
+
+.btn-toggle-eye:hover {
+  color: var(--blue-primary);
+  transform: scale(1.1);
+}
+
+.btn-toggle-eye:active {
+  transform: scale(0.95);
+}
+
+.eye-svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* Quick Player Select Pills */
 .quick-player-picks {
   background: var(--bg-surface-tint);

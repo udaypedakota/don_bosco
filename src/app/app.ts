@@ -34,8 +34,18 @@ export class App {
   // Login Form State
   loginRole = signal<'admin' | 'player'>('admin');
   loginIdentifier = signal<string>('Phani');
-  loginPassword = signal<string>('admin');
+  loginPassword = signal<string>('');
+  showPassword = signal<boolean>(false);
   loginError = signal<string | null>(null);
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update(v => !v);
+  }
+
+  selectQuickPlayer(player: Player): void {
+    this.loginIdentifier.set(player.name);
+    this.loginPassword.set(player.name.toLowerCase() + '@123');
+  }
 
   // Dynamic Add Player Form
   newPlayerName = signal<string>('');

@@ -29,12 +29,12 @@ let lastConnectionError = null;
 
 // Initial 6 players cohort
 const DEFAULT_PLAYERS = [
-  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'admin', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', password: '1234', balance: 0, totalGames: 0, createdAt: new Date().toISOString() }
+  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'phani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: 'siva@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', password: 'uday@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', password: 'nani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', password: 'rajesh@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', password: 'srinvas@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() }
 ];
 
 const ALL_MEMBERS = ['p-phani', 'p-siva', 'p-uday', 'p-nani', 'p-rajesh', 'p-srinvas'];
@@ -448,9 +448,15 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(403).json({ error: 'This account does not have Admin access. Please login as Player.' });
   }
 
-  // If password provided for admin
-  if (user.role === 'admin' && user.password && password && user.password !== password) {
-    return res.status(401).json({ error: 'Incorrect admin password' });
+  // Password validation
+  if (role === 'admin') {
+    if (!password || (user.password && user.password !== password)) {
+      return res.status(401).json({ error: 'Incorrect admin password' });
+    }
+  } else {
+    if (password && user.password && user.password !== password) {
+      return res.status(401).json({ error: 'Incorrect password' });
+    }
   }
 
   res.json({
@@ -511,7 +517,7 @@ app.post('/api/players', async (req, res) => {
     name: name.trim(),
     phone: cleanPhone,
     role: role === 'admin' ? 'admin' : 'player',
-    password: password || '1234',
+    password: password || `${name.trim().toLowerCase().replace(/\s+/g, '')}@123`,
     balance: 0,
     totalGames: 0,
     createdAt: new Date().toISOString()

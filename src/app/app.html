@@ -118,14 +118,14 @@
 
           <!-- Role Toggle: Admin vs Player -->
           <div class="role-tabs">
-            <button type="button" class="role-tab-btn" [class.active]="loginRole() === 'admin'" (click)="loginRole.set('admin'); loginIdentifier.set('Phani')">
+            <button type="button" class="role-tab-btn" [class.active]="loginRole() === 'admin'" (click)="loginRole.set('admin'); loginIdentifier.set('Phani'); loginPassword.set('')">
               <span class="tab-emoji">👑</span>
               <div class="tab-text-wrap">
                 <strong>Admin Login</strong>
                 <small>Court Booker (Phani)</small>
               </div>
             </button>
-            <button type="button" class="role-tab-btn" [class.active]="loginRole() === 'player'" (click)="loginRole.set('player'); loginIdentifier.set('')">
+            <button type="button" class="role-tab-btn" [class.active]="loginRole() === 'player'" (click)="loginRole.set('player'); loginIdentifier.set(''); loginPassword.set('')">
               <span class="tab-emoji">👤</span>
               <div class="tab-text-wrap">
                 <strong>Player Login</strong>
@@ -146,24 +146,59 @@
               <input type="text" class="form-input" [placeholder]="loginRole() === 'admin' ? 'Phani' : 'e.g. Siva or 9848012346'" [ngModel]="loginIdentifier()" (ngModelChange)="loginIdentifier.set($event)" name="identifier">
             </div>
 
+            <!-- Password with Eye Toggle for Admin -->
             @if (loginRole() === 'admin') {
               <div class="form-field">
                 <label class="field-label">Admin Password</label>
-                <input type="password" class="form-input mono" placeholder="admin" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="password">
-                <span class="field-hint">Phani's default password is <code>admin</code></span>
+                <div class="password-input-wrap">
+                  <input [type]="showPassword() ? 'text' : 'password'" class="form-input mono" placeholder="••••••••" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="password" autocomplete="current-password">
+                  <button type="button" class="btn-toggle-eye" (click)="togglePasswordVisibility()" [title]="showPassword() ? 'Hide password' : 'Show password'" aria-label="Toggle password visibility">
+                    @if (showPassword()) {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-svg">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-svg">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    }
+                  </button>
+                </div>
               </div>
             }
 
-            <!-- 1-Click Quick Player Select Pills (For Player Login) -->
+            <!-- 1-Click Quick Player Select Pills & Password (For Player Login) -->
             @if (loginRole() === 'player') {
               <div class="quick-player-picks">
                 <span class="pick-label">Quick select registered players:</span>
                 <div class="picks-grid">
                   @for (player of clubService.players(); track player.id) {
-                    <button type="button" class="pick-pill" [class.selected-pill]="loginIdentifier() === player.name" (click)="loginIdentifier.set(player.name)">
+                    <button type="button" class="pick-pill" [class.selected-pill]="loginIdentifier() === player.name" (click)="selectQuickPlayer(player)">
                       <span>🏸</span> {{ player.name }}
                     </button>
                   }
+                </div>
+              </div>
+
+              <div class="form-field" style="margin-top: 4px;">
+                <label class="field-label">Player Password</label>
+                <div class="password-input-wrap">
+                  <input [type]="showPassword() ? 'text' : 'password'" class="form-input mono" placeholder="e.g. uday@123" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="playerPassword" autocomplete="current-password">
+                  <button type="button" class="btn-toggle-eye" (click)="togglePasswordVisibility()" [title]="showPassword() ? 'Hide password' : 'Show password'" aria-label="Toggle password visibility">
+                    @if (showPassword()) {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-svg">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-svg">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    }
+                  </button>
                 </div>
               </div>
             }
