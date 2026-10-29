@@ -333,6 +333,24 @@ export class App {
     return `upi://pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
   }
 
+  getPhonePeIntentUrl(amount: number, game?: Game | null): string {
+    const u = this.currentUser();
+    const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
+    return `phonepe://pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+  }
+
+  getGPayIntentUrl(amount: number, game?: Game | null): string {
+    const u = this.currentUser();
+    const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
+    return `tez://upi/pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+  }
+
+  getPaytmIntentUrl(amount: number, game?: Game | null): string {
+    const u = this.currentUser();
+    const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
+    return `paytmmp://pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+  }
+
   copyUpiId(upiId: string = '8801147452@ybl'): void {
     if (navigator?.clipboard) {
       navigator.clipboard.writeText(upiId).then(() => {

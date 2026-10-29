@@ -686,7 +686,20 @@
             <p class="qr-hint">Scan with PhonePe, Google Pay, or Paytm</p>
 
             @if ((myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
-              <button class="btn btn-yellow btn-block" style="margin-top: 14px;" (click)="showClaimModal.set(true)">
+              <div class="direct-upi-actions" style="margin-top: 14px; width: 100%;">
+                <a [href]="getPhonePeIntentUrl(-(myPlayerRecord()?.balance || 0))" class="btn btn-phonepe btn-block">
+                  <span>🟣</span> Pay ₹{{ -(myPlayerRecord()?.balance || 0) }} on PhonePe
+                </a>
+                <div class="alt-upi-row">
+                  <a [href]="getGPayIntentUrl(-(myPlayerRecord()?.balance || 0))" class="btn btn-gpay flex-1">
+                    <span>🔵</span> GPay
+                  </a>
+                  <a [href]="getPaytmIntentUrl(-(myPlayerRecord()?.balance || 0))" class="btn btn-paytm flex-1">
+                    <span>🔷</span> Paytm
+                  </a>
+                </div>
+              </div>
+              <button class="btn btn-yellow btn-block" style="margin-top: 10px;" (click)="showClaimModal.set(true)">
                 <span>✓</span> I Have Paid ₹{{ -(myPlayerRecord()?.balance || 0) }} via UPI
               </button>
             }
@@ -1014,10 +1027,18 @@
             </div>
           </div>
 
-          <div style="margin-top: 16px;">
-            <a [href]="getUpiIntentUrl(payAmount())" class="btn btn-primary btn-block btn-lg">
-              <span>⚡</span> Open UPI App Directly (PhonePe / GPay)
+          <div class="direct-upi-actions" style="margin-top: 16px;">
+            <a [href]="getPhonePeIntentUrl(payAmount())" class="btn btn-phonepe btn-block">
+              <span>🟣</span> Pay ₹{{ payAmount() }} on PhonePe Directly
             </a>
+            <div class="alt-upi-row">
+              <a [href]="getGPayIntentUrl(payAmount())" class="btn btn-gpay flex-1">
+                <span>🔵</span> Google Pay
+              </a>
+              <a [href]="getPaytmIntentUrl(payAmount())" class="btn btn-paytm flex-1">
+                <span>🔷</span> Paytm
+              </a>
+            </div>
           </div>
         </div>
 
@@ -1121,10 +1142,20 @@
 
           <p class="qr-hint">Scan with GPay / PhonePe / Paytm or tap button below:</p>
 
-          <!-- Direct Mobile UPI Intent Button -->
-          <a [href]="getUpiIntentUrl(selectedGameForPayment()?.perPlayerShare || 0, selectedGameForPayment())" class="btn btn-primary btn-block upi-intent-btn">
-            <span>📲</span> Pay ₹{{ selectedGameForPayment()?.perPlayerShare }} on GPay / PhonePe
-          </a>
+          <!-- Direct Mobile PhonePe & Alternative UPI Buttons -->
+          <div class="direct-upi-actions" style="margin-top: 14px;">
+            <a [href]="getPhonePeIntentUrl(selectedGameForPayment()?.perPlayerShare || 0, selectedGameForPayment())" class="btn btn-phonepe btn-block">
+              <span>🟣</span> Pay ₹{{ selectedGameForPayment()?.perPlayerShare }} on PhonePe Directly
+            </a>
+            <div class="alt-upi-row">
+              <a [href]="getGPayIntentUrl(selectedGameForPayment()?.perPlayerShare || 0, selectedGameForPayment())" class="btn btn-gpay flex-1">
+                <span>🔵</span> Google Pay
+              </a>
+              <a [href]="getPaytmIntentUrl(selectedGameForPayment()?.perPlayerShare || 0, selectedGameForPayment())" class="btn btn-paytm flex-1">
+                <span>🔷</span> Paytm
+              </a>
+            </div>
+          </div>
 
           <!-- UTR input -->
           <div class="form-field" style="margin-top: 18px; text-align: left;">

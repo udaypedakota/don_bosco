@@ -1919,6 +1919,89 @@
   gap: 8px;
 }
 
+.direct-upi-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-phonepe {
+  background: linear-gradient(135deg, #5F259F, #4A1580);
+  color: #FFFFFF !important;
+  font-weight: 700;
+  padding: 13px 18px;
+  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  box-shadow: 0 4px 14px rgba(95, 37, 159, 0.35);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-phonepe:hover {
+  background: linear-gradient(135deg, #4A1580, #380F61);
+  box-shadow: 0 6px 18px rgba(95, 37, 159, 0.45);
+  transform: translateY(-1px);
+}
+
+.alt-upi-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-gpay {
+  background: #FFFFFF;
+  color: #3C4043 !important;
+  font-weight: 600;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1.5px solid #DADCE0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-gpay:hover {
+  background: #F8F9FA;
+  border-color: #BDC1C6;
+}
+
+.btn-paytm {
+  background: linear-gradient(135deg, #002E6E, #00BAF2);
+  color: #FFFFFF !important;
+  font-weight: 600;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 46, 110, 0.2);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-paytm:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
 /* --------------------------------------------------------------------------
    Modals & Toast
    -------------------------------------------------------------------------- */
