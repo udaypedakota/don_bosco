@@ -4,10 +4,12 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const fs = require('fs');
 const path = require('path');
 const dns = require('dns');
-// Use reliable public DNS to prevent Windows SRV query ECONNREFUSED
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {}
+// Use reliable public DNS to prevent Windows SRV query ECONNREFUSED (Only on local Windows)
+if (!process.env.VERCEL && process.platform === 'win32') {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {}
+}
 
 require('dotenv').config();
 
@@ -212,31 +214,41 @@ function saveLocalDb(data) {
 
 let localStore = loadLocalDb();
 
+let connectingPromise = null;
+
 // Attempt connecting to MongoDB Atlas directly
 async function connectAtlas(uri) {
-  if (!uri || uri.includes('<db_password>')) {
-    console.log('[MongoDB Atlas] Awaiting database password in .env to connect to badmintiondatabase cluster.');
-    return false;
+  if (mongoDb && isConnected) {
+    return true;
   }
-  try {
-    console.log('[MongoDB Atlas] Connecting to badmintiondatabase.vizmqp0.mongodb.net...');
-    if (mongoClient) {
-      await mongoClient.close().catch(() => {});
+  if (connectingPromise) {
+    return connectingPromise;
+  }
+  connectingPromise = (async () => {
+    if (!uri || uri.includes('<db_password>')) {
+      console.log('[MongoDB Atlas] Awaiting database password in .env to connect to badmintiondatabase cluster.');
+      return false;
     }
-    mongoClient = new MongoClient(uri, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
-      connectTimeoutMS: 10000,
-      socketTimeoutMS: 15000
-    });
-    await mongoClient.connect();
-    await mongoClient.db('admin').command({ ping: 1 });
-    mongoDb = mongoClient.db('smashclub');
-    isConnected = true;
-    console.log('[MongoDB Atlas] SUCCESS! Connected live to badmintiondatabase cloud database.');
+    try {
+      console.log('[MongoDB Atlas] Connecting to badmintiondatabase.vizmqp0.mongodb.net...');
+      if (mongoClient) {
+        await mongoClient.close().catch(() => {});
+      }
+      mongoClient = new MongoClient(uri, {
+        serverApi: {
+          version: ServerApiVersion.v1,
+          strict: true,
+          deprecationErrors: true,
+        },
+        connectTimeoutMS: 6000,
+        serverSelectionTimeoutMS: 6000,
+        maxPoolSize: 10
+      });
+      await mongoClient.connect();
+      await mongoClient.db('admin').command({ ping: 1 });
+      mongoDb = mongoClient.db('smashclub');
+      isConnected = true;
+      console.log('[MongoDB Atlas] SUCCESS! Connected live to badmintiondatabase cloud database.');
 
     // Ensure all 3 collections (players, games, payments) exist in Atlas
     const existingCollections = await mongoDb.listCollections().toArray();
@@ -321,7 +333,11 @@ async function connectAtlas(uri) {
     isConnected = false;
     mongoDb = null;
     return false;
+  } finally {
+    connectingPromise = null;
   }
+  })();
+  return connectingPromise;
 }
 
 // Auto-connect on startup
