@@ -143,26 +143,30 @@ h1, h2, h3, h4, h5 {
 }
 
 .container {
+  width: 100%;
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px;
   position: relative;
   z-index: 1;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 16px;
+    padding: 0 10px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    padding: 0 12px;
+    padding: 0 8px !important;
   }
   .form-input, .form-select {
     font-size: 16px; /* Prevents auto zoom in iOS */
-    padding: 11px 14px;
+    padding: 10px 12px;
   }
 }
 

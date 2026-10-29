@@ -66,6 +66,11 @@ export class App {
   claimUtr = signal<string>('');
   toastMessage = signal<string | null>(null);
 
+  // Admin Game Filter & Player Breakdown
+  adminGameFilter = signal<'all' | 'settled' | 'pending'>('all');
+  selectedPlayerForBreakdown = signal<Player | null>(null);
+  showBreakdownModal = signal<boolean>(false);
+
   // Game-by-game Payment Signals
   selectedGameForPayment = signal<Game | null>(null);
   showGamePayModal = signal<boolean>(false);
@@ -128,6 +133,124 @@ export class App {
   unpaidGamesList = computed(() => {
     return this.myAttendedGames().filter(g => this.getGameStatusForPlayer(g).status === 'unpaid');
   });
+
+  isGameFullySettled(game: Game): boolean {
+    if (['2026-09-19', '2026-09-22', '2026-09-24'].includes(game.date) || game.status === 'paid') {
+      return true;
+    }
+    const otherAttendees = game.attendees.filter(id => id !== game.paidByPlayerId);
+    if (otherAttendees.length === 0) return true;
+    return otherAttendees.every(id => this.getGameStatusForPlayer(game, id).status === 'paid');
+  }
+
+  filteredGames = computed(() => {
+    const filter = this.adminGameFilter();
+    const games = this.clubService.games();
+    if (filter === 'settled') {
+      return games.filter(g => this.isGameFullySettled(g));
+    }
+    if (filter === 'pending') {
+      return games.filter(g => !this.isGameFullySettled(g));
+    }
+    return games;
+  });
+
+  settledGamesCount = computed(() => {
+    return this.clubService.games().filter(g => this.isGameFullySettled(g)).length;
+  });
+
+  pendingGamesCount = computed(() => {
+    return this.clubService.games().filter(g => !this.isGameFullySettled(g)).length;
+  });
+
+  getGameSettlementSummary(game: Game) {
+    const otherAttendees = game.attendees.filter(id => id !== game.paidByPlayerId);
+    const isFullySettled = this.isGameFullySettled(game);
+    let paidCount = 0;
+    let pendingCount = 0;
+    let unpaidCount = 0;
+
+    for (const id of otherAttendees) {
+      const st = this.getGameStatusForPlayer(game, id);
+      if (st.status === 'paid') {
+        paidCount++;
+      } else if (st.status === 'pending') {
+        pendingCount++;
+      } else {
+        unpaidCount++;
+      }
+    }
+
+    return {
+      totalAttendees: game.attendees.length,
+      otherAttendeesCount: otherAttendees.length,
+      paidCount,
+      pendingCount,
+      unpaidCount,
+      isFullySettled,
+      collectedAmount: (paidCount * game.perPlayerShare).toFixed(2),
+      pendingAmount: (unpaidCount * game.perPlayerShare).toFixed(2)
+    };
+  }
+
+  adminMarkGamePaid(game: Game, playerId: string): void {
+    const pName = this.getPlayerName(playerId);
+    if (!confirm(`Mark share ₹${game.perPlayerShare} as PAID by ${pName} for game on ${game.date}?`)) {
+      return;
+    }
+
+    this.clubService.recordPayment({
+      playerId,
+      amount: game.perPlayerShare,
+      mode: 'UPI',
+      gameId: game.id,
+      notes: `Court share ₹${game.perPlayerShare} for game on ${game.date} (${game.venue}) - Verified & Settled by Phani`
+    }).subscribe({
+      next: () => {
+        this.showToast(`✅ Marked ₹${game.perPlayerShare} as paid for ${pName}!`);
+      },
+      error: () => {
+        this.showToast('Failed to record payment. Please try again.');
+      }
+    });
+  }
+
+  openPlayerBreakdown(player: Player): void {
+    this.selectedPlayerForBreakdown.set(player);
+    this.showBreakdownModal.set(true);
+  }
+
+  getPlayerGamesStats(player: Player) {
+    const games = this.clubService.games().filter(g => g.attendees.includes(player.id));
+    let paidCount = 0;
+    let unpaidCount = 0;
+    let paidSum = 0;
+    let unpaidSum = 0;
+
+    const gameDetails = games.map(g => {
+      const isBooker = g.paidByPlayerId === player.id;
+      const status = isBooker ? ({ status: 'booker' as const }) : this.getGameStatusForPlayer(g, player.id);
+      if (!isBooker) {
+        if (status.status === 'paid') {
+          paidCount++;
+          paidSum += g.perPlayerShare;
+        } else {
+          unpaidCount++;
+          unpaidSum += g.perPlayerShare;
+        }
+      }
+      return { game: g, isBooker, status };
+    });
+
+    return {
+      totalGames: games.length,
+      paidCount,
+      unpaidCount,
+      paidSum: paidSum.toFixed(2),
+      unpaidSum: unpaidSum.toFixed(2),
+      gameDetails
+    };
+  }
 
   // Game-by-game Payment Status Checker
   getGameStatusForPlayer(game: Game, playerId?: string): { status: 'paid' | 'pending' | 'unpaid'; claim?: Payment } {

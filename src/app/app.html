@@ -357,6 +357,7 @@
                 <th>Role</th>
                 <th>Current Balance</th>
                 <th>Status</th>
+                <th>Game Payments</th>
                 <th style="text-align: right;">Action</th>
               </tr>
             </thead>
@@ -394,6 +395,18 @@
                       <span class="badge" style="background: #F1F5F9; color: #64748B;">Settled</span>
                     }
                   </td>
+                  <td>
+                    @if (player.role !== 'admin') {
+                      @let pStats = getPlayerGamesStats(player);
+                      <button type="button" class="btn-breakdown-chip" (click)="openPlayerBreakdown(player)" title="Click to view all game sessions and payment status">
+                        <span class="chip-paid-count">✓ {{ pStats.paidCount }} Paid</span>
+                        <span class="chip-due-count">⚠️ {{ pStats.unpaidCount }} Due</span>
+                        <span class="chip-arrow">👉</span>
+                      </button>
+                    } @else {
+                      <span class="badge badge-blue">👑 Court Booker</span>
+                    }
+                  </td>
                   <td style="text-align: right;">
                     <button class="btn btn-sm btn-secondary" (click)="openPaymentFor(player)">
                       Record Payment
@@ -411,35 +424,104 @@
         </div>
       </section>
 
-      <!-- 3. DATABASE SAVED GAMES -->
+      <!-- 3. DATABASE SAVED GAMES & GAME-BY-GAME PAYMENT TRACKER -->
       <section class="bright-card games-history-card">
         <div class="card-title-row">
           <div>
-            <h3 class="card-title">Recorded Game Sessions (MongoDB Atlas)</h3>
-            <p class="card-caption">All court sessions recorded in your cloud database</p>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+              <span class="badge badge-yellow">⚡ Game Settlements</span>
+              <span class="badge badge-green">🟢 3 Initial Games Fully Paid</span>
+            </div>
+            <h3 class="card-title">Recorded Game Sessions & Payment Tracking</h3>
+            <p class="card-caption">See which players paid for each session and mark due shares as paid in MongoDB Atlas</p>
+          </div>
+
+          <!-- Filter Pills for Admin -->
+          <div class="game-filter-pills">
+            <button type="button" class="filter-pill" [class.active]="adminGameFilter() === 'all'" (click)="adminGameFilter.set('all')">
+              All Sessions ({{ clubService.games().length }})
+            </button>
+            <button type="button" class="filter-pill pill-settled" [class.active]="adminGameFilter() === 'settled'" (click)="adminGameFilter.set('settled')">
+              ✓ Fully Paid ({{ settledGamesCount() }})
+            </button>
+            <button type="button" class="filter-pill pill-pending" [class.active]="adminGameFilter() === 'pending'" (click)="adminGameFilter.set('pending')">
+              ⚠️ Pending Dues ({{ pendingGamesCount() }})
+            </button>
           </div>
         </div>
 
         <div class="games-feed">
-          @for (game of clubService.games(); track game.id) {
-            <div class="game-feed-item">
-              <div class="feed-left">
-                <span class="venue-name">{{ game.venue }}</span>
-                <span class="date-tag mono">📅 {{ game.date }} · Paid upfront by {{ game.paidByPlayerName }}</span>
+          @for (game of filteredGames(); track game.id) {
+            @let summary = getGameSettlementSummary(game);
+            <div class="game-feed-item" [class.feed-item-settled]="summary.isFullySettled">
+              
+              <!-- Feed Header Line -->
+              <div class="feed-header-line">
+                <div class="feed-header-left">
+                  <div class="feed-venue-row">
+                    <strong class="venue-name">{{ game.venue }}</strong>
+                    @if (summary.isFullySettled) {
+                      <span class="badge badge-green">✓ All {{ summary.paidCount }} Players Paid</span>
+                    } @else {
+                      <span class="badge badge-yellow">⚠️ {{ summary.paidCount }}/{{ summary.otherAttendeesCount }} Paid · {{ summary.unpaidCount }} Due (₹{{ summary.pendingAmount }})</span>
+                    }
+                  </div>
+                  <div class="date-tag mono">
+                    📅 {{ game.date }} · Total Court Fee: ₹{{ game.totalExpense }} · Paid Upfront by {{ game.paidByPlayerName }}
+                  </div>
+                </div>
+
+                <div class="feed-header-right mono">
+                  <div class="feed-total-val">₹{{ game.totalExpense }}</div>
+                  <div class="feed-share-sub">₹{{ game.perPlayerShare }} / player ({{ game.attendees.length }} players)</div>
+                </div>
               </div>
-              <div class="feed-chips">
-                @for (pId of game.attendees; track pId) {
-                  <span class="attendee-tag">{{ getPlayerName(pId) }}</span>
-                }
+
+              <!-- Attendees Individual Payment Status Chips -->
+              <div class="attendees-status-container">
+                <span class="attendees-status-lbl">Attendee Settlements:</span>
+                <div class="attendees-pay-chips">
+                  @for (pId of game.attendees; track pId) {
+                    @if (pId === game.paidByPlayerId) {
+                      <div class="attendee-chip chip-booker" title="Paid whole court fee upfront">
+                        👑 {{ getPlayerName(pId) }} <small>(Upfront Booker)</small>
+                      </div>
+                    } @else {
+                      @let pSt = getGameStatusForPlayer(game, pId);
+                      @if (pSt.status === 'paid') {
+                        <div class="attendee-chip chip-paid" title="Share settled">
+                          <span class="chip-status-icon">✓</span>
+                          <strong>{{ getPlayerName(pId) }}</strong>
+                          <span class="chip-share-text">Paid ₹{{ game.perPlayerShare }}</span>
+                        </div>
+                      } @else if (pSt.status === 'pending') {
+                        <div class="attendee-chip chip-pending" title="Player submitted UPI payment claim">
+                          <span class="chip-status-icon">⏳</span>
+                          <strong>{{ getPlayerName(pId) }}</strong>
+                          <span class="chip-share-text">Claimed ₹{{ game.perPlayerShare }}</span>
+                          <button type="button" class="btn-chip-action btn-chip-approve" (click)="approveClaim(pSt.claim!.id)" title="Approve payment">
+                            ✓ Approve
+                          </button>
+                        </div>
+                      } @else {
+                        <div class="attendee-chip chip-due" title="Due to Phani">
+                          <span class="chip-status-icon">⚠️</span>
+                          <strong>{{ getPlayerName(pId) }}</strong>
+                          <span class="chip-share-text">Due ₹{{ game.perPlayerShare }}</span>
+                          <button type="button" class="btn-chip-action btn-chip-mark-paid" (click)="adminMarkGamePaid(game, pId)" title="Mark as Paid if received in cash/UPI">
+                            ✓ Mark Paid
+                          </button>
+                        </div>
+                      }
+                    }
+                  }
+                </div>
               </div>
-              <div class="feed-total mono">
-                Total: ₹{{ game.totalExpense }}
-                <span class="split-each">({{ game.attendees.length }} players · ₹{{ game.perPlayerShare }}/each)</span>
-              </div>
+
             </div>
           }
-          @if (clubService.games().length === 0) {
-            <p class="muted-text" style="padding: 16px;">No games recorded yet. Schedule a session above!</p>
+          @if (filteredGames().length === 0) {
+            <p class="muted-text" style="padding: 16px; text-align: center;">No sessions match the selected filter.</p>
           }
         </div>
       </section>
@@ -1024,6 +1106,93 @@
           <button type="button" class="btn btn-primary" [disabled]="profileSaving()" (click)="saveProfile()">
             <span>💾</span> {{ profileSaving() ? 'Saving to Cloud...' : 'Save Profile to MongoDB' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL: PLAYER GAME-BY-GAME PAYMENT BREAKDOWN (For Admin / Phani)
+       Shows which games this specific player paid and which are due
+       ======================================================================== -->
+  @if (showBreakdownModal() && selectedPlayerForBreakdown()) {
+    @let player = selectedPlayerForBreakdown()!;
+    @let pStats = getPlayerGamesStats(player);
+    <div class="modal-overlay animate-fade">
+      <div class="modal-card modal-breakdown-card">
+        <div class="modal-header">
+          <div class="modal-header-info">
+            <span class="badge badge-yellow">🏸 Player Settlement Ledger</span>
+            <h3 class="modal-title" style="margin-top: 4px;">{{ player.name }}'s Game Payments</h3>
+          </div>
+          <button class="modal-close" (click)="showBreakdownModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Player Summary Highlights -->
+          <div class="breakdown-summary-banner">
+            <div class="bs-item">
+              <span class="bs-lbl">Attended</span>
+              <strong class="bs-val mono">{{ pStats.totalGames }} Games</strong>
+            </div>
+            <div class="bs-item">
+              <span class="bs-lbl">Games Settled</span>
+              <strong class="bs-val mono text-green">✓ {{ pStats.paidCount }} Paid</strong>
+            </div>
+            <div class="bs-item">
+              <span class="bs-lbl">Games Due</span>
+              <strong class="bs-val mono text-red">⚠️ {{ pStats.unpaidCount }} Due</strong>
+            </div>
+            <div class="bs-item">
+              <span class="bs-lbl">Total Owed</span>
+              <strong class="bs-val mono text-red">₹{{ pStats.unpaidSum }}</strong>
+            </div>
+          </div>
+
+          <!-- List of All Games for this player -->
+          <div class="player-games-list">
+            @for (item of pStats.gameDetails; track item.game.id) {
+              <div class="player-game-row" [class.is-paid-row]="item.status.status === 'paid'" [class.is-due-row]="item.status.status === 'unpaid'">
+                <div class="pgr-left">
+                  <strong class="pgr-venue">{{ item.game.venue }}</strong>
+                  <div class="pgr-date mono muted-text">
+                    📅 {{ item.game.date }} · Court Fee: ₹{{ item.game.totalExpense }} ({{ item.game.attendees.length }} players)
+                  </div>
+                </div>
+
+                <div class="pgr-right">
+                  <div class="pgr-share mono">
+                    Share: ₹{{ item.game.perPlayerShare }}
+                  </div>
+
+                  @if (item.status.status === 'paid') {
+                    <span class="badge badge-green pgr-badge">✓ Settled</span>
+                  } @else if (item.status.status === 'pending') {
+                    <div class="pgr-action-wrap">
+                      <span class="badge badge-yellow pgr-badge">⏳ Claimed</span>
+                      <button type="button" class="btn btn-sm btn-yellow" (click)="approveClaim(item.status.claim!.id)">
+                        Approve
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="pgr-action-wrap">
+                      <span class="badge badge-red pgr-badge">⚠️ Due</span>
+                      <button type="button" class="btn btn-sm btn-primary" (click)="adminMarkGamePaid(item.game, player.id)">
+                        ✓ Mark Paid
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+            @if (pStats.gameDetails.length === 0) {
+              <p class="muted-text" style="padding: 16px; text-align: center;">No recorded games found for this player.</p>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer" style="justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" (click)="showBreakdownModal.set(false)">Close Ledger</button>
         </div>
       </div>
     </div>
