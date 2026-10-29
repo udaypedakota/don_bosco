@@ -1295,8 +1295,13 @@
           </form>
         </div>
 
-        <div class="modal-footer" style="justify-content: space-between;">
-          <button type="button" class="btn btn-secondary" (click)="showProfileModal.set(false)">Cancel</button>
+        <div class="modal-footer" style="justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" class="btn btn-secondary" (click)="showProfileModal.set(false)">Cancel</button>
+            <button type="button" class="btn btn-logout-modal" (click)="showProfileModal.set(false); logout()" style="color: #DC2626; background: #FEE2E2; border: 1.5px solid #FECACA; font-weight: 700; border-radius: var(--radius-md); padding: 8px 14px; gap: 6px;">
+              <span>🚪</span> Sign Out
+            </button>
+          </div>
           <button type="button" class="btn btn-primary" [disabled]="profileSaving()" (click)="saveProfile()">
             <span>💾</span> {{ profileSaving() ? 'Saving to Cloud...' : 'Save Profile to MongoDB' }}
           </button>
