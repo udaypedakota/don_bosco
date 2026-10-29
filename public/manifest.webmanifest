@@ -1,0 +1,30 @@
+{
+  "name": "Badminton",
+  "short_name": "Badminton",
+  "description": "Smart badminton court booking, group expense splitting, and UPI payments.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B132B",
+  "theme_color": "#2563EB",
+  "icons": [
+    {
+      "src": "/assets/badminton-app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/badminton-app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/badminton-app-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

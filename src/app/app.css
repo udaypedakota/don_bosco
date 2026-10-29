@@ -50,6 +50,165 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
+.brand-avatar-img-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0B132B;
+}
+
+.brand-avatar-img-wrap:hover {
+  transform: scale(1.05);
+}
+
+.brand-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.btn-install-app-pill {
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  color: #1D4ED8;
+  border: 1.5px solid #93C5FD;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.btn-install-app-pill:hover {
+  background: #2563EB;
+  color: #FFFFFF;
+  border-color: #2563EB;
+  transform: translateY(-1px);
+}
+
+.install-modal {
+  max-width: 480px;
+  width: 100%;
+}
+
+.install-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  display: block;
+}
+
+.install-tabs-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.install-tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.install-tab-btn.active {
+  background: #FFFFFF;
+  color: #2563EB;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.install-guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-step-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+}
+
+.guide-step-card.highlight-step {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+}
+
+.step-num-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #2563EB;
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.step-text strong {
+  font-size: 0.9rem;
+  color: #0F172A;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.step-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.share-icon-glyph {
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.install-benefit-box {
+  background: #F0FDF4;
+  border: 1px dashed #86EFAC;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #166534;
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
 .brand-avatar svg {
   width: 26px;
   height: 26px;
@@ -2294,6 +2453,16 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
+  }
+  .brand-avatar-img-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+  }
+  .btn-install-app-pill {
+    padding: 4px 8px !important;
+    font-size: 0.72rem !important;
+    gap: 4px !important;
   }
   .brand-avatar svg {
     width: 18px;

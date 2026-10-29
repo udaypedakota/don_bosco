@@ -74,6 +74,8 @@ export class App {
   showAtlasModal = signal<boolean>(false);
   showUpiModal = signal<boolean>(false);
   showClaimModal = signal<boolean>(false);
+  showInstallModal = signal<boolean>(false);
+  installTab = signal<'ios' | 'android'>('ios');
   claimUtr = signal<string>('');
   toastMessage = signal<string | null>(null);
 

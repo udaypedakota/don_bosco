@@ -12,20 +12,23 @@
     <div class="container header-inner">
       <!-- Brand Logo -->
       <div class="brand-group">
-        <div class="brand-avatar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            <circle cx="12" cy="19" r="2.5" fill="#F59E0B" stroke="#F59E0B"/>
-          </svg>
+        <div class="brand-avatar-img-wrap" (click)="showInstallModal.set(true)" title="Install Badminton App">
+          <img src="assets/badminton-app-icon.png" alt="Badminton" class="brand-icon-img">
         </div>
         <div class="brand-meta">
-          <span class="brand-title">SMASH<span class="text-blue">CLUB</span></span>
-          <span class="brand-sub">Dynamic Cloud Court Splitter</span>
+          <span class="brand-title">BADMINTON</span>
+          <span class="brand-sub">Smash Club · Court & Dues</span>
         </div>
       </div>
 
       <!-- Header Right: MongoDB Atlas Status & User Session -->
       <div class="header-right">
+        <!-- Install Badminton App Button -->
+        <button type="button" class="btn-install-app-pill" (click)="showInstallModal.set(true)" title="Install Badminton App on iPhone or Android">
+          <span class="install-icon">📲</span>
+          <span class="install-text">Install App</span>
+        </button>
+
         <!-- Live MongoDB Atlas Cluster Status Pill -->
         <div class="atlas-cloud-badge" [class.is-connected]="clubService.atlasStatus().connected" (click)="showAtlasModal.set(true)">
           <div class="pulse-circle" [class.online]="clubService.atlasStatus().connected" [class.pending]="!clubService.atlasStatus().connected"></div>
@@ -1380,6 +1383,124 @@
 
         <div class="modal-footer" style="justify-content: flex-end;">
           <button type="button" class="btn btn-secondary" (click)="showBreakdownModal.set(false)">Close Ledger</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL 8: INSTALL APP ON PHONE (iPhone & Android)
+       ======================================================================== -->
+  @if (showInstallModal()) {
+    <div class="modal-overlay" (click)="showInstallModal.set(false)">
+      <div class="modal-card install-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="assets/badminton-app-icon.png" alt="Badminton Icon" class="install-modal-icon">
+            <div>
+              <h3 class="modal-title" style="margin: 0; font-size: 1.25rem;">Install "Badminton" App</h3>
+              <p class="card-caption" style="margin: 0; font-size: 0.8rem;">Add to your iPhone or Android Home Screen</p>
+            </div>
+          </div>
+          <button class="modal-close" (click)="showInstallModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Device Tabs (iPhone vs Android) -->
+          <div class="install-tabs-bar">
+            <button type="button" class="install-tab-btn" [class.active]="installTab() === 'ios'" (click)="installTab.set('ios')">
+              <span>🍏</span> iPhone (iOS Safari)
+            </button>
+            <button type="button" class="install-tab-btn" [class.active]="installTab() === 'android'" (click)="installTab.set('android')">
+              <span>🤖</span> Android (Chrome)
+            </button>
+          </div>
+
+          <!-- iPhone (iOS) Steps -->
+          @if (installTab() === 'ios') {
+            <div class="install-guide-steps animate-fade">
+              <div class="guide-step-card">
+                <div class="step-num-circle">1</div>
+                <div class="step-text">
+                  <strong>Safari లో ఓపెన్ చేయండి</strong>
+                  <p>మీ iPhone లో ఈ వెబ్‌సైట్‌ను <strong>Safari</strong> బ్రౌజర్‌లో ఓపెన్ చేయండి.</p>
+                </div>
+              </div>
+
+              <div class="guide-step-card">
+                <div class="step-num-circle">2</div>
+                <div class="step-text">
+                  <strong>Share గుర్తు (బాణం గుర్తు) నొక్కండి</strong>
+                  <p>Safari కింద స్క్రీన్‌లో మధ్యలో ఉండే <strong>Share బటన్ (⬆️)</strong> పై నొక్కండి.</p>
+                </div>
+              </div>
+
+              <div class="guide-step-card highlight-step">
+                <div class="step-num-circle">3</div>
+                <div class="step-text">
+                  <strong>"Add to Home Screen" ఎంచుకోండి</strong>
+                  <p>క్రిందికి స్క్రోల్ చేసి <strong>[+] Add to Home Screen</strong> ఆప్షన్‌ని ఎంచుకోండి.</p>
+                </div>
+              </div>
+
+              <div class="guide-step-card">
+                <div class="step-num-circle">4</div>
+                <div class="step-text">
+                  <strong>పైన "Add" నొక్కండి</strong>
+                  <p>యాప్ పేరు ఆటోమేటిక్‌గా <strong>"Badminton"</strong> అని వస్తుంది. పైన కుడివైపు <strong>Add</strong> నొక్కండి. పూర్తి!</p>
+                </div>
+              </div>
+
+              <div class="install-benefit-box">
+                ✨ మీ iPhone హోమ్ స్క్రీన్‌లో Badminton ఐకాన్ వస్తుంది. ట్యాప్ చేయగానే ఫుల్‌స్క్రీన్ యాప్ లాగా నేరుగా ఓపెన్ అవుతుంది!
+              </div>
+            </div>
+          }
+
+          <!-- Android Steps -->
+          @if (installTab() === 'android') {
+            <div class="install-guide-steps animate-fade">
+              <div class="guide-step-card">
+                <div class="step-num-circle">1</div>
+                <div class="step-text">
+                  <strong>Chrome లో ఓపెన్ చేయండి</strong>
+                  <p>మీ Android మొబైల్‌లో <strong>Chrome</strong> బ్రౌజర్ ఉపయోగించండి.</p>
+                </div>
+              </div>
+
+              <div class="guide-step-card">
+                <div class="step-num-circle">2</div>
+                <div class="step-text">
+                  <strong>మూడు చుక్కలు (⋮) నొక్కండి</strong>
+                  <p>Chrome లో పైన కుడివైపు ఉన్న <strong>మూడు చుక్కలు (⋮)</strong> నొక్కండి.</p>
+                </div>
+              </div>
+
+              <div class="guide-step-card highlight-step">
+                <div class="step-num-circle">3</div>
+                <div class="step-text">
+                  <strong>"Install app" నొక్కండి</strong>
+                  <p>మెనూలో కనిపించే <strong>"Install app"</strong> లేదా <strong>"Add to Home screen"</strong> పై నొక్కండి.</p>
+                </div>
+              </div>
+
+              <div class="guide-step-card">
+                <div class="step-num-circle">4</div>
+                <div class="step-text">
+                  <strong>Install నొక్కండి</strong>
+                  <p>కన్ఫర్మేషన్ పాపప్‌లో <strong>Install</strong> బటన్ నొక్కండి. మీ ఫోన్ యాప్ లిస్ట్‌లో "Badminton" యాడ్ అయిపోతుంది!</p>
+                </div>
+              </div>
+
+              <div class="install-benefit-box">
+                ⚡ మీ Android ఫోన్ లో ఒక సాధారణ Play Store యాప్ లాగే బ్యాడ్మింటన్ ఐకాన్‌తో ఫుల్‌స్క్రీన్‌లో పనిచేస్తుంది!
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer" style="justify-content: flex-end;">
+          <button type="button" class="btn btn-primary" (click)="showInstallModal.set(false)">Got It!</button>
         </div>
       </div>
     </div>
