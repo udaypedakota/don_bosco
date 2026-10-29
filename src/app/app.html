@@ -23,11 +23,6 @@
 
       <!-- Header Right: MongoDB Atlas Status & User Session -->
       <div class="header-right">
-        <!-- Install Badminton App Button -->
-        <button type="button" class="btn-install-app-pill" (click)="showInstallModal.set(true)" title="Install Badminton App on iPhone or Android">
-          <span class="install-icon">📲</span>
-          <span class="install-text">Install App</span>
-        </button>
 
         <!-- Live MongoDB Atlas Cluster Status Pill -->
         <div class="atlas-cloud-badge" [class.is-connected]="clubService.atlasStatus().connected" (click)="showAtlasModal.set(true)">
@@ -219,6 +214,13 @@
                 Not listed? Ask Phani (Admin) to add your name to the court roster.
               }
             </p>
+          </div>
+
+          <!-- PWA Install Shortcut on Login Page ONLY -->
+          <div style="margin-top: 18px; text-align: center; border-top: 1px dashed #E2E8F0; padding-top: 14px;">
+            <button type="button" class="btn btn-secondary btn-block" (click)="showInstallModal.set(true)" style="border-radius: var(--radius-full); font-weight: 700; gap: 8px;">
+              <span>📲</span> Install "Badminton" App on iPhone / Android
+            </button>
           </div>
         </div>
 
@@ -613,18 +615,20 @@
                 {{ (myPlayerRecord()?.name || currentUser()?.name)?.slice(0, 2)?.toUpperCase() }}
               </div>
             }
-            <div>
-              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div class="welcome-text-col">
+              <div class="welcome-name-row">
                 <h1 class="welcome-title">Hello, {{ myPlayerRecord()?.name || currentUser()?.name }}!</h1>
-                <button class="btn btn-sm btn-edit-profile" (click)="openProfileModal()">
-                  <span>✏️</span> Edit Profile
-                </button>
-                <button class="btn btn-sm btn-booking-shortcut" (click)="scrollToBooking()">
-                  <span>🏸</span> Book / Split Court Session
-                </button>
+                <div class="welcome-btn-group">
+                  <button class="btn btn-sm btn-edit-profile" (click)="openProfileModal()">
+                    <span>✏️</span> Edit Profile
+                  </button>
+                  <button class="btn btn-sm btn-booking-shortcut" (click)="scrollToBooking()">
+                    <span>🏸</span> Book Court
+                  </button>
+                </div>
               </div>
               <div class="welcome-meta mono">
-                📱 +91 {{ myPlayerRecord()?.phone || currentUser()?.phone }} · Smash Club Player Account · 🏸 {{ myPlayerRecord()?.skill || 'Intermediate' }}
+                📱 +91 {{ myPlayerRecord()?.phone || currentUser()?.phone }} · Smash Club · 🏸 {{ myPlayerRecord()?.skill || 'Intermediate' }}
               </div>
             </div>
           </div>
