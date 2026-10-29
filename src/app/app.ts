@@ -360,13 +360,53 @@ export class App {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      if (file.size > 2 * 1024 * 1024) {
-        this.profileError.set('Photo must be smaller than 2MB');
+      if (!file.type.startsWith('image/')) {
+        this.profileError.set('Please select a valid image file (JPG, PNG, WEBP)');
         return;
       }
+
+      this.profileError.set(null);
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        this.profileAvatar.set(e.target.result);
+        const img = new Image();
+        img.onload = () => {
+          try {
+            // Resize to crisp avatar size (360x360 square with center-crop)
+            const maxDim = 360;
+            const width = img.naturalWidth || img.width;
+            const height = img.naturalHeight || img.height;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = maxDim;
+            canvas.height = maxDim;
+
+            const minSide = Math.min(width, height);
+            const srcX = (width - minSide) / 2;
+            const srcY = (height - minSide) / 2;
+
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              ctx.drawImage(img, srcX, srcY, minSide, minSide, 0, 0, maxDim, maxDim);
+              // Compressed JPEG at 0.85 quality (~35KB-50KB)
+              const compressedData = canvas.toDataURL('image/jpeg', 0.85);
+              this.profileAvatar.set(compressedData);
+              this.profileError.set(null);
+            } else {
+              this.profileAvatar.set(e.target.result);
+            }
+          } catch (err) {
+            this.profileAvatar.set(e.target.result);
+          }
+        };
+        img.onerror = () => {
+          this.profileError.set('Failed to read image. Please select another photo.');
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = () => {
+        this.profileError.set('Error reading photo file.');
       };
       reader.readAsDataURL(file);
     }
@@ -377,7 +417,10 @@ export class App {
     const u = this.currentUser();
     const p = this.myPlayerRecord();
     const id = p?.id || u?.id;
-    if (!id) return;
+    if (!id) {
+      this.profileError.set('Session expired. Please log in again.');
+      return;
+    }
 
     const name = this.profileName().trim();
     const phone = this.profilePhone().trim().replace(/\D/g, '');
@@ -405,11 +448,12 @@ export class App {
       next: (updated) => {
         this.profileSaving.set(false);
         this.showProfileModal.set(false);
-        this.showToast('✨ Profile updated in MongoDB Atlas cloud!');
+        this.showToast('✨ Profile & photo updated in MongoDB Atlas cloud!');
       },
       error: (err) => {
         this.profileSaving.set(false);
-        this.profileError.set(err.error?.error || 'Failed to save profile. Try again.');
+        const errMsg = err.error?.error || (err.status === 413 ? 'Image is too large. Please select another photo.' : 'Failed to save profile. Try again.');
+        this.profileError.set(errMsg);
       }
     });
   }

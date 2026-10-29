@@ -17,7 +17,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // MongoDB Atlas URI from .env
 let MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ramukorla3_db_user:Uday8329@badmintiondatabase.vizmqp0.mongodb.net/smashclub?retryWrites=true&w=majority';
@@ -562,16 +563,28 @@ app.put('/api/players/:id', async (req, res) => {
   if (upiId !== undefined) updates.upiId = upiId.trim();
   if (password) updates.password = password;
 
-  if (mongoDb) {
-    await mongoDb.collection('players').updateOne({ id }, { $set: updates });
-    const updated = await mongoDb.collection('players').findOne({ id });
-    return res.json(updated);
-  } else {
-    const p = localStore.players.find(pl => pl.id === id);
-    if (!p) return res.status(404).json({ error: 'Player not found' });
-    Object.assign(p, updates);
-    saveLocalDb(localStore);
-    return res.json(p);
+  try {
+    if (mongoDb) {
+      const filter = {
+        $or: [
+          { id: id },
+          { phone: updates.phone || '' },
+          { name: { $regex: new RegExp(`^${name}$`, 'i') } }
+        ]
+      };
+      await mongoDb.collection('players').updateOne(filter, { $set: updates });
+      const updated = await mongoDb.collection('players').findOne(filter);
+      return res.json(updated || { id, ...updates });
+    } else {
+      const p = localStore.players.find(pl => pl.id === id || pl.phone === updates.phone);
+      if (!p) return res.status(404).json({ error: 'Player not found' });
+      Object.assign(p, updates);
+      saveLocalDb(localStore);
+      return res.json(p);
+    }
+  } catch (err) {
+    console.error('Update player error:', err.message);
+    return res.status(500).json({ error: 'Failed to update player: ' + err.message });
   }
 });
 
