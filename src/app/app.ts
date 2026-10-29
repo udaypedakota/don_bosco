@@ -330,7 +330,19 @@ export class App {
   getUpiIntentUrl(amount: number, game?: Game | null): string {
     const u = this.currentUser();
     const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
-    return `upi://pay?pa=smashclub@okhdfcbank&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+    return `upi://pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+  }
+
+  copyUpiId(upiId: string = '8801147452@ybl'): void {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(upiId).then(() => {
+        this.showToast(`📋 Copied UPI ID: ${upiId}`);
+      }).catch(() => {
+        this.showToast(`UPI ID: ${upiId}`);
+      });
+    } else {
+      this.showToast(`UPI ID: ${upiId}`);
+    }
   }
 
   // ==========================================================================

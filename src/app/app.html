@@ -662,38 +662,28 @@
         <div class="player-content-grid">
           <div class="upi-box">
             <div class="upi-card-head">
-              <span class="badge badge-blue">Official Club UPI</span>
-              <span class="vpa-text mono">smashclub@okhdfcbank</span>
+              <span class="badge badge-blue">PhonePe · SBI (9738)</span>
+              <button type="button" class="copy-upi-btn mono" (click)="copyUpiId('8801147452@ybl')" title="Click to copy UPI ID">
+                8801147452@ybl 📋
+              </button>
             </div>
 
-            <!-- Stylized Athletic QR Code -->
-            <div class="qr-box">
-              <svg viewBox="0 0 160 160" class="qr-svg-bright">
-                <rect width="160" height="160" rx="16" fill="#F8FAFC" stroke="#BFDBFE" stroke-width="2"/>
-                <rect x="20" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
-                <rect x="25" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
-                <rect x="29" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
-
-                <rect x="106" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
-                <rect x="111" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
-                <rect x="115" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
-
-                <rect x="20" y="106" width="34" height="34" rx="6" fill="#2563EB"/>
-                <rect x="25" y="111" width="24" height="24" rx="3" fill="#FFFFFF"/>
-                <rect x="29" y="115" width="16" height="16" rx="2" fill="#2563EB"/>
-
-                <circle cx="70" cy="35" r="4" fill="#2563EB"/>
-                <circle cx="85" cy="40" r="3" fill="#F59E0B"/>
-                <circle cx="75" cy="70" r="5" fill="#2563EB"/>
-                <circle cx="95" cy="80" r="4" fill="#3B82F6"/>
-                <circle cx="70" cy="115" r="4" fill="#F59E0B"/>
-                <circle cx="85" cy="120" r="5" fill="#2563EB"/>
-                <circle cx="120" cy="95" r="4" fill="#2563EB"/>
-                <circle cx="110" cy="115" r="3" fill="#3B82F6"/>
-                <circle cx="125" cy="125" r="4" fill="#F59E0B"/>
-              </svg>
+            <!-- Real PhonePe Scanner QR Code -->
+            <div class="real-qr-card">
+              <div class="qr-bank-tag">
+                <span class="sbi-dot"></span> State Bank of India - 9738 · Phani
+              </div>
+              <div class="qr-image-frame">
+                <img src="assets/phani-qr.png" alt="Phani PhonePe QR Code" class="phani-qr-scanner-img">
+              </div>
+              <div class="upi-id-badge-row">
+                <span class="upi-label">UPI ID:</span>
+                <span class="upi-val mono">8801147452@ybl</span>
+                <button type="button" class="btn-copy-chip" (click)="copyUpiId('8801147452@ybl')">Copy</button>
+              </div>
             </div>
-            <p class="qr-hint">Scan with GPay, PhonePe, or Paytm</p>
+
+            <p class="qr-hint">Scan with PhonePe, Google Pay, or Paytm</p>
 
             @if ((myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
               <button class="btn btn-yellow btn-block" style="margin-top: 14px;" (click)="showClaimModal.set(true)">
@@ -1008,33 +998,26 @@
 
         <div class="modal-body" style="text-align: center;">
           <div class="upi-pay-figure mono">₹{{ payAmount() }}</div>
-          <p class="muted-text">Scan with GPay or PhonePe to pay <strong>smashclub@okhdfcbank</strong></p>
+          <p class="muted-text">Scan with PhonePe or GPay to pay <strong>8801147452@ybl</strong> (Phani)</p>
 
-          <div class="qr-wrapper-center">
-            <svg viewBox="0 0 160 160" class="qr-svg-bright">
-              <rect width="160" height="160" rx="16" fill="#F8FAFC" stroke="#BFDBFE" stroke-width="2"/>
-              <rect x="20" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
-              <rect x="25" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
-              <rect x="29" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
+          <div class="real-qr-card-modal">
+            <div class="qr-bank-tag">
+              <span class="sbi-dot"></span> State Bank of India - 9738 · Phani
+            </div>
+            <div class="qr-image-frame">
+              <img src="assets/phani-qr.png" alt="Phani PhonePe QR Code" class="phani-qr-scanner-img">
+            </div>
+            <div class="upi-id-badge-row" style="margin-top: 10px;">
+              <span class="upi-label">UPI ID:</span>
+              <strong class="upi-val mono">8801147452@ybl</strong>
+              <button type="button" class="btn-copy-chip" (click)="copyUpiId('8801147452@ybl')">Copy</button>
+            </div>
+          </div>
 
-              <rect x="106" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
-              <rect x="111" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
-              <rect x="115" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
-
-              <rect x="20" y="106" width="34" height="34" rx="6" fill="#2563EB"/>
-              <rect x="25" y="111" width="24" height="24" rx="3" fill="#FFFFFF"/>
-              <rect x="29" y="115" width="16" height="16" rx="2" fill="#2563EB"/>
-
-              <circle cx="70" cy="35" r="4" fill="#2563EB"/>
-              <circle cx="85" cy="40" r="3" fill="#F59E0B"/>
-              <circle cx="75" cy="70" r="5" fill="#2563EB"/>
-              <circle cx="95" cy="80" r="4" fill="#3B82F6"/>
-              <circle cx="70" cy="115" r="4" fill="#F59E0B"/>
-              <circle cx="85" cy="120" r="5" fill="#2563EB"/>
-              <circle cx="120" cy="95" r="4" fill="#2563EB"/>
-              <circle cx="110" cy="115" r="3" fill="#3B82F6"/>
-              <circle cx="125" cy="125" r="4" fill="#F59E0B"/>
-            </svg>
+          <div style="margin-top: 16px;">
+            <a [href]="getUpiIntentUrl(payAmount())" class="btn btn-primary btn-block btn-lg">
+              <span>⚡</span> Open UPI App Directly (PhonePe / GPay)
+            </a>
           </div>
         </div>
 
@@ -1116,35 +1099,24 @@
           <div class="upi-recipient-pill">
             <span class="pill-label">Pay To Court Booker:</span>
             <strong>Phani (Smash Club)</strong>
-            <span class="mono recipient-vpa">smashclub@okhdfcbank</span>
+            <button type="button" class="copy-upi-btn mono" (click)="copyUpiId('8801147452@ybl')" style="margin-left: 8px;">
+              8801147452@ybl 📋
+            </button>
           </div>
 
-          <!-- Stylized QR Code for this game -->
-          <div class="qr-wrapper-center">
-            <svg viewBox="0 0 160 160" class="qr-svg-bright">
-              <rect width="160" height="160" rx="16" fill="#F8FAFC" stroke="#BFDBFE" stroke-width="2"/>
-              <rect x="20" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
-              <rect x="25" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
-              <rect x="29" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
-
-              <rect x="106" y="20" width="34" height="34" rx="6" fill="#2563EB"/>
-              <rect x="111" y="25" width="24" height="24" rx="3" fill="#FFFFFF"/>
-              <rect x="115" y="29" width="16" height="16" rx="2" fill="#2563EB"/>
-
-              <rect x="20" y="106" width="34" height="34" rx="6" fill="#2563EB"/>
-              <rect x="25" y="111" width="24" height="24" rx="3" fill="#FFFFFF"/>
-              <rect x="29" y="115" width="16" height="16" rx="2" fill="#2563EB"/>
-
-              <circle cx="70" cy="35" r="4" fill="#2563EB"/>
-              <circle cx="85" cy="40" r="3" fill="#F59E0B"/>
-              <circle cx="75" cy="70" r="5" fill="#2563EB"/>
-              <circle cx="95" cy="80" r="4" fill="#3B82F6"/>
-              <circle cx="70" cy="115" r="4" fill="#F59E0B"/>
-              <circle cx="85" cy="120" r="5" fill="#2563EB"/>
-              <circle cx="120" cy="95" r="4" fill="#2563EB"/>
-              <circle cx="110" cy="115" r="3" fill="#3B82F6"/>
-              <circle cx="125" cy="125" r="4" fill="#F59E0B"/>
-            </svg>
+          <!-- Real PhonePe QR Code for this game -->
+          <div class="real-qr-card-modal">
+            <div class="qr-bank-tag">
+              <span class="sbi-dot"></span> State Bank of India - 9738 · Phani
+            </div>
+            <div class="qr-image-frame">
+              <img src="assets/phani-qr.png" alt="Phani PhonePe QR Code" class="phani-qr-scanner-img">
+            </div>
+            <div class="upi-id-badge-row" style="margin-top: 8px;">
+              <span class="upi-label">UPI ID:</span>
+              <strong class="upi-val mono">8801147452@ybl</strong>
+              <button type="button" class="btn-copy-chip" (click)="copyUpiId('8801147452@ybl')">Copy</button>
+            </div>
           </div>
 
           <p class="qr-hint">Scan with GPay / PhonePe / Paytm or tap button below:</p>
@@ -1260,7 +1232,7 @@
 
               <div class="form-field full-width">
                 <label class="field-label">Personal UPI ID (Optional - For Court Refunds)</label>
-                <input type="text" class="form-input mono" placeholder="e.g. yourname@okhdfcbank" [ngModel]="profileUpiId()" (ngModelChange)="profileUpiId.set($event)" name="upiId">
+                <input type="text" class="form-input mono" placeholder="e.g. yourname@ybl or @okaxis" [ngModel]="profileUpiId()" (ngModelChange)="profileUpiId.set($event)" name="upiId">
                 <span class="field-hint">Used by Admin when settling credit or refund balances</span>
               </div>
             </div>

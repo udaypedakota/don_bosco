@@ -30,7 +30,7 @@ let lastConnectionError = null;
 
 // Initial 6 players cohort
 const DEFAULT_PLAYERS = [
-  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'phani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'phani@123', upiId: '8801147452@ybl', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: 'siva@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', password: 'uday@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', password: 'nani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
