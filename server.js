@@ -814,7 +814,7 @@ app.post('/api/payments', async (req, res) => {
   res.status(201).json(payment);
 });
 
-// POST /api/payments/claim (Player reports they paid via UPI - Auto marks as PAID)
+// POST /api/payments/claim (Player reports they paid via UPI)
 app.post('/api/payments/claim', async (req, res) => {
   const { playerId, amount, utr, mode, gameId, notes } = req.body;
   const payAmt = Math.round(parseFloat(amount));
@@ -839,6 +839,18 @@ app.post('/api/payments/claim', async (req, res) => {
   }
   if (!playerEmail) playerEmail = getPlayerEmail(null, playerId, playerName);
 
+  // Prevent multiple duplicate submissions if already pending
+  if (mongoDb) {
+    const existingPending = await mongoDb.collection('payments').findOne({
+      playerId,
+      status: 'pending',
+      amount: payAmt
+    });
+    if (existingPending) {
+      return res.status(200).json(existingPending);
+    }
+  }
+
   const paymentClaim = {
     id: 'pay-claim-' + Date.now(),
     date: new Date().toISOString().split('T')[0],
@@ -848,63 +860,20 @@ app.post('/api/payments/claim', async (req, res) => {
     amount: payAmt,
     mode: mode || 'UPI',
     utr: utr || `UPI-CLAIM-${Date.now().toString().slice(-6)}`,
-    status: 'completed', // Immediately completed - no manual Admin approval needed!
-    notes: notes || `Player paid ₹${payAmt} via UPI. Automatically marked as PAID.`,
+    status: 'pending', // Stored as PENDING - requires Admin Phani approval in the app!
+    notes: notes || `Player reported payment of ₹${payAmt} via UPI. Awaiting Admin verification.`,
     createdAt: new Date().toISOString()
   };
 
   if (mongoDb) {
     await mongoDb.collection('payments').insertOne(paymentClaim);
-    // Increment player balance immediately
-    await mongoDb.collection('players').updateOne({ id: playerId }, { $inc: { balance: payAmt } });
-
-    // If gameId is NOT provided (Pay All Dues), automatically mark all unpaid games as PAID!
-    if (!gameId) {
-      const initialDates = ['2026-09-19', '2026-09-22', '2026-09-24'];
-      const games = await mongoDb.collection('games').find({ attendees: playerId }).toArray();
-      const existingPayments = await mongoDb.collection('payments').find({
-        playerId,
-        status: 'completed'
-      }).toArray();
-      const paidGameIds = new Set(existingPayments.map(p => p.gameId).filter(Boolean));
-
-      const unpaidGames = games.filter(g => !initialDates.includes(g.date) && !paidGameIds.has(g.id));
-      for (const g of unpaidGames) {
-        const gPay = {
-          id: `pay-${Date.now()}-${g.id}-${playerId}`,
-          date: paymentClaim.date,
-          playerId,
-          playerName,
-          gameId: g.id,
-          amount: Math.round(g.perPlayerShare),
-          mode: mode || 'UPI',
-          utr: paymentClaim.utr,
-          status: 'completed',
-          notes: `Court share ₹${Math.round(g.perPlayerShare)} for game on ${g.date} (${g.venue}) - Auto-settled via Pay All Dues`,
-          createdAt: new Date().toISOString()
-        };
-        await mongoDb.collection('payments').insertOne(gPay);
-      }
-    }
   } else {
     localStore.payments.unshift(paymentClaim);
-    const p = localStore.players.find(pl => pl.id === playerId);
-    if (p) p.balance += payAmt;
     saveLocalDb(localStore);
   }
 
-  // Notify admin and player with official receipt
+  // Send admin notification email & player confirmation email
   await Promise.allSettled([
-    sendPaymentReceiptEmail({
-      toEmail: playerEmail,
-      playerName,
-      amount: payAmt,
-      mode: paymentClaim.mode,
-      utr: paymentClaim.utr,
-      date: paymentClaim.date,
-      status: 'completed',
-      notes: paymentClaim.notes
-    }),
     sendAdminPaymentClaimNotification({
       playerName,
       amount: payAmt,
@@ -912,7 +881,15 @@ app.post('/api/payments/claim', async (req, res) => {
       utr: paymentClaim.utr,
       date: paymentClaim.date,
       notes: paymentClaim.notes
-    })
+    }),
+    playerEmail ? sendPaymentClaimSubmittedEmail({
+      toEmail: playerEmail,
+      playerName,
+      amount: payAmt,
+      mode: paymentClaim.mode,
+      utr: paymentClaim.utr,
+      date: paymentClaim.date
+    }) : Promise.resolve()
   ]);
 
   res.status(201).json(paymentClaim);
@@ -990,6 +967,35 @@ app.post('/api/payments/:id/approve', async (req, res) => {
     await mongoDb.collection('payments').updateOne({ id: paymentId }, { $set: { status: 'completed' } });
     await mongoDb.collection('players').updateOne({ id: payment.playerId }, { $inc: { balance: payment.amount } });
     playerObj = await mongoDb.collection('players').findOne({ id: payment.playerId });
+
+    // When Admin approves a Pay All Dues claim, automatically mark all unpaid games as PAID!
+    if (!payment.gameId) {
+      const initialDates = ['2026-09-19', '2026-09-22', '2026-09-24'];
+      const games = await mongoDb.collection('games').find({ attendees: payment.playerId }).toArray();
+      const existingPayments = await mongoDb.collection('payments').find({
+        playerId: payment.playerId,
+        status: 'completed'
+      }).toArray();
+      const paidGameIds = new Set(existingPayments.map(p => p.gameId).filter(Boolean));
+
+      const unpaidGames = games.filter(g => !initialDates.includes(g.date) && !paidGameIds.has(g.id));
+      for (const g of unpaidGames) {
+        const gPay = {
+          id: `pay-${Date.now()}-${g.id}-${payment.playerId}`,
+          date: payment.date,
+          playerId: payment.playerId,
+          playerName: payment.playerName,
+          gameId: g.id,
+          amount: Math.round(g.perPlayerShare),
+          mode: payment.mode || 'UPI',
+          utr: payment.utr,
+          status: 'completed',
+          notes: `Court share ₹${Math.round(g.perPlayerShare)} for game on ${g.date} (${g.venue}) - Approved by Phani`,
+          createdAt: new Date().toISOString()
+        };
+        await mongoDb.collection('payments').insertOne(gPay);
+      }
+    }
   } else {
     const p = localStore.players.find(pl => pl.id === payment.playerId);
     if (p) {

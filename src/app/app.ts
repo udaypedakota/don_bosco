@@ -484,7 +484,7 @@ export class App {
       next: () => {
         this.showGamePayModal.set(false);
         this.gamePayUtr.set('');
-        this.showToast(`✅ Payment of ₹${roundedAmt} recorded for ${game.date}! Marked as PAID.`);
+        this.showToast(`✅ Payment of ₹${roundedAmt} reported for ${game.date}! Awaiting Phani's approval in the app.`);
       },
       error: () => {
         this.showToast('Failed to report payment. Please try again.');
@@ -868,7 +868,7 @@ export class App {
         this.showClaimModal.set(false);
         this.showUpiModal.set(false);
         this.claimUtr.set('');
-        this.showToast('✅ Payment successful! All your dues & games are marked as PAID.');
+        this.showToast('✅ Payment reported! Phani will verify and approve in the app.');
       },
       error: () => {
         this.showToast('Failed to submit claim. Please try again.');
