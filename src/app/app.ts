@@ -237,6 +237,22 @@ export class App {
     });
   }
 
+  adminRevertGamePaid(game: Game, playerId: string): void {
+    const pName = this.getPlayerName(playerId);
+    if (!confirm(`Revert payment for ${pName} on ${game.date} back to DUE?`)) {
+      return;
+    }
+
+    this.clubService.revertGamePayment(game.id, playerId).subscribe({
+      next: () => {
+        this.showToast(`↺ Payment reverted to DUE for ${pName}!`);
+      },
+      error: () => {
+        this.showToast('Failed to revert payment.');
+      }
+    });
+  }
+
   openPlayerBreakdown(player: Player): void {
     this.selectedPlayerForBreakdown.set(player);
     this.showBreakdownModal.set(true);
@@ -331,7 +347,7 @@ export class App {
       next: () => {
         this.showGamePayModal.set(false);
         this.gamePayUtr.set('');
-        this.showToast(`✅ Payment of ₹${roundedAmt} reported for ${game.date}! Awaiting Phani's approval.`);
+        this.showToast(`✅ Payment of ₹${roundedAmt} recorded for ${game.date}! Marked as PAID.`);
       },
       error: () => {
         this.showToast('Failed to report payment. Please try again.');
@@ -715,7 +731,7 @@ export class App {
         this.showClaimModal.set(false);
         this.showUpiModal.set(false);
         this.claimUtr.set('');
-        this.showToast('✅ Payment reported! Phani will verify and approve.');
+        this.showToast('✅ Payment successful! All your dues & games are marked as PAID.');
       },
       error: () => {
         this.showToast('Failed to submit claim. Please try again.');

@@ -814,7 +814,7 @@ app.post('/api/payments', async (req, res) => {
   res.status(201).json(payment);
 });
 
-// POST /api/payments/claim (Player reports they paid via UPI)
+// POST /api/payments/claim (Player reports they paid via UPI - Auto marks as PAID)
 app.post('/api/payments/claim', async (req, res) => {
   const { playerId, amount, utr, mode, gameId, notes } = req.body;
   const payAmt = Math.round(parseFloat(amount));
@@ -848,20 +848,63 @@ app.post('/api/payments/claim', async (req, res) => {
     amount: payAmt,
     mode: mode || 'UPI',
     utr: utr || `UPI-CLAIM-${Date.now().toString().slice(-6)}`,
-    status: 'pending',
-    notes: notes || `Player reported payment of ₹${payAmt} via UPI. Awaiting Admin verification.`,
+    status: 'completed', // Immediately completed - no manual Admin approval needed!
+    notes: notes || `Player paid ₹${payAmt} via UPI. Automatically marked as PAID.`,
     createdAt: new Date().toISOString()
   };
 
   if (mongoDb) {
     await mongoDb.collection('payments').insertOne(paymentClaim);
+    // Increment player balance immediately
+    await mongoDb.collection('players').updateOne({ id: playerId }, { $inc: { balance: payAmt } });
+
+    // If gameId is NOT provided (Pay All Dues), automatically mark all unpaid games as PAID!
+    if (!gameId) {
+      const initialDates = ['2026-09-19', '2026-09-22', '2026-09-24'];
+      const games = await mongoDb.collection('games').find({ attendees: playerId }).toArray();
+      const existingPayments = await mongoDb.collection('payments').find({
+        playerId,
+        status: 'completed'
+      }).toArray();
+      const paidGameIds = new Set(existingPayments.map(p => p.gameId).filter(Boolean));
+
+      const unpaidGames = games.filter(g => !initialDates.includes(g.date) && !paidGameIds.has(g.id));
+      for (const g of unpaidGames) {
+        const gPay = {
+          id: `pay-${Date.now()}-${g.id}-${playerId}`,
+          date: paymentClaim.date,
+          playerId,
+          playerName,
+          gameId: g.id,
+          amount: Math.round(g.perPlayerShare),
+          mode: mode || 'UPI',
+          utr: paymentClaim.utr,
+          status: 'completed',
+          notes: `Court share ₹${Math.round(g.perPlayerShare)} for game on ${g.date} (${g.venue}) - Auto-settled via Pay All Dues`,
+          createdAt: new Date().toISOString()
+        };
+        await mongoDb.collection('payments').insertOne(gPay);
+      }
+    }
   } else {
     localStore.payments.unshift(paymentClaim);
+    const p = localStore.players.find(pl => pl.id === playerId);
+    if (p) p.balance += payAmt;
     saveLocalDb(localStore);
   }
 
-  // Notify admin and player
+  // Notify admin and player with official receipt
   await Promise.allSettled([
+    sendPaymentReceiptEmail({
+      toEmail: playerEmail,
+      playerName,
+      amount: payAmt,
+      mode: paymentClaim.mode,
+      utr: paymentClaim.utr,
+      date: paymentClaim.date,
+      status: 'completed',
+      notes: paymentClaim.notes
+    }),
     sendAdminPaymentClaimNotification({
       playerName,
       amount: payAmt,
@@ -869,18 +912,56 @@ app.post('/api/payments/claim', async (req, res) => {
       utr: paymentClaim.utr,
       date: paymentClaim.date,
       notes: paymentClaim.notes
-    }),
-    playerEmail ? sendPaymentClaimSubmittedEmail({
-      toEmail: playerEmail,
-      playerName,
-      amount: payAmt,
-      mode: paymentClaim.mode,
-      utr: paymentClaim.utr,
-      date: paymentClaim.date
-    }) : Promise.resolve()
+    })
   ]);
 
   res.status(201).json(paymentClaim);
+});
+
+// POST /api/payments/revert-game (Admin unmarks accidental payment for a game)
+app.post('/api/payments/revert-game', async (req, res) => {
+  const { gameId, playerId } = req.body;
+  if (!gameId || !playerId) {
+    return res.status(400).json({ error: 'gameId and playerId are required' });
+  }
+
+  let totalReverted = 0;
+  if (mongoDb) {
+    const payments = await mongoDb.collection('payments').find({
+      gameId,
+      playerId,
+      status: 'completed'
+    }).toArray();
+
+    if (payments.length === 0) {
+      return res.status(404).json({ error: 'No completed payments found for this game and player' });
+    }
+
+    for (const p of payments) {
+      totalReverted += p.amount;
+    }
+
+    await mongoDb.collection('payments').deleteMany({
+      gameId,
+      playerId,
+      status: 'completed'
+    });
+
+    // Deduct the reverted amount from the player's balance
+    await mongoDb.collection('players').updateOne(
+      { id: playerId },
+      { $inc: { balance: -totalReverted } }
+    );
+  } else {
+    const toRemove = localStore.payments.filter(p => p.gameId === gameId && p.playerId === playerId && p.status === 'completed');
+    toRemove.forEach(p => totalReverted += p.amount);
+    localStore.payments = localStore.payments.filter(p => !(p.gameId === gameId && p.playerId === playerId && p.status === 'completed'));
+    const p = localStore.players.find(pl => pl.id === playerId);
+    if (p) p.balance -= totalReverted;
+    saveLocalDb(localStore);
+  }
+
+  res.json({ success: true, message: `Reverted ₹${totalReverted} for player to Due`, revertedAmount: totalReverted });
 });
 
 // POST /api/payments/:id/approve (Admin verifies and settles claim)

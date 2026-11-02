@@ -195,8 +195,17 @@ export class ClubService {
   claimPayment(claim: { playerId: string; amount: number; gameId?: string; utr?: string; mode?: string; notes?: string }): Observable<Payment> {
     return this.http.post<Payment>(`${this.apiUrl}/payments/claim`, claim).pipe(
       tap(newClaim => {
-        this.payments.update(list => [newClaim, ...list]);
         this.loadPayments();
+        this.loadPlayers();
+      })
+    );
+  }
+
+  revertGamePayment(gameId: string, playerId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/payments/revert-game`, { gameId, playerId }).pipe(
+      tap(() => {
+        this.loadPayments();
+        this.loadPlayers();
       })
     );
   }

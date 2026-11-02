@@ -557,6 +557,11 @@
                           <span class="chip-status-icon">✓</span>
                           <strong>{{ getPlayerName(pId) }}</strong>
                           <span class="chip-share-text">Paid ₹{{ game.perPlayerShare }}</span>
+                          @if (isAdmin() && !['2026-09-19', '2026-09-22', '2026-09-24'].includes(game.date)) {
+                            <button type="button" class="btn-chip-action btn-chip-revert" (click)="adminRevertGamePaid(game, pId)" title="Revert back to Due if marked by mistake">
+                              ↺ Revert
+                            </button>
+                          }
                         </div>
                       } @else if (pSt.status === 'pending') {
                         <div class="attendee-chip chip-pending" title="Player submitted UPI payment claim">
