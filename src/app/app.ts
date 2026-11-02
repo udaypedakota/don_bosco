@@ -359,15 +359,73 @@ export class App {
       return { game: g, isBooker, status };
     });
 
+    const totalExpense = Math.round(paidSum + unpaidSum);
+
     return {
       totalGames: games.length,
       paidCount,
       unpaidCount,
-      paidSum: paidSum.toFixed(2),
-      unpaidSum: unpaidSum.toFixed(2),
+      totalExpense,
+      paidSum: Math.round(paidSum),
+      unpaidSum: Math.round(unpaidSum),
       gameDetails
     };
   }
+
+  // Booker (Phani) Financial Overview
+  bookerStats = computed(() => {
+    const games = this.clubService.games();
+    const players = this.clubService.players();
+
+    let totalUpfront = 0;
+    let phaniShare = 0;
+    let totalReceivable = 0;
+
+    for (const g of games) {
+      const exp = Math.round(Number(g.totalExpense) || 0);
+      totalUpfront += exp;
+      const pShare = Math.round(Number(g.perPlayerShare) || 0);
+      if (g.attendees.includes('p-phani') || g.paidByPlayerId === 'p-phani') {
+        phaniShare += pShare;
+      }
+      totalReceivable += (exp - pShare);
+    }
+
+    let totalPending = 0;
+    players.forEach(p => {
+      if (p.role !== 'admin' && p.balance < 0) {
+        totalPending += Math.abs(p.balance);
+      }
+    });
+
+    const totalCollected = Math.max(0, totalReceivable - totalPending);
+
+    return {
+      totalUpfront,
+      phaniShare,
+      totalReceivable,
+      totalCollected,
+      totalPending
+    };
+  });
+
+  // Current Logged-in Player's Stats (Matches, Total Bill, Paid, Dues)
+  myPlayerStats = computed(() => {
+    const p = this.myPlayerRecord();
+    if (!p) {
+      return { totalGames: 0, paidCount: 0, unpaidCount: 0, totalBill: 0, paidAmount: 0, dueAmount: 0 };
+    }
+    const stats = this.getPlayerGamesStats(p);
+    const dueAmt = p.balance < 0 ? Math.abs(p.balance) : 0;
+    return {
+      totalGames: stats.totalGames,
+      paidCount: stats.paidCount,
+      unpaidCount: stats.unpaidCount,
+      totalBill: stats.totalExpense,
+      paidAmount: stats.paidSum,
+      dueAmount: dueAmt
+    };
+  });
 
   // Game-by-game Payment Status Checker
   getGameStatusForPlayer(game: Game, playerId?: string): { status: 'paid' | 'pending' | 'unpaid'; claim?: Payment } {

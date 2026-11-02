@@ -1298,6 +1298,98 @@
   font-size: 0.75rem;
 }
 
+/* Booker (Phani) Financial Overview Banner */
+.booker-summary-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #FEF3C7 0%, #EFF6FF 100%);
+  border: 1.5px solid #FCD34D;
+  border-radius: 12px;
+  margin-top: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.08);
+}
+
+.bsb-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bsb-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #78350F;
+}
+
+.bsb-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.bsb-sub {
+  font-size: 0.72rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+/* Player Personal Lifetime / Monthly Stats Bar */
+.player-personal-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.pps-box {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.pps-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  border-color: #BFDBFE;
+}
+
+.pps-box.has-due {
+  background: #FFFDF7;
+  border-color: #FDE68A;
+}
+
+.pps-lbl {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748B;
+}
+
+.pps-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0F172A;
+  font-family: var(--font-mono, monospace);
+}
+
+.pps-sub {
+  font-size: 0.74rem;
+  color: #94A3B8;
+  font-weight: 600;
+}
+
 /* Admin Game Filter Pills */
 .game-filter-pills {
   display: flex;
