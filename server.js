@@ -34,7 +34,35 @@ let mongoDb = null;
 let isConnected = false;
 let lastConnectionError = null;
 
-// Initial 6 players cohort
+const EMAIL_DIRECTORY = {
+  'p-phani': 'phanidher12@gmail.com',
+  'p-admin': 'phanidher12@gmail.com',
+  'phani': 'phanidher12@gmail.com',
+  '8801147452': 'phanidher12@gmail.com',
+  'p-uday': 'udaypedakota@gmail.com',
+  'uday': 'udaypedakota@gmail.com',
+  '9908660573': 'udaypedakota@gmail.com',
+  'p-rajesh': 'avidirajesh14@gmail.com',
+  'rajesh': 'avidirajesh14@gmail.com',
+  '9603253282': 'avidirajesh14@gmail.com',
+  'p-srinvas': 'srinivasc611@gmail.com',
+  'srinvas': 'srinivasc611@gmail.com',
+  '7013045526': 'srinivasc611@gmail.com',
+  'p-nani': 'nanimamidi1712@gmail.com',
+  'nani': 'nanimamidi1712@gmail.com',
+  '7036349848': 'nanimamidi1712@gmail.com'
+};
+
+function getPlayerEmail(player, playerId, playerName) {
+  if (player && player.email && player.email.trim()) {
+    return player.email.trim();
+  }
+  const byId = playerId ? EMAIL_DIRECTORY[playerId.toLowerCase()] : null;
+  if (byId) return byId;
+  const byName = playerName ? EMAIL_DIRECTORY[playerName.toLowerCase()] : null;
+  if (byName) return byName;
+  return null;
+}
 const DEFAULT_PLAYERS = [
   { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', email: 'phanidher12@gmail.com', password: 'phani@123', upiId: '8801147452@ybl', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: 'siva@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
@@ -708,15 +736,16 @@ app.post('/api/payments', async (req, res) => {
     const p = await mongoDb.collection('players').findOne({ id: playerId });
     if (p) {
       playerName = p.name;
-      if (!playerEmail && p.email) playerEmail = p.email;
+      if (!playerEmail) playerEmail = getPlayerEmail(p, playerId, playerName);
     }
   } else {
     const p = localStore.players.find(pl => pl.id === playerId);
     if (p) {
       playerName = p.name;
-      if (!playerEmail && p.email) playerEmail = p.email;
+      if (!playerEmail) playerEmail = getPlayerEmail(p, playerId, playerName);
     }
   }
+  if (!playerEmail) playerEmail = getPlayerEmail(null, playerId, playerName);
 
   const payment = {
     id: 'pay-' + Date.now(),
@@ -771,15 +800,16 @@ app.post('/api/payments/claim', async (req, res) => {
     const p = await mongoDb.collection('players').findOne({ id: playerId });
     if (p) {
       playerName = p.name;
-      if (!playerEmail && p.email) playerEmail = p.email;
+      if (!playerEmail) playerEmail = getPlayerEmail(p, playerId, playerName);
     }
   } else {
     const p = localStore.players.find(pl => pl.id === playerId);
     if (p) {
       playerName = p.name;
-      if (!playerEmail && p.email) playerEmail = p.email;
+      if (!playerEmail) playerEmail = getPlayerEmail(p, playerId, playerName);
     }
   }
+  if (!playerEmail) playerEmail = getPlayerEmail(null, playerId, playerName);
 
   const paymentClaim = {
     id: 'pay-claim-' + Date.now(),
@@ -861,7 +891,7 @@ app.post('/api/payments/:id/approve', async (req, res) => {
   }
 
   // Dispatch payment receipt to player
-  const playerEmail = playerObj ? playerObj.email : null;
+  const playerEmail = getPlayerEmail(playerObj, payment.playerId, payment.playerName);
   await sendPaymentReceiptEmail({
     toEmail: playerEmail,
     playerName: payment.playerName,
@@ -898,7 +928,7 @@ app.post('/api/payments/:id/reject', async (req, res) => {
     } else {
       player = localStore.players.find(p => p.id === payment.playerId);
     }
-    const playerEmail = player ? player.email : null;
+    const playerEmail = getPlayerEmail(player, payment.playerId, payment.playerName);
 
     if (playerEmail) {
       await sendPaymentRejectedEmail({

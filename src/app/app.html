@@ -650,10 +650,10 @@
               </div>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn btn-primary btn-md" (click)="openMyUpiQr()">
-                  <span>⚡</span> Pay All Dues (₹{{ -(myPlayerRecord()?.balance || 0) }})
+                  <span>⚡</span> Pay via UPI QR (₹{{ -(myPlayerRecord()?.balance || 0) }})
                 </button>
                 <button class="btn btn-yellow btn-md" (click)="showClaimModal.set(true)">
-                  <span>✓</span> Clear All
+                  <span>📩</span> Notify Phani (I Paid All)
                 </button>
               </div>
             } @else {
@@ -1052,7 +1052,7 @@
         <div class="modal-footer" style="justify-content: center;">
           <button class="btn btn-secondary" (click)="showUpiModal.set(false)">Done</button>
           <button class="btn btn-yellow" (click)="showUpiModal.set(false); showClaimModal.set(true)">
-            <span>✓</span> I Have Paid via UPI
+            <span>📩</span> I Have Paid - Notify Phani
           </button>
         </div>
       </div>
@@ -1089,7 +1089,7 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="showClaimModal.set(false)">Cancel</button>
           <button class="btn btn-primary" (click)="submitPaymentClaim()">
-            <span>✓</span> Send Confirmation to Phani
+            <span>📩</span> Send Confirmation to Phani
           </button>
         </div>
       </div>
@@ -1175,7 +1175,7 @@
         <div class="modal-footer" style="justify-content: space-between;">
           <button class="btn btn-secondary" (click)="showGamePayModal.set(false)">Cancel</button>
           <button class="btn btn-yellow" (click)="submitGamePayment()">
-            <span>✓</span> I Have Paid ₹{{ selectedGameForPayment()?.perPlayerShare }}
+            <span>📩</span> I Have Paid ₹{{ selectedGameForPayment()?.perPlayerShare }} - Notify Phani
           </button>
         </div>
       </div>
