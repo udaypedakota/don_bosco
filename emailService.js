@@ -47,7 +47,7 @@ function createPaymentReceiptHtml({ playerName, amount, mode, utr, date, status,
     month: 'short',
     year: 'numeric'
   });
-  const appUrl = process.env.APP_URL || 'https://smash-club-app.vercel.app';
+  const appUrl = process.env.APP_URL || 'https://smash-club-two.vercel.app';
 
   return `
   <!DOCTYPE html>
@@ -161,7 +161,7 @@ function createPaymentRejectedHtml({ playerName, amount, mode, utr, date, reason
     month: 'short',
     year: 'numeric'
   });
-  const appUrl = process.env.APP_URL || 'https://smash-club-app.vercel.app';
+  const appUrl = process.env.APP_URL || 'https://smash-club-two.vercel.app';
 
   return `
   <!DOCTYPE html>
@@ -269,7 +269,7 @@ function createPaymentClaimSubmittedHtml({ playerName, amount, mode, utr, date }
     month: 'short',
     year: 'numeric'
   });
-  const appUrl = process.env.APP_URL || 'https://smash-club-app.vercel.app';
+  const appUrl = process.env.APP_URL || 'https://smash-club-two.vercel.app';
 
   return `
   <!DOCTYPE html>
@@ -367,7 +367,7 @@ function createPaymentClaimSubmittedHtml({ playerName, amount, mode, utr, date }
  * HTML email template for Admin Alert when a player claims payment
  */
 function createAdminClaimAlertHtml({ playerName, amount, mode, utr, date, notes }) {
-  const appUrl = process.env.APP_URL || 'https://smash-club-app.vercel.app';
+  const appUrl = process.env.APP_URL || 'https://smash-club-two.vercel.app';
   return `
   <!DOCTYPE html>
   <html>
