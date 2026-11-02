@@ -183,7 +183,7 @@
               <div class="form-field" style="margin-top: 4px;">
                 <label class="field-label">Player Password</label>
                 <div class="password-input-wrap">
-                  <input [type]="showPassword() ? 'text' : 'password'" class="form-input mono" placeholder="e.g. uday@123" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="playerPassword" autocomplete="current-password">
+                  <input [type]="showPassword() ? 'text' : 'password'" class="form-input mono" [placeholder]="loginIdentifier().toLowerCase() === 'phani' ? 'Enter Phani password manually' : 'e.g. uday@123'" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="playerPassword" autocomplete="current-password">
                   <button type="button" class="btn-toggle-eye" (click)="togglePasswordVisibility()" [title]="showPassword() ? 'Hide password' : 'Show password'" aria-label="Toggle password visibility">
                     @if (showPassword()) {
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-svg">

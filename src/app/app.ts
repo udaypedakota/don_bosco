@@ -45,7 +45,7 @@ export class App {
   selectQuickPlayer(player: Player): void {
     this.loginIdentifier.set(player.name);
     if (player.role === 'admin' || player.name.toLowerCase() === 'phani') {
-      this.loginPassword.set('phani@1998');
+      this.loginPassword.set(''); // Keep empty for Phani (Admin) so password remains private
     } else {
       this.loginPassword.set(player.name.toLowerCase() + '@123');
     }

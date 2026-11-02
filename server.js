@@ -528,15 +528,27 @@ app.post('/api/auth/login', async (req, res) => {
 
 // GET /api/players
 app.get('/api/players', async (req, res) => {
+  let list = [];
   if (mongoDb) {
     try {
-      const players = await mongoDb.collection('players').find({}).toArray();
-      return res.json(players);
+      list = await mongoDb.collection('players').find({}).toArray();
     } catch (err) {
       console.error(err);
+      list = localStore.players;
     }
+  } else {
+    list = localStore.players;
   }
-  res.json(localStore.players);
+  // Sanitize admin password so it is never exposed publicly over the network
+  const sanitized = list.map(p => {
+    if (p.role === 'admin' || (p.name && p.name.toLowerCase() === 'phani')) {
+      const copy = { ...p };
+      delete copy.password;
+      return copy;
+    }
+    return p;
+  });
+  res.json(sanitized);
 });
 
 // POST /api/players (Add new player dynamically)
