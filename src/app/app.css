@@ -2738,36 +2738,58 @@
   }
 
   .header-right {
-    gap: 6px !important;
+    gap: 5px !important;
     flex-shrink: 0 !important;
     margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
-  /* Compact MongoDB Badge on Mobile (Clean 32px pill) */
+  /* Compact MongoDB Badge on Mobile (Clean 30px pill) */
   .atlas-cloud-badge {
-    padding: 6px;
-    border-radius: 50%;
-    min-width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
   }
   .atlas-badge-text, .cloud-ico {
     display: none !important;
   }
   .pulse-circle {
-    width: 11px;
-    height: 11px;
-    margin: 0;
+    width: 10px !important;
+    height: 10px !important;
+    margin: 0 !important;
+  }
+
+  /* Compact Bell Icon Button on Mobile */
+  .btn-notification-bell {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    font-size: 0.9rem !important;
+    flex-shrink: 0 !important;
+    border-radius: 50% !important;
+  }
+  .btn-notification-bell .bell-ping-dot {
+    top: 1px !important;
+    right: 1px !important;
+    width: 7px !important;
+    height: 7px !important;
   }
 
   /* User Session Pill - Compact & Fully Visible on Mobile */
   .user-pill {
-    padding: 4px 6px;
-    gap: 6px;
-    max-width: 155px;
-    border-radius: 20px;
+    padding: 3px 6px !important;
+    gap: 5px !important;
+    max-width: 140px !important;
+    border-radius: 20px !important;
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
   }
   .user-avatar-tag, .user-avatar-photo {
     width: 28px;
@@ -3704,59 +3726,55 @@
 }
 
 /* ============================================================================
-   WEB PUSH NOTIFICATION ALERT STYLES
+   WEB PUSH NOTIFICATION ALERT STYLES (Compact Bell Icon Button)
    ============================================================================ */
 
-.push-alert-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+.btn-notification-bell {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
   background: #FFFFFF;
   border: 1.5px solid var(--border-light);
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
   color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
   cursor: pointer;
+  position: relative;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
-  position: relative;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
 }
 
-.push-alert-pill:hover {
+.btn-notification-bell:hover {
   border-color: var(--blue-primary);
-  color: var(--blue-primary);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
-.push-alert-pill.is-active {
+.btn-notification-bell.is-active {
   background: #EFF6FF;
   border-color: #60A5FA;
-  color: #1D4ED8;
 }
 
-.push-alert-pill.is-active:hover {
-  background: #DBEAFE;
-}
-
-.bell-icon {
-  font-size: 0.95rem;
+.btn-notification-bell .bell-ico {
   line-height: 1;
 }
 
-.bell-label {
-  font-weight: 700;
-}
-
-.bell-live-dot {
-  width: 8px;
-  height: 8px;
+.btn-notification-bell .bell-ping-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #10B981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 0 1.5px rgba(16, 185, 129, 0.4);
   animation: pulseGreen 2s infinite;
 }
 

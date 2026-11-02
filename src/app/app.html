@@ -40,19 +40,17 @@
           </span>
         }
 
-        <!-- Phone Lock-Screen Push Alert Pill -->
+        <!-- Compact Notification Bell Button (Only 🔔) -->
         @if (currentUser() && isPushSupported()) {
-          <button class="push-alert-pill" 
+          <button type="button" class="btn-notification-bell" 
             [class.is-active]="pushPermission() === 'granted'" 
             (click)="togglePushNotifications()" 
             [disabled]="pushLoading()"
-            [title]="pushPermission() === 'granted' ? 'Phone alerts active! Tap to send test alert.' : 'Tap to enable lock-screen notifications on your phone'">
-            <span class="bell-icon">{{ pushPermission() === 'granted' ? '🔔' : '🔕' }}</span>
-            <span class="bell-label">
-              {{ pushLoading() ? 'Activating...' : (pushPermission() === 'granted' ? 'Alerts Active' : 'Enable Alerts') }}
-            </span>
+            [title]="pushPermission() === 'granted' ? 'Phone alerts active (Tap for test alert)' : 'Tap to enable phone lock-screen push alerts'"
+            aria-label="Toggle Phone Notifications">
+            <span class="bell-ico">🔔</span>
             @if (pushPermission() === 'granted') {
-              <span class="bell-live-dot" title="Active"></span>
+              <span class="bell-ping-dot" title="Active"></span>
             }
           </button>
         }
