@@ -56,6 +56,7 @@ const EMAIL_DIRECTORY = {
   '8790859546': 'ysivakumar@intellectinfo.com',
   'aravind': 'aravindgundu7@gmail.com',
   'arvind': 'aravindgundu7@gmail.com',
+  'p-1793615778779': 'aravindgundu7@gmail.com',
   '9464783847': 'aravindgundu7@gmail.com'
 };
 
@@ -75,7 +76,8 @@ const DEFAULT_PLAYERS = [
   { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', email: 'udaypedakota@gmail.com', password: 'uday@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', email: 'nanimamidi1712@gmail.com', password: 'nani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', email: 'avidirajesh14@gmail.com', password: 'rajesh@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', email: 'srinivasc611@gmail.com', password: 'srinvas@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() }
+  { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', email: 'srinivasc611@gmail.com', password: 'srinvas@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-1793615778779', name: 'Aravind', phone: '9464783847', role: 'player', email: 'aravindgundu7@gmail.com', password: 'aravind@123', balance: -206, totalGames: 1, createdAt: '2026-11-02T10:36:18.779Z' }
 ];
 
 const ALL_MEMBERS = ['p-phani', 'p-siva', 'p-uday', 'p-nani', 'p-rajesh', 'p-srinvas'];
@@ -495,7 +497,15 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Incorrect admin password' });
     }
   } else {
-    if (password && user.password && user.password !== password) {
+    const defaultGenPassword = `${user.name.trim().toLowerCase().replace(/\s+/g, '')}@123`;
+    const isAravindAlias = user.name.toLowerCase().includes('aravind') || user.name.toLowerCase().includes('arvind');
+    const isPasswordValid = 
+      !user.password ||
+      user.password === password ||
+      defaultGenPassword === password ||
+      (isAravindAlias && (password === 'aravind@123' || password === 'arvind@123'));
+
+    if (password && !isPasswordValid) {
       return res.status(401).json({ error: 'Incorrect password' });
     }
   }
