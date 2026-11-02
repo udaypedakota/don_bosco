@@ -71,7 +71,7 @@ function getPlayerEmail(player, playerId, playerName) {
   return null;
 }
 const DEFAULT_PLAYERS = [
-  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', email: 'phanidher12@gmail.com', password: 'phani@123', upiId: '8801147452@ybl', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', email: 'phanidher12@gmail.com', password: 'phani@1998', upiId: '8801147452@ybl', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', email: 'ysivakumar@intellectinfo.com', password: 'siva@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', email: 'udaypedakota@gmail.com', password: 'uday@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', email: 'nanimamidi1712@gmail.com', password: 'nani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
@@ -368,7 +368,7 @@ async function connectAtlas(uri) {
 
         await playersCol.deleteMany({});
         const realPlayers = [
-          { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'admin', balance: totalPhaniReceivable, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
+          { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'phani@1998', balance: totalPhaniReceivable, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
           { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
           { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },
           { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', password: '1234', balance: -totalDuePerPlayer, totalGames: 9, createdAt: new Date('2026-09-15T00:00:00Z').toISOString() },

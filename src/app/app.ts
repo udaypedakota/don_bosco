@@ -44,7 +44,11 @@ export class App {
 
   selectQuickPlayer(player: Player): void {
     this.loginIdentifier.set(player.name);
-    this.loginPassword.set(player.name.toLowerCase() + '@123');
+    if (player.role === 'admin' || player.name.toLowerCase() === 'phani') {
+      this.loginPassword.set('phani@1998');
+    } else {
+      this.loginPassword.set(player.name.toLowerCase() + '@123');
+    }
   }
 
   // Dynamic Add Player Form
