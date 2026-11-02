@@ -165,9 +165,39 @@ export class App {
     return otherAttendees.every(id => this.getGameStatusForPlayer(game, id).status === 'paid');
   }
 
+  // Month Filter State & Available Months
+  selectedMonthFilter = signal<string>('all');
+
+  availableMonths = computed(() => {
+    const games = this.clubService.games();
+    const map = new Map<string, { key: string; label: string; count: number }>();
+    for (const g of games) {
+      if (g.date && g.date.length >= 7) {
+        const key = g.date.slice(0, 7);
+        if (!map.has(key)) {
+          const [year, month] = key.split('-');
+          const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          const mIdx = parseInt(month, 10) - 1;
+          const label = `${monthNames[mIdx] || month} ${year}`;
+          map.set(key, { key, label, count: 0 });
+        }
+        map.get(key)!.count++;
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.key.localeCompare(a.key));
+  });
+
   filteredGames = computed(() => {
     const filter = this.adminGameFilter();
-    const games = this.clubService.games();
+    const month = this.selectedMonthFilter();
+    let games = this.clubService.games();
+
+    // 1. Filter by Month if selected
+    if (month !== 'all') {
+      games = games.filter(g => g.date && g.date.startsWith(month));
+    }
+
+    // 2. Filter by Settlement status
     if (filter === 'settled') {
       return games.filter(g => this.isGameFullySettled(g));
     }
@@ -176,6 +206,55 @@ export class App {
     }
     return games;
   });
+
+  monthSummaryStats = computed(() => {
+    const month = this.selectedMonthFilter();
+    let games = this.clubService.games();
+    if (month !== 'all') {
+      games = games.filter(g => g.date && g.date.startsWith(month));
+    }
+
+    let totalExpense = 0;
+    let totalCollected = 0;
+    let totalPending = 0;
+
+    for (const g of games) {
+      const gExp = Math.round(Number(g.totalExpense) || 0);
+      totalExpense += gExp;
+      const summary = this.getGameSettlementSummary(g);
+      totalCollected += Math.round(Number(summary.collectedAmount) || 0);
+      totalPending += Math.round(Number(summary.pendingAmount) || 0);
+    }
+
+    let label = 'All Recorded Months';
+    if (month !== 'all') {
+      const mObj = this.availableMonths().find(m => m.key === month);
+      label = mObj ? mObj.label : month;
+    }
+
+    return {
+      monthKey: month,
+      label,
+      totalGames: games.length,
+      totalExpense,
+      totalCollected,
+      totalPending
+    };
+  });
+
+  shareMonthBillWhatsApp(): void {
+    const stats = this.monthSummaryStats();
+    const text = `🏸 *Smash Club - ${stats.label} Bill Statement* 🏸\n` +
+      `-----------------------------------------\n` +
+      `📅 *Total Sessions:* ${stats.totalGames} Games\n` +
+      `💰 *Total Court Expenses:* ₹${stats.totalExpense}\n` +
+      `✅ *Collected:* ₹${stats.totalCollected}\n` +
+      `⚠️ *Pending Dues:* ₹${stats.totalPending}\n` +
+      `-----------------------------------------\n` +
+      `Check live statement at: https://smash-club-two.vercel.app`;
+    
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  }
 
   settledGamesCount = computed(() => {
     return this.clubService.games().filter(g => this.isGameFullySettled(g)).length;

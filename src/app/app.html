@@ -475,11 +475,7 @@
                     <button class="btn btn-sm btn-secondary" (click)="openPaymentFor(player)">
                       Record Payment
                     </button>
-                    @if (player.role !== 'admin') {
-                      <button class="btn btn-sm btn-secondary" style="margin-left: 6px; color: #EF4444;" (click)="deletePlayer(player.id, player.name)">
-                        ✕
-                      </button>
-                    }
+                    
                   </td>
                 </tr>
               }
@@ -511,6 +507,53 @@
             <button type="button" class="filter-pill pill-pending" [class.active]="adminGameFilter() === 'pending'" (click)="adminGameFilter.set('pending')">
               ⚠️ Pending Dues ({{ pendingGamesCount() }})
             </button>
+          </div>
+        </div>
+
+        
+        <!-- Month Filter Tabs & Monthly Statement Card (Option 1) -->
+        <div class="month-filter-section">
+          <div class="month-filter-bar">
+            <div class="month-tabs">
+              <button type="button" class="month-tab-btn" [class.active]="selectedMonthFilter() === 'all'" (click)="selectedMonthFilter.set('all')">
+                <span>📅</span> All Months ({{ clubService.games().length }})
+              </button>
+              @for (m of availableMonths(); track m.key) {
+                <button type="button" class="month-tab-btn" [class.active]="selectedMonthFilter() === m.key" (click)="selectedMonthFilter.set(m.key)">
+                  <span>🏸</span> {{ m.label }} ({{ m.count }})
+                </button>
+              }
+            </div>
+
+            @if (isAdmin()) {
+              <button type="button" class="btn-whatsapp-share" (click)="shareMonthBillWhatsApp()" title="Share this month's expense bill on WhatsApp">
+                <span>💬</span> Share {{ monthSummaryStats().label }} Statement
+              </button>
+            }
+          </div>
+
+          <!-- Monthly Statement Bill Stats Banner -->
+          <div class="monthly-summary-card">
+            <div class="msc-col">
+              <span class="msc-label">Selected Statement</span>
+              <strong class="msc-value msc-blue">{{ monthSummaryStats().label }}</strong>
+            </div>
+            <div class="msc-col">
+              <span class="msc-label">Sessions Played</span>
+              <strong class="msc-value">{{ monthSummaryStats().totalGames }} Games</strong>
+            </div>
+            <div class="msc-col">
+              <span class="msc-label">Total Court Fee</span>
+              <strong class="msc-value">₹{{ monthSummaryStats().totalExpense }}</strong>
+            </div>
+            <div class="msc-col">
+              <span class="msc-label">Total Collected</span>
+              <strong class="msc-value msc-green">₹{{ monthSummaryStats().totalCollected }}</strong>
+            </div>
+            <div class="msc-col">
+              <span class="msc-label">Pending Dues</span>
+              <strong class="msc-value msc-red">₹{{ monthSummaryStats().totalPending }}</strong>
+            </div>
           </div>
         </div>
 
