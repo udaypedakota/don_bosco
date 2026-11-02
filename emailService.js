@@ -80,7 +80,7 @@ function createPaymentReceiptHtml({ playerName, amount, mode, utr, date, status,
                 
                 <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 20px; margin: 0 auto;">
                   <span style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">AMOUNT PAID</span>
-                  <div style="font-size: 36px; font-weight: 800; color: #10b981; margin-top: 4px;">₹${parseFloat(amount).toFixed(2)}</div>
+                  <div style="font-size: 36px; font-weight: 800; color: #10b981; margin-top: 4px;">₹${Math.round(amount)}</div>
                 </div>
               </td>
             </tr>
@@ -194,7 +194,7 @@ function createPaymentRejectedHtml({ playerName, amount, mode, utr, date, reason
                 
                 <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 18px; margin: 0 auto;">
                   <span style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">CLAIMED AMOUNT</span>
-                  <div style="font-size: 32px; font-weight: 800; color: #ef4444; margin-top: 4px;">₹${parseFloat(amount).toFixed(2)}</div>
+                  <div style="font-size: 32px; font-weight: 800; color: #ef4444; margin-top: 4px;">₹${Math.round(amount)}</div>
                 </div>
               </td>
             </tr>
@@ -300,7 +300,7 @@ function createPaymentClaimSubmittedHtml({ playerName, amount, mode, utr, date }
                 
                 <div style="background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 18px; margin: 0 auto;">
                   <span style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">AMOUNT SUBMITTED</span>
-                  <div style="font-size: 32px; font-weight: 800; color: #38bdf8; margin-top: 4px;">₹${parseFloat(amount).toFixed(2)}</div>
+                  <div style="font-size: 32px; font-weight: 800; color: #38bdf8; margin-top: 4px;">₹${Math.round(amount)}</div>
                 </div>
               </td>
             </tr>
@@ -385,11 +385,11 @@ function createAdminClaimAlertHtml({ playerName, amount, mode, utr, date, notes 
       </div>
       <div style="padding: 24px;">
         <p style="font-size: 15px; margin: 0 0 16px; color: #cbd5e1;">
-          <strong>${playerName}</strong> submitted a payment claim of <strong style="color: #10b981; font-size: 17px;">₹${parseFloat(amount).toFixed(2)}</strong>.
+          <strong>${playerName}</strong> submitted a payment claim of <strong style="color: #10b981; font-size: 17px;">₹${Math.round(amount)}</strong>.
         </p>
         <table width="100%" cellpadding="10" style="background: #0b1120; border: 1px solid #1e293b; border-radius: 10px; margin: 15px 0; font-size: 14px;">
           <tr style="border-bottom: 1px solid #1e293b;"><td style="color: #94a3b8;">Player:</td><td style="color: #fff; font-weight: bold;">${playerName}</td></tr>
-          <tr style="border-bottom: 1px solid #1e293b;"><td style="color: #94a3b8;">Amount:</td><td style="color: #10b981; font-weight: bold; font-size: 16px;">₹${parseFloat(amount).toFixed(2)}</td></tr>
+          <tr style="border-bottom: 1px solid #1e293b;"><td style="color: #94a3b8;">Amount:</td><td style="color: #10b981; font-weight: bold; font-size: 16px;">₹${Math.round(amount)}</td></tr>
           <tr style="border-bottom: 1px solid #1e293b;"><td style="color: #94a3b8;">Mode:</td><td style="color: #38bdf8;">${mode || 'UPI'}</td></tr>
           <tr style="border-bottom: 1px solid #1e293b;"><td style="color: #94a3b8;">UTR / Ref:</td><td style="color: #fff; font-family: monospace;">${utr || 'N/A'}</td></tr>
           <tr><td style="color: #94a3b8;">Notes:</td><td style="color: #cbd5e1;">${notes || 'None'}</td></tr>
@@ -422,7 +422,7 @@ async function sendPaymentReceiptEmail({ toEmail, playerName, amount, mode, utr,
     return { success: false, reason: 'No recipient email' };
   }
 
-  const subject = `🏸 Payment Receipt: ₹${parseFloat(amount).toFixed(2)} Approved - Don Bosco Smash Club`;
+  const subject = `🏸 Payment Receipt: ₹${Math.round(amount)} Approved - Don Bosco Smash Club`;
   const html = createPaymentReceiptHtml({ playerName, amount, mode, utr, date, status, notes });
 
   try {
@@ -456,7 +456,7 @@ async function sendPaymentRejectedEmail({ toEmail, playerName, amount, mode, utr
     return { success: false, reason: 'No recipient email' };
   }
 
-  const subject = `❌ Payment Claim Update: ₹${parseFloat(amount).toFixed(2)} - Don Bosco Smash Club`;
+  const subject = `❌ Payment Claim Update: ₹${Math.round(amount)} - Don Bosco Smash Club`;
   const html = createPaymentRejectedHtml({ playerName, amount, mode, utr, date, reason });
 
   try {
@@ -482,7 +482,7 @@ async function sendPaymentClaimSubmittedEmail({ toEmail, playerName, amount, mod
   const transporter = getTransporter();
   if (!transporter || !toEmail) return { success: false };
 
-  const subject = `⏳ Payment Request Submitted: ₹${parseFloat(amount).toFixed(2)} - Don Bosco Smash Club`;
+  const subject = `⏳ Payment Request Submitted: ₹${Math.round(amount)} - Don Bosco Smash Club`;
   const html = createPaymentClaimSubmittedHtml({ playerName, amount, mode, utr, date });
 
   try {
@@ -513,7 +513,7 @@ async function sendAdminPaymentClaimNotification({ playerName, amount, mode, utr
 
   const adminEmail = process.env.ADMIN_EMAIL || 'phanidher12@gmail.com';
 
-  const subject = `🔔 New Payment Claim: ₹${parseFloat(amount).toFixed(2)} from ${playerName} | Smash Club`;
+  const subject = `🔔 New Payment Claim: ₹${Math.round(amount)} from ${playerName} | Smash Club`;
   const html = createAdminClaimAlertHtml({ playerName, amount, mode, utr, date, notes });
 
   try {

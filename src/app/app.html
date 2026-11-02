@@ -264,7 +264,7 @@
                 </div>
 
                 <div class="claim-amount mono text-blue">
-                  ₹{{ claim.amount }}
+                  ₹{{ round(claim.amount) }}
                 </div>
 
                 <div class="claim-actions">
@@ -380,7 +380,7 @@
           <div class="formula-display">
             <div class="formula-box">
               <span class="form-lbl">Court Cost</span>
-              <span class="form-val mono text-blue">₹{{ totalGameExpense() }}</span>
+              <span class="form-val mono text-blue">₹{{ round(totalGameExpense()) }}</span>
             </div>
             <span class="math-op">÷</span>
             <div class="formula-box">
@@ -390,7 +390,7 @@
             <span class="math-op">=</span>
             <div class="formula-box highlight-share">
               <span class="form-lbl">Per Player Share</span>
-              <span class="form-val mono result-share">₹{{ perPlayerShare() }}</span>
+              <span class="form-val mono result-share">₹{{ round(perPlayerShare()) }}</span>
             </div>
           </div>
 
@@ -531,13 +531,13 @@
                     }
                   </div>
                   <div class="date-tag mono">
-                    📅 {{ game.date }} · Total Court Fee: ₹{{ game.totalExpense }} · Paid Upfront by {{ game.paidByPlayerName }}
+                    📅 {{ game.date }} · Total Court Fee: ₹{{ round(game.totalExpense) }} · Paid Upfront by {{ game.paidByPlayerName }}
                   </div>
                 </div>
 
                 <div class="feed-header-right mono">
                   <div class="feed-total-val">₹{{ game.totalExpense }}</div>
-                  <div class="feed-share-sub">₹{{ game.perPlayerShare }} / player ({{ game.attendees.length }} players)</div>
+                  <div class="feed-share-sub">₹{{ round(game.perPlayerShare) }} / player ({{ game.attendees.length }} players)</div>
                 </div>
               </div>
 
@@ -640,17 +640,17 @@
                 <span class="due-val mono text-yellow">Pending Phani's Approval</span>
               </div>
               <div class="badge badge-yellow" style="padding: 10px 16px; font-weight: 700; font-size: 0.9rem;">
-                ⏳ ₹{{ myPendingPayment()?.amount }} Reported via UPI
+                ⏳ ₹{{ round(myPendingPayment()?.amount) }} Reported via UPI
               </div>
             } @else if ((myPlayerRecord()?.balance || 0) < 0) {
               <div class="due-info">
                 <span class="due-lbl">Total Outstanding Dues</span>
-                <span class="due-val mono text-red">₹{{ -(myPlayerRecord()?.balance || 0) }}</span>
+                <span class="due-val mono text-red">₹{{ round(-(myPlayerRecord()?.balance || 0)) }}</span>
                 <small class="text-muted" style="font-size: 0.78rem; display: block;">You can pay game-by-game below</small>
               </div>
               <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn btn-primary btn-md" (click)="openMyUpiQr()">
-                  <span>⚡</span> Pay via UPI QR (₹{{ -(myPlayerRecord()?.balance || 0) }})
+                  <span>⚡</span> Pay via UPI QR (₹{{ round(-(myPlayerRecord()?.balance || 0)) }})
                 </button>
                 <button class="btn btn-yellow btn-md" (click)="showClaimModal.set(true)">
                   <span>📩</span> Notify Phani (I Paid All)
@@ -694,20 +694,20 @@
 
             @if ((myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
               <div class="direct-upi-actions" style="margin-top: 14px; width: 100%;">
-                <a [href]="getPhonePeIntentUrl(-(myPlayerRecord()?.balance || 0))" class="btn btn-phonepe btn-block">
-                  <span>🟣</span> Pay ₹{{ -(myPlayerRecord()?.balance || 0) }} on PhonePe
+                <a [href]="getPhonePeIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-phonepe btn-block">
+                  <span>🟣</span> Pay ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} on PhonePe
                 </a>
                 <div class="alt-upi-row">
-                  <a [href]="getGPayIntentUrl(-(myPlayerRecord()?.balance || 0))" class="btn btn-gpay flex-1">
+                  <a [href]="getGPayIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-gpay flex-1">
                     <span>🔵</span> GPay
                   </a>
-                  <a [href]="getPaytmIntentUrl(-(myPlayerRecord()?.balance || 0))" class="btn btn-paytm flex-1">
+                  <a [href]="getPaytmIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-paytm flex-1">
                     <span>🔷</span> Paytm
                   </a>
                 </div>
               </div>
               <button class="btn btn-yellow btn-block" style="margin-top: 10px;" (click)="showClaimModal.set(true)">
-                <span>✓</span> I Have Paid ₹{{ -(myPlayerRecord()?.balance || 0) }} via UPI
+                <span>✓</span> I Have Paid ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} via UPI
               </button>
             }
           </div>
@@ -738,17 +738,17 @@
                   <div class="session-action-group">
                     @if (gStatus.status === 'paid') {
                       <div class="status-pill status-paid mono">
-                        <span class="pill-check">✓</span> Settled (₹{{ game.perPlayerShare }})
+                        <span class="pill-check">✓</span> Settled (₹{{ round(game.perPlayerShare) }})
                       </div>
                     } @else if (gStatus.status === 'pending') {
                       <div class="status-pill status-pending mono" title="Awaiting Phani's approval">
-                        <span class="pill-clock">⏳</span> Approval Pending (₹{{ game.perPlayerShare }})
+                        <span class="pill-clock">⏳</span> Approval Pending (₹{{ round(game.perPlayerShare) }})
                       </div>
                     } @else {
                       <div class="unpaid-action-wrap">
-                        <span class="share-badge-unpaid mono">Share: ₹{{ game.perPlayerShare }}</span>
+                        <span class="share-badge-unpaid mono">Share: ₹{{ round(game.perPlayerShare) }}</span>
                         <button class="btn btn-sm btn-pay-game" (click)="openGamePayment(game)">
-                          <span>⚡</span> Pay ₹{{ game.perPlayerShare }}
+                          <span>⚡</span> Pay ₹{{ round(game.perPlayerShare) }}
                         </button>
                       </div>
                     }
@@ -946,7 +946,7 @@
             <label class="field-label">Player</label>
             <select class="form-select" [ngModel]="payPlayerId()" (ngModelChange)="payPlayerId.set($event)">
               @for (p of clubService.players(); track p.id) {
-                <option [value]="p.id">{{ p.name }} (Balance: ₹{{ p.balance }})</option>
+                <option [value]="p.id">{{ p.name }} (Balance: ₹{{ round(p.balance) }})</option>
               }
             </select>
           </div>
@@ -1017,7 +1017,7 @@
         </div>
 
         <div class="modal-body" style="text-align: center;">
-          <div class="upi-pay-figure mono">₹{{ payAmount() }}</div>
+          <div class="upi-pay-figure mono">₹{{ round(payAmount()) }}</div>
           <p class="muted-text">Scan with PhonePe or GPay to pay <strong>8801147452@ybl</strong> (Phani)</p>
 
           <div class="real-qr-card-modal">
@@ -1072,7 +1072,7 @@
 
         <div class="modal-body">
           <p style="margin-bottom: 16px; font-size: 0.95rem; line-height: 1.5;">
-            Did you transfer <strong class="mono text-blue" style="font-size: 1.15rem;">₹{{ -(myPlayerRecord()?.balance || 0) }}</strong> to <strong>Phani</strong> via PhonePe, Google Pay, or Paytm?
+            Did you transfer <strong class="mono text-blue" style="font-size: 1.15rem;">₹{{ round(-(myPlayerRecord()?.balance || 0)) }}</strong> to <strong>Phani</strong> via PhonePe, Google Pay, or Paytm?
           </p>
 
           <div class="form-field">
@@ -1115,11 +1115,11 @@
           <div class="game-pay-summary">
             <div class="summary-venue">{{ selectedGameForPayment()?.venue }}</div>
             <div class="summary-meta mono">
-              📅 Date: <strong>{{ selectedGameForPayment()?.date }}</strong> · Total Court Rent: ₹{{ selectedGameForPayment()?.totalExpense }}
+              📅 Date: <strong>{{ selectedGameForPayment()?.date }}</strong> · Total Court Rent: ₹{{ round(selectedGameForPayment()?.totalExpense) }}
             </div>
             <div class="summary-share-card">
               <span class="share-title">Your Exact Share for this Game</span>
-              <div class="share-figure mono">₹{{ selectedGameForPayment()?.perPlayerShare }}</div>
+              <div class="share-figure mono">₹{{ round(selectedGameForPayment()?.perPlayerShare) }}</div>
             </div>
           </div>
 
@@ -1288,7 +1288,7 @@
               <div class="pstat-item">
                 <span class="pstat-lbl">Account Balance</span>
                 <strong class="pstat-val mono" [class.text-red]="(myPlayerRecord()?.balance || 0) < 0" [class.text-green]="(myPlayerRecord()?.balance || 0) >= 0">
-                  {{ (myPlayerRecord()?.balance || 0) < 0 ? 'Owes ₹' + -(myPlayerRecord()?.balance || 0) : 'Clear (₹0)' }}
+                  {{ (myPlayerRecord()?.balance || 0) < 0 ? 'Owes ₹' + round(-(myPlayerRecord()?.balance || 0)) : 'Clear (₹0)' }}
                 </strong>
               </div>
             </div>

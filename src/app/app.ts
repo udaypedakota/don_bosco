@@ -79,6 +79,11 @@ export class App {
   claimUtr = signal<string>('');
   toastMessage = signal<string | null>(null);
 
+  round(val: any): number {
+    if (val === null || val === undefined || isNaN(val)) return 0;
+    return Math.round(Number(val));
+  }
+
   // Admin Game Filter & Player Breakdown
   adminGameFilter = signal<'all' | 'settled' | 'pending'>('all');
   selectedPlayerForBreakdown = signal<Player | null>(null);
@@ -310,18 +315,19 @@ export class App {
     const u = this.currentUser();
     if (!game || !u) return;
 
+    const roundedAmt = Math.round(game.perPlayerShare);
     this.clubService.claimPayment({
       playerId: u.id,
-      amount: game.perPlayerShare,
+      amount: roundedAmt,
       gameId: game.id,
       utr: this.gamePayUtr().trim(),
       mode: 'UPI',
-      notes: `Court share ₹${game.perPlayerShare} for game on ${game.date} (${game.venue})`
+      notes: `Court share ₹${roundedAmt} for game on ${game.date} (${game.venue})`
     }).subscribe({
       next: () => {
         this.showGamePayModal.set(false);
         this.gamePayUtr.set('');
-        this.showToast(`✅ Payment of ₹${game.perPlayerShare} reported for ${game.date}! Awaiting Phani's approval.`);
+        this.showToast(`✅ Payment of ₹${roundedAmt} reported for ${game.date}! Awaiting Phani's approval.`);
       },
       error: () => {
         this.showToast('Failed to report payment. Please try again.');
@@ -331,26 +337,30 @@ export class App {
 
   getUpiIntentUrl(amount: number, game?: Game | null): string {
     const u = this.currentUser();
+    const cleanAmt = Math.round(amount);
     const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
-    return `upi://pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+    return `upi://pay?pa=8801147452@ybl&pn=Phani&am=${cleanAmt}&cu=INR&tn=${encodeURIComponent(note)}`;
   }
 
   getPhonePeIntentUrl(amount: number, game?: Game | null): string {
     const u = this.currentUser();
+    const cleanAmt = Math.round(amount);
     const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
-    return `phonepe://pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+    return `phonepe://pay?pa=8801147452@ybl&pn=Phani&am=${cleanAmt}&cu=INR&tn=${encodeURIComponent(note)}`;
   }
 
   getGPayIntentUrl(amount: number, game?: Game | null): string {
     const u = this.currentUser();
+    const cleanAmt = Math.round(amount);
     const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
-    return `tez://upi/pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+    return `tez://upi/pay?pa=8801147452@ybl&pn=Phani&am=${cleanAmt}&cu=INR&tn=${encodeURIComponent(note)}`;
   }
 
   getPaytmIntentUrl(amount: number, game?: Game | null): string {
     const u = this.currentUser();
+    const cleanAmt = Math.round(amount);
     const note = game ? `SmashClub_${game.date}_${u?.name || 'Player'}` : `SmashClub_Settlement_${u?.name || 'Player'}`;
-    return `paytmmp://pay?pa=8801147452@ybl&pn=Phani&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+    return `paytmmp://pay?pa=8801147452@ybl&pn=Phani&am=${cleanAmt}&cu=INR&tn=${encodeURIComponent(note)}`;
   }
 
   copyUpiId(upiId: string = '8801147452@ybl'): void {
@@ -680,7 +690,7 @@ export class App {
 
   openMyUpiQr(): void {
     const p = this.myPlayerRecord();
-    this.payAmount.set(p && p.balance < 0 ? Math.abs(p.balance) : 300);
+    this.payAmount.set(p && p.balance < 0 ? Math.round(Math.abs(p.balance)) : 300);
     this.showUpiModal.set(true);
   }
 
@@ -690,7 +700,7 @@ export class App {
       this.showToast('You do not have any pending dues!');
       return;
     }
-    const dueAmt = Math.abs(p.balance);
+    const dueAmt = Math.round(Math.abs(p.balance));
     this.clubService.claimPayment({
       playerId: p.id,
       amount: dueAmt,

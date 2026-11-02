@@ -652,7 +652,7 @@ app.post('/api/games', async (req, res) => {
     return res.status(400).json({ error: 'Select at least one attendee' });
   }
 
-  const share = parseFloat((total / attendees.length).toFixed(2));
+  const share = Math.round(total / attendees.length);
 
   // Find payer name
   let payerName = 'Phani';
@@ -725,7 +725,7 @@ app.get('/api/payments', async (req, res) => {
 // POST /api/payments (Admin records direct payment)
 app.post('/api/payments', async (req, res) => {
   const { playerId, amount, mode, utr, notes, gameId } = req.body;
-  const payAmt = parseFloat(amount);
+  const payAmt = Math.round(parseFloat(amount));
   if (!playerId || !payAmt || payAmt <= 0) {
     return res.status(400).json({ error: 'Valid player and amount are required' });
   }
@@ -789,7 +789,7 @@ app.post('/api/payments', async (req, res) => {
 // POST /api/payments/claim (Player reports they paid via UPI)
 app.post('/api/payments/claim', async (req, res) => {
   const { playerId, amount, utr, mode, gameId, notes } = req.body;
-  const payAmt = parseFloat(amount);
+  const payAmt = Math.round(parseFloat(amount));
   if (!playerId || !payAmt || payAmt <= 0) {
     return res.status(400).json({ error: 'Valid player and amount are required' });
   }
