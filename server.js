@@ -12,6 +12,12 @@ if (!process.env.VERCEL && process.platform === 'win32') {
 }
 
 require('dotenv').config();
+const {
+  sendPaymentReceiptEmail,
+  sendPaymentRejectedEmail,
+  sendPaymentClaimSubmittedEmail,
+  sendAdminPaymentClaimNotification
+} = require('./emailService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,12 +36,12 @@ let lastConnectionError = null;
 
 // Initial 6 players cohort
 const DEFAULT_PLAYERS = [
-  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', password: 'phani@123', upiId: '8801147452@ybl', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', email: 'phanidher12@gmail.com', password: 'phani@123', upiId: '8801147452@ybl', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: 'siva@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', password: 'uday@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', password: 'nani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', password: 'rajesh@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', password: 'srinvas@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() }
+  { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', email: 'udaypedakota@gmail.com', password: 'uday@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', email: 'nanimamidi1712@gmail.com', password: 'nani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', email: 'avidirajesh14@gmail.com', password: 'rajesh@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-srinvas', name: 'Srinvas', phone: '7013045526', role: 'player', email: 'srinivasc611@gmail.com', password: 'srinvas@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() }
 ];
 
 const ALL_MEMBERS = ['p-phani', 'p-siva', 'p-uday', 'p-nani', 'p-rajesh', 'p-srinvas'];
@@ -491,7 +497,7 @@ app.get('/api/players', async (req, res) => {
 
 // POST /api/players (Add new player dynamically)
 app.post('/api/players', async (req, res) => {
-  const { name, phone, role, password } = req.body;
+  const { name, phone, role, password, email } = req.body;
   if (!name || !name.trim()) {
     return res.status(400).json({ error: 'Player name is required' });
   }
@@ -518,6 +524,7 @@ app.post('/api/players', async (req, res) => {
     name: name.trim(),
     phone: cleanPhone,
     role: role === 'admin' ? 'admin' : 'player',
+    email: email ? email.trim().toLowerCase() : '',
     password: password || `${name.trim().toLowerCase().replace(/\s+/g, '')}@123`,
     balance: 0,
     totalGames: 0,
@@ -549,7 +556,7 @@ app.delete('/api/players/:id', async (req, res) => {
 // PUT /api/players/:id (Update Profile Details & Avatar)
 app.put('/api/players/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, phone, avatar, skill, hand, upiId, password } = req.body;
+  const { name, phone, avatar, skill, hand, upiId, password, email } = req.body;
 
   const updates = {};
   if (name && name.trim()) updates.name = name.trim();
@@ -562,6 +569,7 @@ app.put('/api/players/:id', async (req, res) => {
   if (hand) updates.hand = hand;
   if (upiId !== undefined) updates.upiId = upiId.trim();
   if (password) updates.password = password;
+  if (email !== undefined) updates.email = (email || '').trim().toLowerCase();
 
   try {
     if (mongoDb) {
@@ -695,12 +703,19 @@ app.post('/api/payments', async (req, res) => {
   }
 
   let playerName = 'Player';
+  let playerEmail = req.body.email || null;
   if (mongoDb) {
     const p = await mongoDb.collection('players').findOne({ id: playerId });
-    if (p) playerName = p.name;
+    if (p) {
+      playerName = p.name;
+      if (!playerEmail && p.email) playerEmail = p.email;
+    }
   } else {
     const p = localStore.players.find(pl => pl.id === playerId);
-    if (p) playerName = p.name;
+    if (p) {
+      playerName = p.name;
+      if (!playerEmail && p.email) playerEmail = p.email;
+    }
   }
 
   const payment = {
@@ -727,6 +742,18 @@ app.post('/api/payments', async (req, res) => {
     saveLocalDb(localStore);
   }
 
+  // Send payment receipt email
+  await sendPaymentReceiptEmail({
+    toEmail: playerEmail,
+    playerName,
+    amount: payAmt,
+    mode: payment.mode,
+    utr: payment.utr,
+    date: payment.date,
+    status: 'completed',
+    notes: payment.notes
+  }).catch(e => console.error('[Email Trigger Error]', e.message));
+
   res.status(201).json(payment);
 });
 
@@ -739,12 +766,19 @@ app.post('/api/payments/claim', async (req, res) => {
   }
 
   let playerName = 'Player';
+  let playerEmail = req.body.email || null;
   if (mongoDb) {
     const p = await mongoDb.collection('players').findOne({ id: playerId });
-    if (p) playerName = p.name;
+    if (p) {
+      playerName = p.name;
+      if (!playerEmail && p.email) playerEmail = p.email;
+    }
   } else {
     const p = localStore.players.find(pl => pl.id === playerId);
-    if (p) playerName = p.name;
+    if (p) {
+      playerName = p.name;
+      if (!playerEmail && p.email) playerEmail = p.email;
+    }
   }
 
   const paymentClaim = {
@@ -767,6 +801,26 @@ app.post('/api/payments/claim', async (req, res) => {
     localStore.payments.unshift(paymentClaim);
     saveLocalDb(localStore);
   }
+
+  // Notify admin and player
+  await Promise.allSettled([
+    sendAdminPaymentClaimNotification({
+      playerName,
+      amount: payAmt,
+      mode: paymentClaim.mode,
+      utr: paymentClaim.utr,
+      date: paymentClaim.date,
+      notes: paymentClaim.notes
+    }),
+    playerEmail ? sendPaymentClaimSubmittedEmail({
+      toEmail: playerEmail,
+      playerName,
+      amount: payAmt,
+      mode: paymentClaim.mode,
+      utr: paymentClaim.utr,
+      date: paymentClaim.date
+    }) : Promise.resolve()
+  ]);
 
   res.status(201).json(paymentClaim);
 });
@@ -792,14 +846,32 @@ app.post('/api/payments/:id/approve', async (req, res) => {
 
   payment.status = 'completed';
 
+  let playerObj = null;
   if (mongoDb) {
     await mongoDb.collection('payments').updateOne({ id: paymentId }, { $set: { status: 'completed' } });
     await mongoDb.collection('players').updateOne({ id: payment.playerId }, { $inc: { balance: payment.amount } });
+    playerObj = await mongoDb.collection('players').findOne({ id: payment.playerId });
   } else {
     const p = localStore.players.find(pl => pl.id === payment.playerId);
-    if (p) p.balance += payment.amount;
+    if (p) {
+      p.balance += payment.amount;
+      playerObj = p;
+    }
     saveLocalDb(localStore);
   }
+
+  // Dispatch payment receipt to player
+  const playerEmail = playerObj ? playerObj.email : null;
+  await sendPaymentReceiptEmail({
+    toEmail: playerEmail,
+    playerName: payment.playerName,
+    amount: payment.amount,
+    mode: payment.mode,
+    utr: payment.utr,
+    date: payment.date,
+    status: 'completed',
+    notes: payment.notes
+  }).catch(e => console.error('[Email Trigger Error]', e.message));
 
   res.json({ success: true, payment });
 });
@@ -807,14 +879,60 @@ app.post('/api/payments/:id/approve', async (req, res) => {
 // POST /api/payments/:id/reject (Admin rejects invalid claim)
 app.post('/api/payments/:id/reject', async (req, res) => {
   const paymentId = req.params.id;
+  const reason = req.body && req.body.reason ? req.body.reason : 'Payment record could not be verified';
+  let payment = null;
+
   if (mongoDb) {
+    payment = await mongoDb.collection('payments').findOne({ id: paymentId });
     await mongoDb.collection('payments').updateOne({ id: paymentId }, { $set: { status: 'rejected' } });
   } else {
-    const pay = localStore.payments.find(p => p.id === paymentId);
-    if (pay) pay.status = 'rejected';
+    payment = localStore.payments.find(p => p.id === paymentId);
+    if (payment) payment.status = 'rejected';
     saveLocalDb(localStore);
   }
+
+  if (payment) {
+    let player = null;
+    if (mongoDb) {
+      player = await mongoDb.collection('players').findOne({ id: payment.playerId });
+    } else {
+      player = localStore.players.find(p => p.id === payment.playerId);
+    }
+    const playerEmail = player ? player.email : null;
+
+    if (playerEmail) {
+      await sendPaymentRejectedEmail({
+        toEmail: playerEmail,
+        playerName: payment.playerName,
+        amount: payment.amount,
+        mode: payment.mode,
+        utr: payment.utr,
+        date: payment.date,
+        reason
+      }).catch(e => console.error('[Email Trigger Error]', e.message));
+    }
+  }
+
   res.json({ success: true, message: 'Payment claim rejected' });
+});
+
+// POST /api/test-email (Test email dispatch)
+app.post('/api/test-email', async (req, res) => {
+  const to = req.body.to || process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+  if (!to) {
+    return res.status(400).json({ error: 'Please specify "to" in JSON body or set EMAIL_USER in .env' });
+  }
+  const result = await sendPaymentReceiptEmail({
+    toEmail: to,
+    playerName: req.body.playerName || 'Test Player',
+    amount: req.body.amount || 200,
+    mode: 'UPI (PhonePe)',
+    utr: 'UPI-TEST-' + Date.now().toString().slice(-6),
+    date: new Date().toISOString().split('T')[0],
+    status: 'completed',
+    notes: 'Test email from Don Bosco Smash Club setup'
+  });
+  res.json(result);
 });
 
 if (!process.env.VERCEL) {
