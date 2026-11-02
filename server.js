@@ -50,7 +50,13 @@ const EMAIL_DIRECTORY = {
   '7013045526': 'srinivasc611@gmail.com',
   'p-nani': 'nanimamidi1712@gmail.com',
   'nani': 'nanimamidi1712@gmail.com',
-  '7036349848': 'nanimamidi1712@gmail.com'
+  '7036349848': 'nanimamidi1712@gmail.com',
+  'p-siva': 'ysivakumar@intellectinfo.com',
+  'siva': 'ysivakumar@intellectinfo.com',
+  '8790859546': 'ysivakumar@intellectinfo.com',
+  'aravind': 'aravindgundu7@gmail.com',
+  'arvind': 'aravindgundu7@gmail.com',
+  '9464783847': 'aravindgundu7@gmail.com'
 };
 
 function getPlayerEmail(player, playerId, playerName) {
@@ -65,7 +71,7 @@ function getPlayerEmail(player, playerId, playerName) {
 }
 const DEFAULT_PLAYERS = [
   { id: 'p-phani', name: 'Phani', phone: '8801147452', role: 'admin', email: 'phanidher12@gmail.com', password: 'phani@123', upiId: '8801147452@ybl', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
-  { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', password: 'siva@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
+  { id: 'p-siva', name: 'Siva', phone: '8790859546', role: 'player', email: 'ysivakumar@intellectinfo.com', password: 'siva@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-uday', name: 'Uday', phone: '9908660573', role: 'player', email: 'udaypedakota@gmail.com', password: 'uday@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-nani', name: 'Nani', phone: '7036349848', role: 'player', email: 'nanimamidi1712@gmail.com', password: 'nani@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
   { id: 'p-rajesh', name: 'Rajesh', phone: '9603253282', role: 'player', email: 'avidirajesh14@gmail.com', password: 'rajesh@123', balance: 0, totalGames: 0, createdAt: new Date().toISOString() },
