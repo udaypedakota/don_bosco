@@ -40,6 +40,23 @@
           </span>
         }
 
+        <!-- Phone Lock-Screen Push Alert Pill -->
+        @if (currentUser() && isPushSupported()) {
+          <button class="push-alert-pill" 
+            [class.is-active]="pushPermission() === 'granted'" 
+            (click)="togglePushNotifications()" 
+            [disabled]="pushLoading()"
+            [title]="pushPermission() === 'granted' ? 'Phone alerts active! Tap to send test alert.' : 'Tap to enable lock-screen notifications on your phone'">
+            <span class="bell-icon">{{ pushPermission() === 'granted' ? '🔔' : '🔕' }}</span>
+            <span class="bell-label">
+              {{ pushLoading() ? 'Activating...' : (pushPermission() === 'granted' ? 'Alerts Active' : 'Enable Alerts') }}
+            </span>
+            @if (pushPermission() === 'granted') {
+              <span class="bell-live-dot" title="Active"></span>
+            }
+          </button>
+        }
+
         <!-- User Session Indicator & Profile Modal Trigger -->
         @if (currentUser()) {
           <div class="user-pill clickable-profile" (click)="openProfileModal()" title="Click to view & edit your profile details">
@@ -279,6 +296,20 @@
             }
           </div>
         </section>
+      }
+
+      <!-- Admin Phone Alert Prompt Banner -->
+      @if (pushPermission() === 'default' && isPushSupported()) {
+        <div class="push-prompt-banner admin-prompt-banner">
+          <div class="prompt-icon-col">🔔</div>
+          <div class="prompt-info-col">
+            <strong class="prompt-title">Phani, Enable Lock-Screen Phone Alerts</strong>
+            <p class="prompt-desc">Receive instant push notifications on your phone lock screen whenever players submit UPI payment claims or book courts!</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm prompt-action-btn" (click)="togglePushNotifications()" [disabled]="pushLoading()">
+            {{ pushLoading() ? 'Activating...' : '⚡ Turn On Phone Alerts' }}
+          </button>
+        </div>
       }
 
       <!-- 1. DYNAMIC COURT SPLIT HERO (Today, Tomorrow, Any Date) -->
@@ -738,7 +769,20 @@
           </div>
         </div>
 
-        
+        <!-- Player Push Alert Banner -->
+        @if (pushPermission() === 'default' && isPushSupported()) {
+          <div class="push-prompt-banner player-prompt-banner">
+            <div class="prompt-icon-col">🔔</div>
+            <div class="prompt-info-col">
+              <strong class="prompt-title">Get Instant Alerts on Your Phone Lock Screen</strong>
+              <p class="prompt-desc">Never miss an update! Get a buzz when Phani verifies & settles your UPI payment or when new match dates are scheduled.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm prompt-action-btn" (click)="togglePushNotifications()" [disabled]="pushLoading()">
+              {{ pushLoading() ? 'Activating...' : '🔔 Turn On Alerts' }}
+            </button>
+          </div>
+        }
+
         <!-- Player Personal Lifetime / Monthly Stats Bar (Item 1 & 2) -->
         <div class="player-personal-stats-bar">
           <div class="pps-box">

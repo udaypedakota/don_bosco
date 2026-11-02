@@ -4,6 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { ClubService } from './services/club.service';
 import { Player, Game, Payment } from './models/club.models';
 
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -14,7 +25,30 @@ import { Player, Game, Payment } from './models/club.models';
 export class App {
   clubService = inject(ClubService);
 
+  // Web Push Notification State
+  pushPermission = signal<NotificationPermission | 'unsupported'>('default');
+  pushLoading = signal<boolean>(false);
+  isPushSupported = signal<boolean>(false);
+
   constructor() {
+    // Check Web Push Support
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'Notification' in window) {
+      this.isPushSupported.set(true);
+      this.pushPermission.set(Notification.permission);
+      if (Notification.permission === 'granted') {
+        this.registerPushForUser();
+      }
+    } else {
+      this.pushPermission.set('unsupported');
+    }
+
+    effect(() => {
+      const user = this.currentUser();
+      if (user && this.pushPermission() === 'granted') {
+        this.registerPushForUser();
+      }
+    });
+
     effect(() => {
       const players = this.clubService.players();
       if (players.length > 0) {
@@ -939,5 +973,104 @@ export class App {
   getPlayerName(id: string): string {
     const p = this.clubService.players().find(pl => pl.id === id);
     return p ? p.name : id;
+  }
+
+  // ==========================================================================
+  // WEB PUSH NOTIFICATIONS REGISTRATION & CONTROLS
+  // ==========================================================================
+  async registerPushForUser(): Promise<boolean> {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+      return false;
+    }
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+
+      this.clubService.getVapidPublicKey().subscribe({
+        next: async (res) => {
+          if (!res || !res.publicKey) return;
+          try {
+            let sub = await reg.pushManager.getSubscription();
+            if (!sub) {
+              const convertedVapidKey = urlBase64ToUint8Array(res.publicKey);
+              sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidKey as any
+              });
+            }
+
+            const user = this.currentUser();
+            this.clubService.subscribeToPush({
+              subscription: sub.toJSON(),
+              playerId: user?.id || 'anonymous',
+              playerName: user?.name || 'Smash Member',
+              role: user?.role || 'player'
+            }).subscribe({
+              next: () => console.log('[Push] Subscription synced to server for', user?.name),
+              error: (e) => console.error('[Push] Sync error:', e)
+            });
+          } catch (e) {
+            console.error('[Push Subscription Error]', e);
+          }
+        },
+        error: (err) => console.error('[VAPID Fetch Error]', err)
+      });
+      return true;
+    } catch (e) {
+      console.error('[SW Register Error]', e);
+      return false;
+    }
+  }
+
+  async togglePushNotifications(): Promise<void> {
+    if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
+      this.showToast('Push notifications are not supported in this browser.');
+      return;
+    }
+
+    if (Notification.permission === 'granted') {
+      this.sendTestAlert();
+      return;
+    }
+
+    if (Notification.permission === 'denied') {
+      this.showToast('⚠️ Notifications blocked in browser settings. Please allow notifications in site permissions.');
+      return;
+    }
+
+    this.pushLoading.set(true);
+    try {
+      const perm = await Notification.requestPermission();
+      this.pushPermission.set(perm);
+      if (perm === 'granted') {
+        await this.registerPushForUser();
+        this.pushLoading.set(false);
+        this.showToast('🔔 Phone lock-screen notifications enabled! Sending test alert...');
+        setTimeout(() => this.sendTestAlert(), 1200);
+      } else {
+        this.pushLoading.set(false);
+        this.showToast('Notification permission was not granted.');
+      }
+    } catch (err: any) {
+      this.pushLoading.set(false);
+      this.showToast('Error enabling notifications: ' + err.message);
+    }
+  }
+
+  sendTestAlert(): void {
+    const user = this.currentUser();
+    this.clubService.sendTestPush({
+      playerId: user?.id,
+      role: user?.role,
+      title: '🏸 Smash Club Phone Alert!',
+      body: `Hi ${user?.name || 'there'}! Phone lock-screen push alerts are active and working.`
+    }).subscribe({
+      next: (res) => {
+        this.showToast('🔔 Test alert sent to phone lock screen!');
+      },
+      error: () => {
+        this.showToast('Failed to send test alert.');
+      }
+    });
   }
 }

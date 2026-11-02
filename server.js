@@ -18,6 +18,25 @@ const {
   sendPaymentClaimSubmittedEmail,
   sendAdminPaymentClaimNotification
 } = require('./emailService');
+const webpush = require('web-push');
+
+// Web Push Notification Setup (VAPID)
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || 'BHDCaC5ncvVC_rr8XwAL9YTG8oc79YXlAVPpOfyDWhAaFoxLSeVZZphYR6SiK5BEJl89dC_xwUIz2nASBzJo8zI';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '3oLx8MAPj2fkLhE-GupsPeSvQqE7SjSfTDY2YfhJpjg';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'phanidher12@gmail.com';
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  try {
+    webpush.setVapidDetails(
+      `mailto:${ADMIN_EMAIL}`,
+      VAPID_PUBLIC_KEY,
+      VAPID_PRIVATE_KEY
+    );
+    console.log('[WebPush] VAPID configured successfully');
+  } catch (err) {
+    console.error('[WebPush] VAPID config error:', err.message);
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -242,7 +261,8 @@ function loadLocalDb() {
   const defaultDb = {
     players: DEFAULT_PLAYERS,
     games: [],
-    payments: []
+    payments: [],
+    subscriptions: []
   };
   fs.writeFileSync(LOCAL_DB_FILE, JSON.stringify(defaultDb, null, 2));
   return defaultDb;
@@ -257,6 +277,64 @@ function saveLocalDb(data) {
 }
 
 let localStore = loadLocalDb();
+if (!localStore.subscriptions) localStore.subscriptions = [];
+
+// Helper function to send Web Push Notifications
+async function sendPushNotification(query, payload) {
+  try {
+    let subs = [];
+    if (mongoDb) {
+      subs = await mongoDb.collection('subscriptions').find(query).toArray();
+    } else {
+      subs = (localStore.subscriptions || []).filter(s => {
+        for (const k in query) {
+          if (s[k] !== query[k]) return false;
+        }
+        return true;
+      });
+    }
+
+    if (!subs || subs.length === 0) {
+      console.log('[WebPush] No matching subscriptions for query:', JSON.stringify(query));
+      return { sent: 0, total: 0 };
+    }
+
+    const payloadStr = JSON.stringify({
+      title: payload.title || '🏸 Smash Club',
+      body: payload.body || '',
+      icon: payload.icon || '/assets/badminton-app-icon.png',
+      badge: '/assets/badminton-app-icon.png',
+      tag: payload.tag || 'smash-alert-' + Date.now(),
+      url: payload.url || '/'
+    });
+
+    let sentCount = 0;
+    for (const subRecord of subs) {
+      const sub = subRecord.subscription || subRecord;
+      if (!sub || !sub.endpoint) continue;
+      try {
+        await webpush.sendNotification(sub, payloadStr);
+        sentCount++;
+      } catch (err) {
+        console.error('[WebPush] Error delivering to endpoint:', sub.endpoint?.slice(0, 35), err.statusCode || err.message);
+        // Remove dead / unsubscribed endpoints
+        if (err.statusCode === 404 || err.statusCode === 410) {
+          if (mongoDb) {
+            await mongoDb.collection('subscriptions').deleteOne({ endpoint: sub.endpoint }).catch(() => {});
+          } else if (localStore.subscriptions) {
+            localStore.subscriptions = localStore.subscriptions.filter(s => s.endpoint !== sub.endpoint);
+            saveLocalDb(localStore);
+          }
+        }
+      }
+    }
+    console.log(`[WebPush] Successfully delivered ${sentCount}/${subs.length} alerts`);
+    return { sent: sentCount, total: subs.length };
+  } catch (err) {
+    console.error('[WebPush] Dispatch error:', err.message);
+    return { sent: 0, error: err.message };
+  }
+}
 
 let connectingPromise = null;
 
@@ -730,6 +808,18 @@ app.post('/api/games', async (req, res) => {
     saveLocalDb(localStore);
   }
 
+  // Send instant push notification to attendees
+  for (const pId of attendees) {
+    if (pId !== newGame.paidByPlayerId) {
+      sendPushNotification({ playerId: pId }, {
+        title: '🏸 New Game Added!',
+        body: `${payerName} booked ${newGame.venue} on ${newGame.date}. Your share: ₹${share}.`,
+        tag: `game-${newGame.id}`,
+        url: '/?tab=player'
+      }).catch(() => {});
+    }
+  }
+
   res.status(201).json(newGame);
 });
 
@@ -872,7 +962,7 @@ app.post('/api/payments/claim', async (req, res) => {
     saveLocalDb(localStore);
   }
 
-  // Send admin notification email & player confirmation email
+  // Send admin notification email & player confirmation email + Instant Web Push to Admin
   await Promise.allSettled([
     sendAdminPaymentClaimNotification({
       playerName,
@@ -889,7 +979,14 @@ app.post('/api/payments/claim', async (req, res) => {
       mode: paymentClaim.mode,
       utr: paymentClaim.utr,
       date: paymentClaim.date
-    }) : Promise.resolve()
+    }) : Promise.resolve(),
+    // Instant Web Push to Admin (Phani's Phone)
+    sendPushNotification({ role: 'admin' }, {
+      title: '🏸 Payment Claim Received!',
+      body: `${playerName} reported UPI payment of ₹${payAmt}. Tap to review & approve.`,
+      tag: `claim-${paymentClaim.id}`,
+      url: '/?tab=admin'
+    })
   ]);
 
   res.status(201).json(paymentClaim);
@@ -1005,18 +1102,26 @@ app.post('/api/payments/:id/approve', async (req, res) => {
     saveLocalDb(localStore);
   }
 
-  // Dispatch payment receipt to player
+  // Dispatch payment receipt to player via Email and Instant Web Push
   const playerEmail = getPlayerEmail(playerObj, payment.playerId, payment.playerName);
-  await sendPaymentReceiptEmail({
-    toEmail: playerEmail,
-    playerName: payment.playerName,
-    amount: payment.amount,
-    mode: payment.mode,
-    utr: payment.utr,
-    date: payment.date,
-    status: 'completed',
-    notes: payment.notes
-  }).catch(e => console.error('[Email Trigger Error]', e.message));
+  await Promise.allSettled([
+    sendPaymentReceiptEmail({
+      toEmail: playerEmail,
+      playerName: payment.playerName,
+      amount: payment.amount,
+      mode: payment.mode,
+      utr: payment.utr,
+      date: payment.date,
+      status: 'completed',
+      notes: payment.notes
+    }),
+    sendPushNotification({ playerId: payment.playerId }, {
+      title: '✅ Payment Approved & Settled!',
+      body: `Phani approved your ₹${payment.amount} UPI payment. All dues marked as settled!`,
+      tag: `approved-${payment.id}`,
+      url: '/?tab=player'
+    })
+  ]).catch(e => console.error('[Push/Email Trigger Error]', e.message));
 
   res.json({ success: true, payment });
 });
@@ -1045,8 +1150,8 @@ app.post('/api/payments/:id/reject', async (req, res) => {
     }
     const playerEmail = getPlayerEmail(player, payment.playerId, payment.playerName);
 
-    if (playerEmail) {
-      await sendPaymentRejectedEmail({
+    await Promise.allSettled([
+      playerEmail ? sendPaymentRejectedEmail({
         toEmail: playerEmail,
         playerName: payment.playerName,
         amount: payment.amount,
@@ -1054,11 +1159,86 @@ app.post('/api/payments/:id/reject', async (req, res) => {
         utr: payment.utr,
         date: payment.date,
         reason
-      }).catch(e => console.error('[Email Trigger Error]', e.message));
-    }
+      }) : Promise.resolve(),
+      sendPushNotification({ playerId: payment.playerId }, {
+        title: '⚠️ Payment Claim Update',
+        body: `Your payment claim for ₹${payment.amount} was not approved: ${reason}`,
+        tag: `rejected-${payment.id}`,
+        url: '/?tab=player'
+      })
+    ]).catch(e => console.error('[Push/Email Reject Error]', e.message));
   }
 
   res.json({ success: true, message: 'Payment claim rejected' });
+});
+
+// ============================================================================
+// WEB PUSH NOTIFICATIONS ROUTES
+// ============================================================================
+
+// GET /api/notifications/vapid-key
+app.get('/api/notifications/vapid-key', (req, res) => {
+  res.json({
+    publicKey: VAPID_PUBLIC_KEY
+  });
+});
+
+// POST /api/notifications/subscribe (Register browser for lock-screen push alerts)
+app.post('/api/notifications/subscribe', async (req, res) => {
+  const { subscription, playerId, playerName, role } = req.body;
+  if (!subscription || !subscription.endpoint) {
+    return res.status(400).json({ error: 'Valid push subscription required' });
+  }
+
+  const record = {
+    endpoint: subscription.endpoint,
+    subscription,
+    playerId: playerId || 'anonymous',
+    playerName: playerName || 'Player',
+    role: role || 'player',
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    if (mongoDb) {
+      await mongoDb.collection('subscriptions').updateOne(
+        { endpoint: subscription.endpoint },
+        { $set: record },
+        { upsert: true }
+      );
+    } else {
+      localStore.subscriptions = localStore.subscriptions || [];
+      const idx = localStore.subscriptions.findIndex(s => s.endpoint === subscription.endpoint);
+      if (idx >= 0) {
+        localStore.subscriptions[idx] = record;
+      } else {
+        localStore.subscriptions.push(record);
+      }
+      saveLocalDb(localStore);
+    }
+
+    res.json({ success: true, message: 'Subscription saved successfully' });
+  } catch (err) {
+    console.error('[WebPush Subscribe Error]', err);
+    res.status(500).json({ error: 'Failed to save subscription' });
+  }
+});
+
+// POST /api/notifications/test (Verify alert appears on phone lock screen)
+app.post('/api/notifications/test', async (req, res) => {
+  const { playerId, role, title, body } = req.body;
+  const filter = {};
+  if (playerId) filter.playerId = playerId;
+  if (role) filter.role = role;
+
+  const result = await sendPushNotification(filter, {
+    title: title || '🏸 Smash Club Phone Alert!',
+    body: body || 'Test push notification: Phone alerts are working perfectly!',
+    tag: 'test-' + Date.now(),
+    url: '/'
+  });
+
+  res.json({ success: true, result });
 });
 
 // POST /api/test-email (Test email dispatch)

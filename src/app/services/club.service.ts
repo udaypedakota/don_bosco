@@ -226,4 +226,19 @@ export class ClubService {
       })
     );
   }
+
+  // ============================================================================
+  // WEB PUSH NOTIFICATIONS
+  // ============================================================================
+  getVapidPublicKey(): Observable<{ publicKey: string }> {
+    return this.http.get<{ publicKey: string }>(`${this.apiUrl}/notifications/vapid-key`);
+  }
+
+  subscribeToPush(payload: { subscription: any; playerId?: string; playerName?: string; role?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/notifications/subscribe`, payload);
+  }
+
+  sendTestPush(payload: { playerId?: string; role?: string; title?: string; body?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/notifications/test`, payload);
+  }
 }
