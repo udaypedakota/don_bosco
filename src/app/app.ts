@@ -799,7 +799,7 @@ export class App {
       next: (updated) => {
         this.profileSaving.set(false);
         this.showProfileModal.set(false);
-        this.showToast('✨ Profile & photo updated in MongoDB Atlas cloud!');
+        this.showToast('✨ Profile & photo updated successfully!');
       },
       error: (err) => {
         this.profileSaving.set(false);
@@ -1044,7 +1044,7 @@ export class App {
   approveClaim(paymentId: string): void {
     this.clubService.approvePayment(paymentId).subscribe({
       next: () => {
-        this.showToast('✅ Payment approved! Player dues settled in MongoDB Atlas.');
+        this.showToast('✅ Payment approved! Player dues settled.');
       },
       error: () => {
         this.showToast('Error approving payment.');

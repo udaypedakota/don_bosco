@@ -1088,10 +1088,11 @@
             </button>
           </div>
         }
+      </section>
 
-        <!-- PREMIUM TODAY'S COURT MATCH PASS CARD (For Players) -->
-        @if (activeCourtSession(); as match) {
-          <div class="match-pass-card animate-fade">
+      <!-- PREMIUM TODAY'S COURT MATCH PASS CARD (For Players) -->
+      @if (activeCourtSession(); as match) {
+        <div class="match-pass-card animate-fade">
             <div class="mp-inner">
               <div class="mp-top-bar">
                 <div class="mp-status-pill" [class.is-today]="isTodayCourtSession()">
@@ -1420,7 +1421,6 @@
           </div>
 
         </div>
-      </section>
     </main>
   }
 

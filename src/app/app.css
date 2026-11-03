@@ -1975,6 +1975,57 @@
   .pm-box-body {
     padding: 12px 10px 16px;
   }
+
+  /* Admin Game Row Card Mobile Layout - Stacks venue and details on full width to prevent column text squeeze */
+  .admin-game-row-card {
+    border-radius: 12px;
+  }
+  .agrc-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 12px 14px !important;
+  }
+  .agrc-left {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .agrc-venue {
+    font-size: 0.98rem !important;
+    font-weight: 800 !important;
+    white-space: normal !important;
+    line-height: 1.3 !important;
+  }
+  .agrc-meta {
+    font-size: 0.78rem !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+    color: #64748B !important;
+    word-break: normal !important;
+  }
+  .agrc-right {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-top: 8px !important;
+    border-top: 1px dashed #E2E8F0 !important;
+  }
+  .agrc-right .badge,
+  .agrc-right .status-pill {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+    white-space: nowrap !important;
+  }
+  .btn-attendees-chip {
+    font-size: 0.75rem !important;
+    padding: 4px 10px !important;
+    white-space: nowrap !important;
+  }
+  .agrc-attendees-drawer {
+    padding: 10px 12px 12px !important;
+  }
 }
 
 /* Admin Game Filter Pills */
@@ -3318,6 +3369,11 @@
   }
 
   /* Player Portal */
+  .player-hero-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+    margin-bottom: 20px !important;
+  }
   .player-top-row {
     flex-direction: column;
     align-items: stretch;
@@ -4081,6 +4137,11 @@
   }
 
   /* Player Portal */
+  .player-hero-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+    margin-bottom: 20px !important;
+  }
   .player-top-row {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -4181,47 +4242,65 @@
     padding: 5px 11px !important;
   }
   .session-card {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-    padding: 10px 12px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
   }
   .session-info {
-    flex: 1 !important;
+    width: 100% !important;
     min-width: 0 !important;
   }
   .session-venue {
-    font-size: 0.92rem !important;
-    font-weight: 700 !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    font-size: 0.96rem !important;
+    font-weight: 800 !important;
+    white-space: normal !important;
+    line-height: 1.3 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
   .session-date {
-    font-size: 0.72rem !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    font-size: 0.78rem !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    margin-top: 2px !important;
   }
   .session-action-group {
-    width: auto !important;
-    flex-shrink: 0 !important;
-  }
-  .unpaid-action-wrap {
-    width: auto !important;
+    width: 100% !important;
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-top: 8px !important;
+    border-top: 1px dashed rgba(0, 0, 0, 0.08) !important;
+    margin-top: 2px !important;
+  }
+  .session-action-group .status-pill {
+    width: 100% !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    font-size: 0.78rem !important;
+    padding: 5px 10px !important;
+  }
+  .unpaid-action-wrap {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
   }
   .share-badge-unpaid {
-    font-size: 0.74rem !important;
-    padding: 3px 6px !important;
+    font-size: 0.78rem !important;
+    padding: 4px 8px !important;
   }
   .btn-pay-game {
     flex: none !important;
-    padding: 5px 10px !important;
-    font-size: 0.76rem !important;
+    padding: 5px 12px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
   }
   .status-pill {
     width: auto !important;
@@ -5025,27 +5104,84 @@
 
 /* Mobile Responsiveness for Match Pass */
 @media (max-width: 768px) {
+  .match-pass-card {
+    border-radius: 16px !important;
+    margin-bottom: 20px !important;
+  }
   .mp-inner {
-    padding: 18px 16px;
+    padding: 16px 14px !important;
+  }
+  .mp-top-bar {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding-bottom: 12px !important;
+  }
+  .mp-status-pill {
+    font-size: 0.72rem !important;
+    padding: 5px 10px !important;
+  }
+  .mp-venue-chip {
+    font-size: 0.78rem !important;
+    padding: 5px 10px !important;
+    max-width: 60% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
   .mp-content-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 16px 0;
-  }
-  .mp-meta-block,
-  .mp-attendees-block {
-    border-left: none;
-    padding-left: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 14px;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    padding: 14px 0 !important;
   }
   .mp-time-text {
-    font-size: 1.35rem;
+    font-size: 1.35rem !important;
+  }
+  .mp-meta-block {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    border-left: none !important;
+    padding-left: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-top: 12px !important;
+  }
+  .mp-attendees-block {
+    border-left: none !important;
+    padding-left: 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding-top: 12px !important;
+  }
+  .mp-avatar-cluster {
+    gap: 5px !important;
+    margin-bottom: 6px !important;
+  }
+  .mp-mini-avatar {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  .mp-attendee-sub {
+    white-space: normal !important;
+    max-width: 100% !important;
+    line-height: 1.35 !important;
+    font-size: 0.76rem !important;
+    color: #94A3B8 !important;
   }
   .mp-bottom-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding-top: 12px !important;
+  }
+  .mp-booker-credit {
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+  }
+  .mp-callout-badge {
+    align-self: flex-start !important;
+    font-size: 0.75rem !important;
+    padding: 3px 10px !important;
   }
 }
