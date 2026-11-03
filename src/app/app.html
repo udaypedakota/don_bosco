@@ -668,23 +668,9 @@
             <h3 class="card-title">Recorded Game Sessions & Payment Tracking</h3>
             <p class="card-caption">Attendance and payment settlement breakdown across all match sessions</p>
           </div>
-
-          <!-- Filter Pills for Admin -->
-          <div class="game-filter-pills">
-            <button type="button" class="filter-pill" [class.active]="adminGameFilter() === 'all'" (click)="adminGameFilter.set('all')">
-              All Sessions ({{ clubService.games().length }})
-            </button>
-            <button type="button" class="filter-pill pill-settled" [class.active]="adminGameFilter() === 'settled'" (click)="adminGameFilter.set('settled')">
-              ✓ Fully Paid ({{ settledGamesCount() }})
-            </button>
-            <button type="button" class="filter-pill pill-pending" [class.active]="adminGameFilter() === 'pending'" (click)="adminGameFilter.set('pending')">
-              ⚠️ Pending Dues ({{ pendingGamesCount() }})
-            </button>
-          </div>
         </div>
 
-        
-        <!-- Month Filter Tabs & Monthly Statement Card (Option 1) -->
+        <!-- Month Filter Tabs & Monthly Statement Card -->
         <div class="month-filter-section">
           <div class="month-filter-bar">
             <div class="month-tabs">
@@ -730,73 +716,294 @@
           </div>
         </div>
 
-        <div class="games-feed">
-          @for (game of filteredGames(); track game.id) {
-            @let summary = getGameSettlementSummary(game);
-            <div class="game-feed-item" [class.feed-item-settled]="summary.isFullySettled">
-              
-              <!-- Feed Header Line -->
-              <div class="feed-header-line">
-                <div class="feed-header-left">
-                  <div class="feed-venue-row">
-                    <strong class="venue-name">{{ game.venue }}</strong>
-                    @if (summary.isFullySettled) {
-                      <span class="badge badge-green">✓ All {{ summary.paidCount }} Players Paid</span>
-                    } @else {
-                      <span class="badge badge-yellow">⚠️ {{ summary.paidCount }}/{{ summary.otherAttendeesCount }} Paid · {{ summary.unpaidCount }} Due (₹{{ round(summary.pendingAmount) }})</span>
-                    }
-                  </div>
-                  <div class="date-tag mono">
-                    📅 {{ game.date }} · Total Court Fee: ₹{{ round(game.totalExpense) }} · Paid Upfront by {{ game.paidByPlayerName }}
-                  </div>
-                </div>
+        <!-- ===================================================================
+             ADMIN 3 DEDICATED EXPANDABLE MATCH BOXES (Matching Player Portal)
+             Box 1: All Match Sessions (Click to expand & view all sessions)
+             Box 2: Sessions with Pending Dues (Click to view only unpaid sessions)
+             Box 3: Fully Settled Sessions (Click to view only 100% settled sessions)
+             =================================================================== -->
+        <div class="player-match-boxes admin-match-boxes">
 
-                <div class="feed-header-right mono">
-                  <div class="feed-total-val">₹{{ round(game.totalExpense) }}</div>
-                  <div class="feed-share-sub">₹{{ round(game.perPlayerShare) }} / player ({{ game.attendees.length }} players)</div>
+          <!-- BOX 1: ALL SESSIONS -->
+          <div class="pm-box all-matches-box" [class.is-expanded]="isAdminBoxOpen('all')">
+            <div class="pm-box-header" (click)="toggleAdminBox('all')">
+              <div class="pmb-left">
+                <div class="pmb-icon-badge pmb-blue">🏸</div>
+                <div class="pmb-text">
+                  <div class="pmb-title-row">
+                    <h3 class="pmb-title">All Match Sessions</h3>
+                    <span class="pmb-badge pmb-badge-blue mono">{{ monthAllGames().length }} Sessions</span>
+                  </div>
+                  <div class="pmb-subtitle">
+                    <span>Court Fees: <strong>₹{{ monthSummaryStats().totalExpense }}</strong></span>
+                    <span class="pmb-dot">·</span>
+                    <span class="text-green">₹{{ monthSummaryStats().totalCollected }} Collected</span>
+                    <span class="pmb-dot">·</span>
+                    <span class="text-red">₹{{ monthSummaryStats().totalPending }} Pending</span>
+                  </div>
                 </div>
               </div>
+              <div class="pmb-right">
+                <button type="button" class="btn-box-toggle" [class.active]="isAdminBoxOpen('all')">
+                  <span>{{ isAdminBoxOpen('all') ? 'Hide Sessions ▴' : 'Click to View Sessions ▾' }}</span>
+                </button>
+              </div>
+            </div>
 
-              <!-- Attendees Individual Payment Status (Clean View-Only Details) -->
-              <div class="attendees-status-container">
-                <span class="attendees-status-lbl">Attendee Settlements:</span>
-                <div class="attendees-pay-chips">
-                  @for (pId of game.attendees; track pId) {
-                    @if (pId === game.paidByPlayerId) {
-                      <div class="attendee-chip chip-booker" title="Paid whole court fee upfront">
-                        👑 {{ getPlayerName(pId) }} <small>(Upfront Booker)</small>
+            <!-- Content: All Sessions for this month -->
+            @if (isAdminBoxOpen('all')) {
+              <div class="pm-box-body">
+                <div class="admin-games-stack">
+                  @for (game of monthAllGames(); track game.id) {
+                    @let summary = getGameSettlementSummary(game);
+                    <div class="admin-game-row-card" [class.is-settled]="summary.isFullySettled">
+                      <div class="agrc-header" (click)="toggleGameAttendees(game.id)">
+                        <div class="agrc-left">
+                          <strong class="agrc-venue">{{ game.venue }}</strong>
+                          <div class="agrc-meta mono">
+                            📅 {{ game.date }} · Court Fee: ₹{{ round(game.totalExpense) }} · ₹{{ round(game.perPlayerShare) }}/player ({{ game.attendees.length }} players)
+                          </div>
+                        </div>
+
+                        <div class="agrc-right">
+                          @if (summary.isFullySettled) {
+                            <span class="status-pill status-paid mono">
+                              <span class="pill-check">✓</span> All {{ summary.paidCount }} Paid
+                            </span>
+                          } @else {
+                            <span class="badge badge-yellow mono" style="font-size: 0.8rem; font-weight: 700;">
+                              ⚠️ {{ summary.paidCount }}/{{ summary.otherAttendeesCount }} Paid · {{ summary.unpaidCount }} Due (₹{{ round(summary.pendingAmount) }})
+                            </span>
+                          }
+                          <button type="button" class="btn-attendees-chip">
+                            <span>{{ isGameAttendeesOpen(game.id) ? 'Hide Attendees ▴' : 'Attendees (' + game.attendees.length + ') ▾' }}</span>
+                          </button>
+                        </div>
                       </div>
-                    } @else {
-                      @let pSt = getGameStatusForPlayer(game, pId);
-                      @if (pSt.status === 'paid') {
-                        <div class="attendee-chip chip-paid" title="Share settled">
-                          <span class="chip-status-icon">✓</span>
-                          <strong>{{ getPlayerName(pId) }}</strong>
-                          <span class="chip-share-text">Paid ₹{{ round(game.perPlayerShare) }}</span>
-                        </div>
-                      } @else if (pSt.status === 'pending') {
-                        <div class="attendee-chip chip-pending" title="Player reported UPI payment - Pending Admin approval">
-                          <span class="chip-status-icon">⏳</span>
-                          <strong>{{ getPlayerName(pId) }}</strong>
-                          <span class="chip-share-text">Pending ₹{{ round(game.perPlayerShare) }}</span>
-                        </div>
-                      } @else {
-                        <div class="attendee-chip chip-due" title="Due to Phani">
-                          <span class="chip-status-icon">⚠️</span>
-                          <strong>{{ getPlayerName(pId) }}</strong>
-                          <span class="chip-share-text">Due ₹{{ round(game.perPlayerShare) }}</span>
+
+                      <!-- Expandable Attendees List for this specific match -->
+                      @if (isGameAttendeesOpen(game.id)) {
+                        <div class="agrc-attendees-drawer">
+                          <span class="attendees-status-lbl">Attendee Breakdown:</span>
+                          <div class="attendees-pay-chips">
+                            @for (pId of game.attendees; track pId) {
+                              @if (pId === game.paidByPlayerId) {
+                                <div class="attendee-chip chip-booker" title="Paid whole court fee upfront">
+                                  👑 {{ getPlayerName(pId) }} <small>(Upfront Booker)</small>
+                                </div>
+                              } @else {
+                                @let pSt = getGameStatusForPlayer(game, pId);
+                                @if (pSt.status === 'paid') {
+                                  <div class="attendee-chip chip-paid" title="Share settled">
+                                    <span class="chip-status-icon">✓</span>
+                                    <strong>{{ getPlayerName(pId) }}</strong>
+                                    <span class="chip-share-text">Paid ₹{{ round(game.perPlayerShare) }}</span>
+                                  </div>
+                                } @else if (pSt.status === 'pending') {
+                                  <div class="attendee-chip chip-pending" title="Player reported UPI payment - Pending Admin approval">
+                                    <span class="chip-status-icon">⏳</span>
+                                    <strong>{{ getPlayerName(pId) }}</strong>
+                                    <span class="chip-share-text">Pending ₹{{ round(game.perPlayerShare) }}</span>
+                                  </div>
+                                } @else {
+                                  <div class="attendee-chip chip-due" title="Due to Phani">
+                                    <span class="chip-status-icon">⚠️</span>
+                                    <strong>{{ getPlayerName(pId) }}</strong>
+                                    <span class="chip-share-text">Due ₹{{ round(game.perPlayerShare) }}</span>
+                                  </div>
+                                }
+                              }
+                            }
+                          </div>
                         </div>
                       }
-                    }
+                    </div>
+                  }
+                  @if (monthAllGames().length === 0) {
+                    <p class="muted-text text-center" style="padding: 16px 0;">No sessions found for this statement.</p>
                   }
                 </div>
               </div>
+            }
+          </div>
 
+          <!-- BOX 2: SESSIONS WITH PENDING DUES -->
+          <div class="pm-box unpaid-matches-box" [class.has-dues]="monthPendingGames().length > 0" [class.is-expanded]="isAdminBoxOpen('pending')">
+            <div class="pm-box-header" (click)="toggleAdminBox('pending')">
+              <div class="pmb-left">
+                <div class="pmb-icon-badge" [class.pmb-red]="monthPendingGames().length > 0" [class.pmb-green]="monthPendingGames().length === 0">
+                  {{ monthPendingGames().length > 0 ? '⚠️' : '✓' }}
+                </div>
+                <div class="pmb-text">
+                  <div class="pmb-title-row">
+                    <h3 class="pmb-title">Sessions with Pending Dues</h3>
+                    @if (monthPendingGames().length > 0) {
+                      <span class="pmb-badge pmb-badge-red mono">{{ monthPendingGames().length }} Sessions · ₹{{ monthSummaryStats().totalPending }} Pending</span>
+                    } @else {
+                      <span class="pmb-badge pmb-badge-green mono">All Sessions Settled (₹0 Due)</span>
+                    }
+                  </div>
+                  <div class="pmb-subtitle">
+                    @if (monthPendingGames().length > 0) {
+                      <span class="text-red"><strong>₹{{ monthSummaryStats().totalPending }} to collect</strong> across {{ monthPendingGames().length }} match sessions</span>
+                    } @else {
+                      <span class="text-green">All recorded sessions for this statement are 100% collected!</span>
+                    }
+                  </div>
+                </div>
+              </div>
+              <div class="pmb-right">
+                <button type="button" class="btn-box-toggle" [class.active]="isAdminBoxOpen('pending')" [class.btn-box-due]="monthPendingGames().length > 0">
+                  <span>{{ isAdminBoxOpen('pending') ? 'Hide Dues Sessions ▴' : (monthPendingGames().length > 0 ? 'Click to View ' + monthPendingGames().length + ' Dues Sessions ▾' : 'Click to View ▾') }}</span>
+                </button>
+              </div>
             </div>
-          }
-          @if (filteredGames().length === 0) {
-            <p class="muted-text" style="padding: 16px; text-align: center;">No sessions match the selected filter.</p>
-          }
+
+            <!-- Content: Pending Sessions List -->
+            @if (isAdminBoxOpen('pending')) {
+              <div class="pm-box-body">
+                @if (monthPendingGames().length > 0) {
+                  <div class="admin-games-stack">
+                    @for (game of monthPendingGames(); track game.id) {
+                      @let summary = getGameSettlementSummary(game);
+                      <div class="admin-game-row-card is-pending-game">
+                        <div class="agrc-header" (click)="toggleGameAttendees(game.id)">
+                          <div class="agrc-left">
+                            <strong class="agrc-venue">{{ game.venue }}</strong>
+                            <div class="agrc-meta mono">
+                              📅 {{ game.date }} · Court Fee: ₹{{ round(game.totalExpense) }} · ₹{{ round(game.perPlayerShare) }}/player
+                            </div>
+                          </div>
+
+                          <div class="agrc-right">
+                            <span class="badge badge-yellow mono" style="font-size: 0.8rem; font-weight: 700;">
+                              ⚠️ {{ summary.unpaidCount }} Due (₹{{ round(summary.pendingAmount) }})
+                            </span>
+                            <button type="button" class="btn-attendees-chip">
+                              <span>{{ isGameAttendeesOpen(game.id) ? 'Hide Attendees ▴' : 'View Attendees (' + game.attendees.length + ') ▾' }}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Attendees Drawer -->
+                        @if (isGameAttendeesOpen(game.id)) {
+                          <div class="agrc-attendees-drawer">
+                            <span class="attendees-status-lbl">Attendee Breakdown:</span>
+                            <div class="attendees-pay-chips">
+                              @for (pId of game.attendees; track pId) {
+                                @if (pId === game.paidByPlayerId) {
+                                  <div class="attendee-chip chip-booker">👑 {{ getPlayerName(pId) }} <small>(Booker)</small></div>
+                                } @else {
+                                  @let pSt = getGameStatusForPlayer(game, pId);
+                                  @if (pSt.status === 'paid') {
+                                    <div class="attendee-chip chip-paid">
+                                      <span class="chip-status-icon">✓</span>
+                                      <strong>{{ getPlayerName(pId) }}</strong>
+                                      <span class="chip-share-text">Paid ₹{{ round(game.perPlayerShare) }}</span>
+                                    </div>
+                                  } @else if (pSt.status === 'pending') {
+                                    <div class="attendee-chip chip-pending">
+                                      <span class="chip-status-icon">⏳</span>
+                                      <strong>{{ getPlayerName(pId) }}</strong>
+                                      <span class="chip-share-text">Pending ₹{{ round(game.perPlayerShare) }}</span>
+                                    </div>
+                                  } @else {
+                                    <div class="attendee-chip chip-due">
+                                      <span class="chip-status-icon">⚠️</span>
+                                      <strong>{{ getPlayerName(pId) }}</strong>
+                                      <span class="chip-share-text">Due ₹{{ round(game.perPlayerShare) }}</span>
+                                    </div>
+                                  }
+                                }
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="clean-empty-state">
+                    <div class="ces-icon">🎉</div>
+                    <h4 class="ces-title">All Sessions Fully Settled!</h4>
+                    <p class="ces-desc">Zero pending dues for this selected statement.</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- BOX 3: FULLY SETTLED SESSIONS -->
+          <div class="pm-box paid-matches-box" [class.is-expanded]="isAdminBoxOpen('settled')">
+            <div class="pm-box-header" (click)="toggleAdminBox('settled')">
+              <div class="pmb-left">
+                <div class="pmb-icon-badge pmb-green">✅</div>
+                <div class="pmb-text">
+                  <div class="pmb-title-row">
+                    <h3 class="pmb-title">Fully Settled Sessions</h3>
+                    <span class="pmb-badge pmb-badge-green mono">{{ monthSettledGames().length }} Sessions Settled</span>
+                  </div>
+                  <div class="pmb-subtitle">
+                    <span>All attendee court shares are 100% cleared via UPI</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pmb-right">
+                <button type="button" class="btn-box-toggle" [class.active]="isAdminBoxOpen('settled')">
+                  <span>{{ isAdminBoxOpen('settled') ? 'Hide Settled Sessions ▴' : 'Click to View Settled Sessions ▾' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content: Settled Sessions List -->
+            @if (isAdminBoxOpen('settled')) {
+              <div class="pm-box-body">
+                <div class="admin-games-stack">
+                  @for (game of monthSettledGames(); track game.id) {
+                    @let summary = getGameSettlementSummary(game);
+                    <div class="admin-game-row-card is-settled">
+                      <div class="agrc-header" (click)="toggleGameAttendees(game.id)">
+                        <div class="agrc-left">
+                          <strong class="agrc-venue">{{ game.venue }}</strong>
+                          <div class="agrc-meta mono">
+                            📅 {{ game.date }} · Court Fee: ₹{{ round(game.totalExpense) }} ({{ game.attendees.length }} players)
+                          </div>
+                        </div>
+
+                        <div class="agrc-right">
+                          <span class="status-pill status-paid mono">
+                            <span class="pill-check">✓</span> All {{ summary.paidCount }} Paid (₹{{ round(game.totalExpense) }})
+                          </span>
+                          <button type="button" class="btn-attendees-chip">
+                            <span>{{ isGameAttendeesOpen(game.id) ? 'Hide ▴' : 'Attendees (' + game.attendees.length + ') ▾' }}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      @if (isGameAttendeesOpen(game.id)) {
+                        <div class="agrc-attendees-drawer">
+                          <span class="attendees-status-lbl">Attendee Breakdown:</span>
+                          <div class="attendees-pay-chips">
+                            @for (pId of game.attendees; track pId) {
+                              <div class="attendee-chip chip-paid">
+                                <span class="chip-status-icon">✓</span>
+                                <strong>{{ getPlayerName(pId) }}</strong>
+                                <span class="chip-share-text">Settled ₹{{ round(game.perPlayerShare) }}</span>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                  @if (monthSettledGames().length === 0) {
+                    <p class="muted-text text-center" style="padding: 16px 0;">No settled sessions found yet.</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
         </div>
       </section>
     </main>

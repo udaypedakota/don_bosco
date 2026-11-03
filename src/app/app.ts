@@ -290,6 +290,55 @@ export class App {
     return Array.from(map.values()).sort((a, b) => b.key.localeCompare(a.key));
   });
 
+  // Admin Expandable Boxes ('all', 'pending', 'settled')
+  openedAdminBoxes = signal<{ all: boolean; pending: boolean; settled: boolean }>({
+    all: false,
+    pending: false,
+    settled: false
+  });
+
+  toggleAdminBox(box: 'all' | 'pending' | 'settled'): void {
+    this.openedAdminBoxes.update(s => ({
+      ...s,
+      [box]: !s[box]
+    }));
+  }
+
+  isAdminBoxOpen(box: 'all' | 'pending' | 'settled'): boolean {
+    return this.openedAdminBoxes()[box];
+  }
+
+  // Admin Game Attendees Toggle per Game ID
+  expandedGameAttendees = signal<Record<string, boolean>>({});
+
+  toggleGameAttendees(gameId: string): void {
+    this.expandedGameAttendees.update(m => ({
+      ...m,
+      [gameId]: !m[gameId]
+    }));
+  }
+
+  isGameAttendeesOpen(gameId: string): boolean {
+    return !!this.expandedGameAttendees()[gameId];
+  }
+
+  monthAllGames = computed(() => {
+    const month = this.selectedMonthFilter();
+    let games = this.clubService.games();
+    if (month !== 'all') {
+      games = games.filter(g => g.date && g.date.startsWith(month));
+    }
+    return games;
+  });
+
+  monthPendingGames = computed(() => {
+    return this.monthAllGames().filter(g => !this.isGameFullySettled(g));
+  });
+
+  monthSettledGames = computed(() => {
+    return this.monthAllGames().filter(g => this.isGameFullySettled(g));
+  });
+
   filteredGames = computed(() => {
     const filter = this.adminGameFilter();
     const month = this.selectedMonthFilter();

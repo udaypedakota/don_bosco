@@ -1834,6 +1834,105 @@
   color: #FFFFFF;
 }
 
+/* Admin Games Stack & Row Cards inside Expandable Boxes */
+.admin-games-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-game-row-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.admin-game-row-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.admin-game-row-card.is-settled {
+  background: #FAFCF9;
+  border-color: #DCFCE7;
+}
+
+.admin-game-row-card.is-pending-game {
+  background: #FFFEFC;
+  border-color: #FEF08A;
+}
+
+.agrc-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.agrc-header:hover {
+  background: #F8FAFC;
+}
+
+.agrc-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.agrc-venue {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.agrc-meta {
+  font-size: 0.8rem;
+  color: #64748B;
+}
+
+.agrc-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-attendees-chip {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1D4ED8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.btn-attendees-chip:hover {
+  background: #DBEAFE;
+}
+
+.agrc-attendees-drawer {
+  padding: 12px 16px 14px;
+  border-top: 1px dashed #E2E8F0;
+  background: #F8FAFC;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: pmbFadeIn 0.2s ease-out;
+}
+
 @media (max-width: 900px) {
   .unpaid-split-grid {
     grid-template-columns: 1fr;
