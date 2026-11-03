@@ -15,7 +15,7 @@
         <div class="brand-avatar-img-wrap" (click)="showInstallModal.set(true)" title="Install Badminton App">
           <img src="assets/badminton-app-icon.png" alt="Badminton" class="brand-icon-img">
         </div>
-        <div class="brand-meta">
+        <div class="brand-meta clickable" (click)="triggerLoginCelebration()" title="🏸 Tap for Shuttlecock Celebration Burst!">
           <span class="brand-title">BADMINTON</span>
           <span class="brand-sub">Smash Club · Court & Dues</span>
         </div>
@@ -2152,4 +2152,7 @@
       <span>{{ toastMessage() }}</span>
     </div>
   }
+
+  <!-- Login Celebration Confetti & Shuttlecock Burst Canvas -->
+  <canvas #celebrationCanvas id="loginCelebrationCanvas" class="celebration-canvas" [class.is-active]="isCelebrationActive()"></canvas>
 </div>

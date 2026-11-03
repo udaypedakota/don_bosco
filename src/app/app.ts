@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClubService } from './services/club.service';
@@ -22,8 +22,14 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnDestroy {
   clubService = inject(ClubService);
+
+  // Login Celebration State (Shuttlecock & Party Confetti Burst)
+  isCelebrationActive = signal<boolean>(false);
+  @ViewChild('celebrationCanvas') celebrationCanvasRef?: ElementRef<HTMLCanvasElement>;
+  private celebrationAnimId?: number;
+  private celebrationTimeouts: any[] = [];
 
   // Web Push Notification State
   pushPermission = signal<NotificationPermission | 'unsupported'>('default');
@@ -41,6 +47,7 @@ export class App {
             next: (res) => {
               if (res.success && res.user) {
                 this.showToast(`🏸 Welcome back, ${res.user.name}!`);
+                this.triggerLoginCelebration();
                 const cleanUrl = window.location.pathname;
                 window.history.replaceState({}, document.title, cleanUrl);
               }
@@ -832,6 +839,7 @@ export class App {
       next: (res) => {
         if (res.success) {
           this.showToast(`✨ Welcome, ${res.user.name}!`);
+          this.triggerLoginCelebration();
           // Auto select all players as attendees by default for convenience
           this.gameAttendees.set(this.clubService.players().map(p => p.id));
           const adminP = this.clubService.players().find(p => p.role === 'admin');
@@ -1315,5 +1323,228 @@ export class App {
 
   broadcastGameAlert(): void {
     this.openBroadcastModal();
+  }
+
+  ngOnDestroy(): void {
+    if (this.celebrationAnimId) {
+      cancelAnimationFrame(this.celebrationAnimId);
+    }
+    this.celebrationTimeouts.forEach(t => clearTimeout(t));
+  }
+
+  // ==========================================================================
+  // LOGIN CELEBRATION SHUTTLECOCK & CONFETTI PARTY POPPERS BURST
+  // Launches realistic 3D shuttlecocks, shimmering confetti, and celebration sparkles
+  // ==========================================================================
+  triggerLoginCelebration(): void {
+    if (typeof window === 'undefined') return;
+
+    this.isCelebrationActive.set(true);
+
+    if (this.celebrationAnimId) {
+      cancelAnimationFrame(this.celebrationAnimId);
+    }
+    this.celebrationTimeouts.forEach(t => clearTimeout(t));
+    this.celebrationTimeouts = [];
+
+    setTimeout(() => {
+      const canvas = this.celebrationCanvasRef?.nativeElement || (document.getElementById('loginCelebrationCanvas') as HTMLCanvasElement);
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+
+      interface Particle {
+        type: 'shuttle' | 'confetti' | 'sparkle';
+        x: number;
+        y: number;
+        vx: number;
+        vy: number;
+        rotation: number;
+        vRot: number;
+        size: number;
+        color: string;
+        emoji?: string;
+        wobble: number;
+        vWobble: number;
+        life: number;
+        maxLife: number;
+        gravity: number;
+        drag: number;
+      }
+
+      const particles: Particle[] = [];
+      const colors = ['#2563EB', '#F59E0B', '#10B981', '#EF4444', '#60A5FA', '#FBBF24', '#34D399', '#EC4899', '#FFFFFF'];
+      const sparkles = ['✨', '⭐', '🎉', '🌟', '💫'];
+
+      // Draw high-detail 3D tournament feather shuttlecock
+      const drawShuttle = (c: CanvasRenderingContext2D, size: number) => {
+        const s = size / 32;
+        c.save();
+
+        // 1. Feather Skirt
+        const skirtGrad = c.createLinearGradient(0, -18 * s, 0, 4 * s);
+        skirtGrad.addColorStop(0, '#FFFFFF');
+        skirtGrad.addColorStop(0.65, '#F8FAFC');
+        skirtGrad.addColorStop(1, '#CBD5E1');
+
+        c.beginPath();
+        c.moveTo(-13 * s, -18 * s);
+        c.lineTo(13 * s, -18 * s);
+        c.lineTo(5.5 * s, 4 * s);
+        c.lineTo(-5.5 * s, 4 * s);
+        c.closePath();
+        c.fillStyle = skirtGrad;
+        c.shadowColor = 'rgba(0, 0, 0, 0.28)';
+        c.shadowBlur = 6 * s;
+        c.shadowOffsetY = 3 * s;
+        c.fill();
+
+        // Feather ribs
+        c.shadowColor = 'transparent';
+        c.strokeStyle = '#94A3B8';
+        c.lineWidth = 1 * s;
+        for (let i = -10; i <= 10; i += 3.5) {
+          c.beginPath();
+          c.moveTo(i * s * 1.25, -18 * s);
+          c.lineTo(i * s * 0.45, 4 * s);
+          c.stroke();
+        }
+
+        // Dual blue binding threads
+        c.strokeStyle = '#2563EB';
+        c.lineWidth = 1.3 * s;
+        c.beginPath();
+        c.arc(0, -6 * s, 8 * s, 0.2, Math.PI - 0.2);
+        c.stroke();
+
+        c.beginPath();
+        c.arc(0, -12 * s, 11.5 * s, 0.2, Math.PI - 0.2);
+        c.stroke();
+
+        // Cork base
+        const corkGrad = c.createRadialGradient(-1.5 * s, 7 * s, 1 * s, 0, 9 * s, 7 * s);
+        corkGrad.addColorStop(0, '#FFFFFF');
+        corkGrad.addColorStop(0.5, '#FEF3C7');
+        corkGrad.addColorStop(1, '#D97706');
+
+        c.beginPath();
+        c.arc(0, 5 * s, 6 * s, 0, Math.PI);
+        c.fillStyle = corkGrad;
+        c.fill();
+
+        // Red band on cork
+        c.fillStyle = '#EF4444';
+        c.fillRect(-5.5 * s, 3.5 * s, 11 * s, 2 * s);
+
+        c.restore();
+      };
+
+      const spawnBurst = (originX: number, originY: number, baseAngleDeg: number, spreadDeg: number, count: number) => {
+        for (let i = 0; i < count; i++) {
+          const angle = (baseAngleDeg + (Math.random() - 0.5) * spreadDeg) * (Math.PI / 180);
+          const speed = 14 + Math.random() * 11;
+          const isShuttle = Math.random() < 0.28;
+          const isSparkle = !isShuttle && Math.random() < 0.22;
+
+          particles.push({
+            type: isShuttle ? 'shuttle' : isSparkle ? 'sparkle' : 'confetti',
+            x: originX + (Math.random() - 0.5) * 30,
+            y: originY + (Math.random() - 0.5) * 20,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            rotation: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 0.16,
+            size: isShuttle ? 28 + Math.random() * 12 : isSparkle ? 18 + Math.random() * 8 : 8 + Math.random() * 8,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            emoji: isSparkle ? sparkles[Math.floor(Math.random() * sparkles.length)] : undefined,
+            wobble: Math.random() * Math.PI * 2,
+            vWobble: 0.08 + Math.random() * 0.12,
+            life: 0,
+            maxLife: 130 + Math.floor(Math.random() * 50),
+            gravity: isShuttle ? 0.36 : 0.26,
+            drag: 0.985
+          });
+        }
+      };
+
+      // Wave 1: Left and right bottom corners blast up towards the sky!
+      spawnBurst(width * 0.12, height * 0.96, -55, 34, 45);
+      spawnBurst(width * 0.88, height * 0.96, -125, 34, 45);
+
+      // Wave 2: Center burst after 220ms
+      const t1 = setTimeout(() => {
+        spawnBurst(width * 0.5, height * 0.92, -90, 48, 50);
+      }, 220);
+      this.celebrationTimeouts.push(t1);
+
+      const render = () => {
+        ctx.clearRect(0, 0, width, height);
+
+        let activeCount = 0;
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.vx *= p.drag;
+          p.rotation += p.vRot;
+          p.wobble += p.vWobble;
+          p.life++;
+          const alpha = Math.max(0, 1 - (p.life / p.maxLife));
+
+          if (alpha > 0.01 && p.y < height + 80) {
+            activeCount++;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.globalAlpha = alpha;
+
+            if (p.type === 'shuttle') {
+              drawShuttle(ctx, p.size);
+            } else if (p.type === 'sparkle') {
+              ctx.font = `${p.size}px sans-serif`;
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(p.emoji || '✨', 0, 0);
+            } else {
+              // 3D twirling metallic confetti
+              ctx.scale(Math.cos(p.wobble), 1);
+              ctx.fillStyle = p.color;
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+              ctx.shadowBlur = 3;
+              ctx.fillRect(-p.size / 2, -p.size / 3, p.size, (p.size * 2) / 3);
+            }
+
+            ctx.restore();
+          }
+        }
+
+        if (activeCount > 0) {
+          this.celebrationAnimId = requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, width, height);
+          this.isCelebrationActive.set(false);
+        }
+      };
+
+      this.celebrationAnimId = requestAnimationFrame(render);
+
+      const tStop = setTimeout(() => {
+        if (this.celebrationAnimId) {
+          cancelAnimationFrame(this.celebrationAnimId);
+        }
+        ctx.clearRect(0, 0, width, height);
+        this.isCelebrationActive.set(false);
+      }, 3800);
+      this.celebrationTimeouts.push(tStop);
+    }, 40);
   }
 }
