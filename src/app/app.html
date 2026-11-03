@@ -111,7 +111,7 @@
 
           <!-- Bottom Art Captions -->
           <div class="art-captions">
-            <span class="badge badge-yellow">⚡ MongoDB Atlas Cloud</span>
+            <span class="badge badge-yellow">⚡ Live Club Cloud</span>
             <h2 class="art-title">Court Booking & <br>Smart Expense Split</h2>
             <p class="art-desc">Phani books the court. Siva, Uday, Nani & everyone track their dues and pay via UPI!</p>
           </div>
@@ -399,7 +399,7 @@
                 <span class="broadcast-ico">📢</span>
               </button>
             </div>
-            <p class="card-caption">All recorded games and player shares save directly to MongoDB Atlas cloud database!</p>
+            <p class="card-caption">All recorded games and player shares are saved and updated live!</p>
           </div>
 
           <!-- Date Selector Buttons -->
@@ -529,7 +529,7 @@
           </div>
 
           <button class="btn btn-primary btn-lg" (click)="saveGameAndSplit()">
-            <span>💾</span> Save Game to MongoDB & Split
+            <span>💾</span> Save Game & Split Expenses
           </button>
         </div>
       </section>
@@ -539,7 +539,7 @@
         <div class="card-title-row">
           <div>
             <h3 class="card-title">Club Players Roster & Balances</h3>
-            <p class="card-caption">All member court shares, payments received, and live dues stored in MongoDB Atlas</p>
+            <p class="card-caption">All member court shares, payments received, and live dues updated in real-time</p>
           </div>
           <button class="btn btn-yellow btn-sm" (click)="showAddPlayerModal.set(true)">
             <span>+</span> Add New Player
@@ -727,26 +727,24 @@
           <!-- BOX 1: ALL SESSIONS -->
           <div class="pm-box all-matches-box" [class.is-expanded]="isAdminBoxOpen('all')">
             <div class="pm-box-header" (click)="toggleAdminBox('all')">
-              <div class="pmb-left">
-                <div class="pmb-icon-badge pmb-blue">🏸</div>
-                <div class="pmb-text">
-                  <div class="pmb-title-row">
+              <div class="pmb-main-row">
+                <div class="pmb-brand-group">
+                  <div class="pmb-icon-badge pmb-blue">🏸</div>
+                  <div class="pmb-heading-wrap">
                     <h3 class="pmb-title">All Match Sessions</h3>
                     <span class="pmb-badge pmb-badge-blue mono">{{ monthAllGames().length }} Sessions</span>
                   </div>
-                  <div class="pmb-subtitle">
-                    <span>Court Fees: <strong>₹{{ monthSummaryStats().totalExpense }}</strong></span>
-                    <span class="pmb-dot">·</span>
-                    <span class="text-green">₹{{ monthSummaryStats().totalCollected }} Collected</span>
-                    <span class="pmb-dot">·</span>
-                    <span class="text-red">₹{{ monthSummaryStats().totalPending }} Pending</span>
-                  </div>
+                </div>
+                <div class="pmb-toggle-indicator" [class.is-open]="isAdminBoxOpen('all')">
+                  <span class="pmb-chevron-btn">{{ isAdminBoxOpen('all') ? 'Hide ▴' : 'View ▾' }}</span>
                 </div>
               </div>
-              <div class="pmb-right">
-                <button type="button" class="btn-box-toggle" [class.active]="isAdminBoxOpen('all')">
-                  <span>{{ isAdminBoxOpen('all') ? 'Hide Sessions ▴' : 'Click to View Sessions ▾' }}</span>
-                </button>
+              <div class="pmb-subtitle-row">
+                <span>Court Fees: <strong>₹{{ monthSummaryStats().totalExpense }}</strong></span>
+                <span class="pmb-dot">·</span>
+                <span class="text-green">₹{{ monthSummaryStats().totalCollected }} Collected</span>
+                <span class="pmb-dot">·</span>
+                <span class="text-red">₹{{ monthSummaryStats().totalPending }} Pending</span>
               </div>
             </div>
 
@@ -830,32 +828,32 @@
           <!-- BOX 2: SESSIONS WITH PENDING DUES -->
           <div class="pm-box unpaid-matches-box" [class.has-dues]="monthPendingGames().length > 0" [class.is-expanded]="isAdminBoxOpen('pending')">
             <div class="pm-box-header" (click)="toggleAdminBox('pending')">
-              <div class="pmb-left">
-                <div class="pmb-icon-badge" [class.pmb-red]="monthPendingGames().length > 0" [class.pmb-green]="monthPendingGames().length === 0">
-                  {{ monthPendingGames().length > 0 ? '⚠️' : '✓' }}
-                </div>
-                <div class="pmb-text">
-                  <div class="pmb-title-row">
+              <div class="pmb-main-row">
+                <div class="pmb-brand-group">
+                  <div class="pmb-icon-badge" [class.pmb-red]="monthPendingGames().length > 0" [class.pmb-green]="monthPendingGames().length === 0">
+                    {{ monthPendingGames().length > 0 ? '⚠️' : '✓' }}
+                  </div>
+                  <div class="pmb-heading-wrap">
                     <h3 class="pmb-title">Sessions with Pending Dues</h3>
                     @if (monthPendingGames().length > 0) {
-                      <span class="pmb-badge pmb-badge-red mono">{{ monthPendingGames().length }} Sessions · ₹{{ monthSummaryStats().totalPending }} Pending</span>
+                      <span class="pmb-badge pmb-badge-red mono">{{ monthPendingGames().length }} Due</span>
                     } @else {
-                      <span class="pmb-badge pmb-badge-green mono">All Sessions Settled (₹0 Due)</span>
-                    }
-                  </div>
-                  <div class="pmb-subtitle">
-                    @if (monthPendingGames().length > 0) {
-                      <span class="text-red"><strong>₹{{ monthSummaryStats().totalPending }} to collect</strong> across {{ monthPendingGames().length }} match sessions</span>
-                    } @else {
-                      <span class="text-green">All recorded sessions for this statement are 100% collected!</span>
+                      <span class="pmb-badge pmb-badge-green mono">0 Due</span>
                     }
                   </div>
                 </div>
+                <div class="pmb-toggle-indicator" [class.is-open]="isAdminBoxOpen('pending')">
+                  <span class="pmb-chevron-btn" [class.btn-due-indicator]="monthPendingGames().length > 0">
+                    {{ isAdminBoxOpen('pending') ? 'Hide ▴' : (monthPendingGames().length > 0 ? 'View Dues ▾' : 'View ▾') }}
+                  </span>
+                </div>
               </div>
-              <div class="pmb-right">
-                <button type="button" class="btn-box-toggle" [class.active]="isAdminBoxOpen('pending')" [class.btn-box-due]="monthPendingGames().length > 0">
-                  <span>{{ isAdminBoxOpen('pending') ? 'Hide Dues Sessions ▴' : (monthPendingGames().length > 0 ? 'Click to View ' + monthPendingGames().length + ' Dues Sessions ▾' : 'Click to View ▾') }}</span>
-                </button>
+              <div class="pmb-subtitle-row">
+                @if (monthPendingGames().length > 0) {
+                  <span class="text-red"><strong>₹{{ monthSummaryStats().totalPending }} to collect</strong> across {{ monthPendingGames().length }} match sessions</span>
+                } @else {
+                  <span class="text-green">All recorded sessions for this statement are 100% collected!</span>
+                }
               </div>
             </div>
 
@@ -936,22 +934,20 @@
           <!-- BOX 3: FULLY SETTLED SESSIONS -->
           <div class="pm-box paid-matches-box" [class.is-expanded]="isAdminBoxOpen('settled')">
             <div class="pm-box-header" (click)="toggleAdminBox('settled')">
-              <div class="pmb-left">
-                <div class="pmb-icon-badge pmb-green">✅</div>
-                <div class="pmb-text">
-                  <div class="pmb-title-row">
+              <div class="pmb-main-row">
+                <div class="pmb-brand-group">
+                  <div class="pmb-icon-badge pmb-green">✅</div>
+                  <div class="pmb-heading-wrap">
                     <h3 class="pmb-title">Fully Settled Sessions</h3>
-                    <span class="pmb-badge pmb-badge-green mono">{{ monthSettledGames().length }} Sessions Settled</span>
-                  </div>
-                  <div class="pmb-subtitle">
-                    <span>All attendee court shares are 100% cleared via UPI</span>
+                    <span class="pmb-badge pmb-badge-green mono">{{ monthSettledGames().length }} Settled</span>
                   </div>
                 </div>
+                <div class="pmb-toggle-indicator" [class.is-open]="isAdminBoxOpen('settled')">
+                  <span class="pmb-chevron-btn">{{ isAdminBoxOpen('settled') ? 'Hide ▴' : 'View ▾' }}</span>
+                </div>
               </div>
-              <div class="pmb-right">
-                <button type="button" class="btn-box-toggle" [class.active]="isAdminBoxOpen('settled')">
-                  <span>{{ isAdminBoxOpen('settled') ? 'Hide Settled Sessions ▴' : 'Click to View Settled Sessions ▾' }}</span>
-                </button>
+              <div class="pmb-subtitle-row">
+                <span>All attendee court shares are 100% cleared via UPI</span>
               </div>
             </div>
 
@@ -1174,26 +1170,24 @@
           <!-- BOX 1: ALL MATCHES -->
           <div class="pm-box all-matches-box" [class.is-expanded]="isBoxOpen('all')">
             <div class="pm-box-header" (click)="togglePlayerBox('all')">
-              <div class="pmb-left">
-                <div class="pmb-icon-badge pmb-blue">🏸</div>
-                <div class="pmb-text">
-                  <div class="pmb-title-row">
+              <div class="pmb-main-row">
+                <div class="pmb-brand-group">
+                  <div class="pmb-icon-badge pmb-blue">🏸</div>
+                  <div class="pmb-heading-wrap">
                     <h3 class="pmb-title">All Matches Attended</h3>
                     <span class="pmb-badge pmb-badge-blue mono">{{ myAttendedGames().length }} Games</span>
                   </div>
-                  <div class="pmb-subtitle">
-                    <span>Total Court Share: <strong>₹{{ myPlayerStats().totalBill }}</strong></span>
-                    <span class="pmb-dot">·</span>
-                    <span>{{ myPlayerStats().paidCount }} Settled</span>
-                    <span class="pmb-dot">·</span>
-                    <span>{{ myPlayerStats().unpaidCount }} Due</span>
-                  </div>
+                </div>
+                <div class="pmb-toggle-indicator" [class.is-open]="isBoxOpen('all')">
+                  <span class="pmb-chevron-btn">{{ isBoxOpen('all') ? 'Hide ▴' : 'View ▾' }}</span>
                 </div>
               </div>
-              <div class="pmb-right">
-                <button type="button" class="btn-box-toggle" [class.active]="isBoxOpen('all')">
-                  <span>{{ isBoxOpen('all') ? 'Hide Matches ▴' : 'Click to View Matches ▾' }}</span>
-                </button>
+              <div class="pmb-subtitle-row">
+                <span>Total Court Share: <strong>₹{{ myPlayerStats().totalBill }}</strong></span>
+                <span class="pmb-dot">·</span>
+                <span class="text-green">{{ myPlayerStats().paidCount }} Settled</span>
+                <span class="pmb-dot">·</span>
+                <span [class.text-red]="myPlayerStats().unpaidCount > 0">{{ myPlayerStats().unpaidCount }} Due</span>
               </div>
             </div>
 
@@ -1242,32 +1236,32 @@
           <!-- BOX 2: UNPAID MATCHES -->
           <div class="pm-box unpaid-matches-box" [class.has-dues]="unpaidGamesList().length > 0" [class.is-expanded]="isBoxOpen('unpaid')">
             <div class="pm-box-header" (click)="togglePlayerBox('unpaid')">
-              <div class="pmb-left">
-                <div class="pmb-icon-badge" [class.pmb-red]="unpaidGamesList().length > 0" [class.pmb-green]="unpaidGamesList().length === 0">
-                  {{ unpaidGamesList().length > 0 ? '⚠️' : '✓' }}
-                </div>
-                <div class="pmb-text">
-                  <div class="pmb-title-row">
+              <div class="pmb-main-row">
+                <div class="pmb-brand-group">
+                  <div class="pmb-icon-badge" [class.pmb-red]="unpaidGamesList().length > 0" [class.pmb-green]="unpaidGamesList().length === 0">
+                    {{ unpaidGamesList().length > 0 ? '⚠️' : '✓' }}
+                  </div>
+                  <div class="pmb-heading-wrap">
                     <h3 class="pmb-title">Unpaid Matches & Dues</h3>
                     @if (unpaidGamesList().length > 0) {
-                      <span class="pmb-badge pmb-badge-red mono">₹{{ myPlayerStats().dueAmount }} Due · {{ unpaidGamesList().length }} Matches</span>
+                      <span class="pmb-badge pmb-badge-red mono">₹{{ myPlayerStats().dueAmount }} Due</span>
                     } @else {
-                      <span class="pmb-badge pmb-badge-green mono">All Settled (₹0 Due)</span>
-                    }
-                  </div>
-                  <div class="pmb-subtitle">
-                    @if (unpaidGamesList().length > 0) {
-                      <span class="text-red"><strong>{{ unpaidGamesList().length }} match share{{ unpaidGamesList().length > 1 ? 's' : '' }} pending</strong> · Click to view & pay via UPI</span>
-                    } @else {
-                      <span class="text-green">All your match shares are fully paid up! Zero dues pending.</span>
+                      <span class="pmb-badge pmb-badge-green mono">All Settled (₹0)</span>
                     }
                   </div>
                 </div>
+                <div class="pmb-toggle-indicator" [class.is-open]="isBoxOpen('unpaid')">
+                  <span class="pmb-chevron-btn" [class.btn-due-indicator]="unpaidGamesList().length > 0">
+                    {{ isBoxOpen('unpaid') ? 'Hide ▴' : (unpaidGamesList().length > 0 ? 'Pay Dues ▾' : 'View ▾') }}
+                  </span>
+                </div>
               </div>
-              <div class="pmb-right">
-                <button type="button" class="btn-box-toggle" [class.active]="isBoxOpen('unpaid')" [class.btn-box-due]="unpaidGamesList().length > 0">
-                  <span>{{ isBoxOpen('unpaid') ? 'Hide Dues ▴' : (unpaidGamesList().length > 0 ? 'Click to View & Pay Dues ▾' : 'Click to View ▾') }}</span>
-                </button>
+              <div class="pmb-subtitle-row">
+                @if (unpaidGamesList().length > 0) {
+                  <span class="text-red"><strong>{{ unpaidGamesList().length }} match share{{ unpaidGamesList().length > 1 ? 's' : '' }} pending</strong> · Pay via PhonePe / UPI</span>
+                } @else {
+                  <span class="text-green">All your match shares are fully paid up! Zero dues pending.</span>
+                }
               </div>
             </div>
 
@@ -1381,22 +1375,20 @@
           <!-- BOX 3: PAID MATCHES -->
           <div class="pm-box paid-matches-box" [class.is-expanded]="isBoxOpen('paid')">
             <div class="pm-box-header" (click)="togglePlayerBox('paid')">
-              <div class="pmb-left">
-                <div class="pmb-icon-badge pmb-green">✅</div>
-                <div class="pmb-text">
-                  <div class="pmb-title-row">
+              <div class="pmb-main-row">
+                <div class="pmb-brand-group">
+                  <div class="pmb-icon-badge pmb-green">✅</div>
+                  <div class="pmb-heading-wrap">
                     <h3 class="pmb-title">Paid / Settled Matches</h3>
-                    <span class="pmb-badge pmb-badge-green mono">{{ paidGamesList().length }} Games Settled</span>
-                  </div>
-                  <div class="pmb-subtitle">
-                    <span>Total Settled via UPI: <strong>₹{{ myPlayerStats().paidAmount }}</strong> ({{ paidGamesList().length }} matches)</span>
+                    <span class="pmb-badge pmb-badge-green mono">{{ paidGamesList().length }} Settled</span>
                   </div>
                 </div>
+                <div class="pmb-toggle-indicator" [class.is-open]="isBoxOpen('paid')">
+                  <span class="pmb-chevron-btn">{{ isBoxOpen('paid') ? 'Hide ▴' : 'View ▾' }}</span>
+                </div>
               </div>
-              <div class="pmb-right">
-                <button type="button" class="btn-box-toggle" [class.active]="isBoxOpen('paid')">
-                  <span>{{ isBoxOpen('paid') ? 'Hide Paid Matches ▴' : 'Click to View Paid Matches ▾' }}</span>
-                </button>
+              <div class="pmb-subtitle-row">
+                <span>Total Settled via UPI: <strong>₹{{ myPlayerStats().paidAmount }}</strong> ({{ paidGamesList().length }} matches)</span>
               </div>
             </div>
 
@@ -1439,7 +1431,7 @@
     <div class="modal-overlay" (click)="showAddPlayerModal.set(false)">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3 class="modal-title">Add New Player to MongoDB</h3>
+          <h3 class="modal-title">Add New Player</h3>
           <button class="modal-close" (click)="showAddPlayerModal.set(false)">✕</button>
         </div>
 
@@ -1469,7 +1461,7 @@
 
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="showAddPlayerModal.set(false)">Cancel</button>
-          <button class="btn btn-primary" (click)="submitAddPlayer()">Save Player to MongoDB</button>
+          <button class="btn btn-primary" (click)="submitAddPlayer()">Save Player</button>
         </div>
       </div>
     </div>
@@ -1848,7 +1840,7 @@
             </button>
           </div>
           <button type="button" class="btn btn-primary" [disabled]="profileSaving()" (click)="saveProfile()">
-            <span>💾</span> {{ profileSaving() ? 'Saving to Cloud...' : 'Save Profile to MongoDB' }}
+            <span>💾</span> {{ profileSaving() ? 'Saving Profile...' : 'Save Profile' }}
           </button>
         </div>
       </div>
