@@ -3325,9 +3325,9 @@
   }
 
   .main-layout {
-    padding-top: 24px !important;
+    padding-top: 14px !important;
     padding-bottom: 40px !important;
-    gap: 20px !important;
+    gap: 18px !important;
   }
 
   /* Admin Section */
@@ -3553,11 +3553,11 @@
     color: #FFFFFF !important;
   }
 
-  /* Main Layout Spacing on Mobile - Clear breathing margin between header and top card */
+  /* Main Layout Spacing on Mobile - Balanced subtle gap between header and top card */
   .main-layout {
-    padding-top: 26px !important;
+    padding-top: 13px !important;
     padding-bottom: 40px !important;
-    gap: 18px !important;
+    gap: 16px !important;
   }
 
   /* Login Page Mobile (iPhone & Android <= 640px) - STRICT 100vw CONSTRAINTS */
@@ -3565,7 +3565,7 @@
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
-    padding: 18px 10px !important;
+    padding: 10px 10px !important;
     margin: 0 !important;
     overflow-x: hidden !important;
     display: flex !important;
