@@ -180,18 +180,18 @@
 
             <!-- 1-Click Quick Player Select Pills & Password (For Player Login) -->
             @if (loginRole() === 'player') {
-              <div class="quick-player-picks">
-                <span class="pick-label">Quick select registered players:</span>
-                <div class="picks-grid">
+              <div class="quick-player-picks-compact">
+                <span class="pick-label-sm">Quick pick name:</span>
+                <div class="picks-grid-compact">
                   @for (player of clubService.players(); track player.id) {
-                    <button type="button" class="pick-pill" [class.selected-pill]="loginIdentifier() === player.name" (click)="selectQuickPlayer(player)">
-                      <span>🏸</span> {{ player.name }}
+                    <button type="button" class="pick-pill-compact" [class.selected-pill]="loginIdentifier() === player.name" (click)="selectQuickPlayer(player)">
+                      {{ player.name }}
                     </button>
                   }
                 </div>
               </div>
 
-              <div class="form-field" style="margin-top: 4px;">
+              <div class="form-field">
                 <label class="field-label">Player Password</label>
                 <div class="password-input-wrap">
                   <input [type]="showPassword() ? 'text' : 'password'" class="form-input mono" [placeholder]="loginIdentifier().toLowerCase() === 'phani' ? 'Enter Phani password manually' : 'e.g. uday@123'" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="playerPassword" autocomplete="current-password">
@@ -212,7 +212,7 @@
               </div>
             }
 
-            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 14px;">
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 6px;">
               <span>⚡</span> Sign In as {{ loginRole() === 'admin' ? 'Admin (Phani)' : 'Player' }}
             </button>
           </form>

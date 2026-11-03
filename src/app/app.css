@@ -463,21 +463,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 24px 16px;
 }
 
 .login-split-card {
   width: 100%;
-  max-width: 1080px;
-  min-height: 620px;
+  max-width: 920px;
+  min-height: 460px;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: var(--radius-xl);
-  box-shadow: 0 30px 70px -15px rgba(37, 99, 235, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  box-shadow: 0 24px 60px -15px rgba(37, 99, 235, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   border: 2px solid rgba(255, 255, 255, 0.9);
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.15fr 1fr;
   overflow: hidden;
   position: relative;
 }
@@ -523,7 +523,7 @@
   background: linear-gradient(145deg, #1D4ED8 0%, #2563EB 55%, #3B82F6 100%);
   position: relative;
   overflow: hidden;
-  padding: 48px;
+  padding: 32px 28px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -577,12 +577,12 @@
 .hero-image-wrap {
   position: relative;
   z-index: 3;
-  margin: 30px auto;
-  max-width: 360px;
-  border-radius: 24px;
+  margin: 12px auto;
+  max-width: 250px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-  border: 4px solid #FFFFFF;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
+  border: 3.5px solid #FFFFFF;
   transform: perspective(800px) rotateY(-5deg) rotateX(3deg);
   transition: transform 0.3s ease;
 }
@@ -607,22 +607,23 @@
 }
 
 .art-title {
-  font-size: 1.9rem;
+  font-size: 1.35rem;
   font-weight: 900;
   color: #FFFFFF;
-  margin-top: 10px;
-  margin-bottom: 6px;
+  margin-top: 6px;
+  margin-bottom: 2px;
   line-height: 1.15;
 }
 
 .art-desc {
   color: #DBEAFE;
-  font-size: 0.95rem;
+  font-size: 0.82rem;
+  line-height: 1.3;
 }
 
 /* Right Form Panel */
 .login-form-panel {
-  padding: 48px;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -630,29 +631,29 @@
 }
 
 .welcome-heading {
-  font-size: 1.85rem;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  font-size: 1.55rem;
+  margin-top: 4px;
+  margin-bottom: 2px;
 }
 
 .welcome-sub {
   color: var(--text-muted);
-  font-size: 0.92rem;
-  margin-bottom: 24px;
+  font-size: 0.84rem;
+  margin-bottom: 12px;
 }
 
 .role-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .role-tab-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 8px;
+  padding: 8px 12px;
   border-radius: var(--radius-md);
   background: var(--bg-surface-subtle);
   border: 2px solid var(--border-light);
@@ -673,17 +674,17 @@
 }
 
 .tab-emoji {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 .tab-text-wrap strong {
   display: block;
-  font-size: 0.92rem;
+  font-size: 0.85rem;
   color: var(--text-main);
 }
 
 .tab-text-wrap small {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
 }
 
@@ -694,17 +695,17 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 9px;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .field-label {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-secondary);
 }
@@ -764,27 +765,74 @@
   height: 20px;
 }
 
-/* Quick Player Select Pills */
+/* Compact Quick Player Select Pills */
+.quick-player-picks-compact {
+  margin-top: 3px;
+  margin-bottom: 2px;
+}
+
+.pick-label-sm {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748B;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.picks-grid-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.pick-pill-compact {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #334155;
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.3;
+}
+
+.pick-pill-compact:hover {
+  border-color: var(--blue-primary);
+  color: var(--blue-primary);
+  background: #EFF6FF;
+}
+
+.pick-pill-compact.selected-pill {
+  background: var(--blue-primary);
+  color: #FFFFFF;
+  border-color: var(--blue-primary);
+  box-shadow: 0 1px 6px rgba(37, 99, 235, 0.25);
+}
+
+/* Quick Player Select Pills (Legacy Fallback) */
 .quick-player-picks {
   background: var(--bg-surface-tint);
   border: 1px solid var(--blue-border);
   border-radius: var(--radius-md);
-  padding: 14px;
-  margin-top: 4px;
+  padding: 10px 12px;
+  margin-top: 2px;
 }
 
 .pick-label {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--blue-dark);
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .picks-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
 .pick-pill {
@@ -792,9 +840,9 @@
   border: 1px solid var(--border-light);
   color: var(--text-main);
   font-family: var(--font-body);
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -818,17 +866,18 @@
 }
 
 .btn-lg {
-  padding: 14px 28px;
-  font-size: 1.05rem;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border-radius: 10px;
 }
 
 .form-footer-note {
-  margin-top: 24px;
+  margin-top: 12px;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
   border-top: 1px solid var(--border-light);
-  padding-top: 16px;
+  padding-top: 8px;
 }
 
 .banner {
@@ -3042,23 +3091,23 @@
     font-size: 0.92rem !important;
     border-radius: 12px !important;
   }
-  .quick-player-picks {
+  .quick-player-picks, .quick-player-picks-compact {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    padding: 10px 10px !important;
-    border-radius: 12px !important;
-    margin-top: 4px !important;
+    margin-top: 3px !important;
   }
-  .picks-grid {
+  .picks-grid, .picks-grid-compact {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    gap: 5px !important;
+    gap: 4px !important;
   }
-  .pick-pill {
-    font-size: 0.75rem !important;
-    padding: 5px 8px !important;
+  .pick-pill, .pick-pill-compact {
+    font-size: 0.74rem !important;
+    padding: 3px 8px !important;
+    box-sizing: border-box !important;
+  }
     box-sizing: border-box !important;
   }
   .form-footer-note {
@@ -3529,7 +3578,6 @@
     grid-template-columns: 1fr !important;
     gap: 6px !important;
   }
-}
 
 /* --------------------------------------------------------------------------
    Profile Modal & Avatar Customization Styles
