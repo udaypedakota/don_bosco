@@ -2136,6 +2136,16 @@
   margin-top: 32px;
 }
 
+/* No Dues Layout: when player has paid all bills or has no pending dues */
+.player-content-grid.no-dues-grid {
+  grid-template-columns: 1fr !important;
+}
+
+.player-content-grid.no-dues-grid .my-sessions-panel {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 @media (max-width: 800px) {
   .player-content-grid {
     grid-template-columns: 1fr;
@@ -2152,6 +2162,57 @@
   align-items: center;
   text-align: center;
   gap: 14px;
+}
+
+.pending-verification-box {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 1.5px solid #FDE68A;
+  padding: 26px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12);
+}
+
+.pending-verify-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pv-icon-glow {
+  font-size: 2.2rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.pv-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #92400E;
+}
+
+.pv-amount {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #B45309;
+}
+
+.pv-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 14px;
+}
+
+.pv-desc {
+  font-size: 0.78rem;
+  color: #78350F;
+  line-height: 1.45;
+  margin-top: 6px;
+  max-width: 250px;
 }
 
 .vpa-text {

@@ -986,33 +986,34 @@
         </div>
 
         <!-- UPI QR Scanner & Attended Sessions -->
-        <div class="player-content-grid">
-          <div class="upi-box">
-            <div class="upi-card-head">
-              <span class="badge badge-blue">PhonePe · SBI (9738)</span>
-              <button type="button" class="copy-upi-btn mono" (click)="copyUpiId('8801147452@ybl')" title="Click to copy UPI ID">
-                8801147452@ybl 📋
-              </button>
-            </div>
-
-            <!-- Real PhonePe Scanner QR Code -->
-            <div class="real-qr-card">
-              <div class="qr-bank-tag">
-                <span class="sbi-dot"></span> State Bank of India - 9738 · Phani
+        <div class="player-content-grid" [class.no-dues-grid]="(myPlayerRecord()?.balance || 0) >= 0 && !myPendingPayment()">
+          @if ((myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
+            <!-- ONLY SHOW SCANNER & PAYMENT BOX IF PLAYER HAS UNPAID DUES -->
+            <div class="upi-box">
+              <div class="upi-card-head">
+                <span class="badge badge-blue">PhonePe · SBI (9738)</span>
+                <button type="button" class="copy-upi-btn mono" (click)="copyUpiId('8801147452@ybl')" title="Click to copy UPI ID">
+                  8801147452@ybl 📋
+                </button>
               </div>
-              <div class="qr-image-frame">
-                <img src="assets/phani-qr.png" alt="Phani PhonePe QR Code" class="phani-qr-scanner-img">
-              </div>
-              <div class="upi-id-badge-row">
-                <span class="upi-label">UPI ID:</span>
-                <span class="upi-val mono">8801147452@ybl</span>
-                <button type="button" class="btn-copy-chip" (click)="copyUpiId('8801147452@ybl')">Copy</button>
-              </div>
-            </div>
 
-            <p class="qr-hint">Scan with PhonePe, Google Pay, or Paytm</p>
+              <!-- Real PhonePe Scanner QR Code -->
+              <div class="real-qr-card">
+                <div class="qr-bank-tag">
+                  <span class="sbi-dot"></span> State Bank of India - 9738 · Phani
+                </div>
+                <div class="qr-image-frame">
+                  <img src="assets/phani-qr.png" alt="Phani PhonePe QR Code" class="phani-qr-scanner-img">
+                </div>
+                <div class="upi-id-badge-row">
+                  <span class="upi-label">UPI ID:</span>
+                  <span class="upi-val mono">8801147452@ybl</span>
+                  <button type="button" class="btn-copy-chip" (click)="copyUpiId('8801147452@ybl')">Copy</button>
+                </div>
+              </div>
 
-            @if ((myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
+              <p class="qr-hint">Scan with PhonePe, Google Pay, or Paytm</p>
+
               <div class="direct-upi-actions" style="margin-top: 14px; width: 100%;">
                 <a [href]="getPhonePeIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-phonepe btn-block">
                   <span>🟣</span> Pay ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} on PhonePe
@@ -1029,8 +1030,21 @@
               <button class="btn btn-yellow btn-block" style="margin-top: 10px;" (click)="showClaimModal.set(true)">
                 <span>✓</span> I Have Paid ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} via UPI
               </button>
-            }
-          </div>
+            </div>
+          } @else if (myPendingPayment()) {
+            <!-- Payment Reported: Verification Pending from Phani -->
+            <div class="upi-box pending-verification-box">
+              <div class="pending-verify-inner">
+                <div class="pv-icon-glow">⏳</div>
+                <h4 class="pv-title">Payment Verification Pending</h4>
+                <div class="pv-amount mono">₹{{ round(myPendingPayment()?.amount) }}</div>
+                <div class="badge badge-yellow pv-badge">Awaiting Phani's Approval</div>
+                <p class="pv-desc">
+                  You reported this UPI payment. Once Phani verifies and approves it on Admin dashboard, your dues will be settled automatically.
+                </p>
+              </div>
+            </div>
+          }
 
           <!-- Sessions Attended by this player -->
           <div class="my-sessions-panel">
