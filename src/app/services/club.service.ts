@@ -86,6 +86,20 @@ export class ClubService {
     );
   }
 
+  quickRestore(playerId: string): Observable<{ success: boolean; user: any }> {
+    return this.http.post<{ success: boolean; user: any }>(`${this.apiUrl}/auth/quick-restore`, { playerId }).pipe(
+      tap(res => {
+        if (res.success && res.user) {
+          this.currentUser.set(res.user);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('smash_user', JSON.stringify(res.user));
+          }
+          this.refreshAllData();
+        }
+      })
+    );
+  }
+
   logout(): void {
     this.currentUser.set(null);
     localStorage.removeItem('smash_user');

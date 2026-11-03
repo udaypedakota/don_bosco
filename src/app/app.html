@@ -323,11 +323,16 @@
         <div class="card-title-row">
           <div>
             <span class="badge badge-yellow">🏸 Court Session Booking</span>
-            <h2 class="card-heading">Schedule & Split Court Game</h2>
+            <div class="heading-with-action">
+              <h2 class="card-heading">Schedule & Split Court Game</h2>
+              <button type="button" class="btn-broadcast-ico" (click)="openBroadcastModal()" title="Alert all players about match schedule or updates (Push Notification)">
+                <span class="broadcast-ico">📢</span>
+              </button>
+            </div>
             <p class="card-caption">All recorded games and player shares save directly to MongoDB Atlas cloud database!</p>
           </div>
 
-          <!-- Date Selector Buttons & Match Alert Broadcast -->
+          <!-- Date Selector Buttons -->
           <div class="date-selector-bar">
             <button type="button" class="date-chip" (click)="setToday()">
               Today
@@ -336,9 +341,6 @@
               Tomorrow
             </button>
             <input type="date" class="date-input mono" [ngModel]="gameDate()" (ngModelChange)="gameDate.set($event)">
-            <button type="button" class="btn-broadcast-alert" (click)="broadcastGameAlert()" title="Send lock-screen push notification to all players about this session">
-              <span>📢</span> Alert All Players
-            </button>
           </div>
         </div>
 
@@ -933,11 +935,16 @@
               <span class="badge badge-yellow">🏸 Court Session Booking</span>
               <span class="badge badge-blue">⚡ Direct Player Access</span>
             </div>
-            <h2 class="card-heading">Schedule & Split Court Game</h2>
+            <div class="heading-with-action">
+              <h2 class="card-heading">Schedule & Split Court Game</h2>
+              <button type="button" class="btn-broadcast-ico" (click)="openBroadcastModal()" title="Alert all players about match schedule or updates (Push Notification)">
+                <span class="broadcast-ico">📢</span>
+              </button>
+            </div>
             <p class="card-caption">Booked a court at Donbosco or AG Sports Club? Record the session here and the fee will be split automatically across all attendees!</p>
           </div>
 
-          <!-- Date Selector Buttons & Match Alert Broadcast -->
+          <!-- Date Selector Buttons -->
           <div class="date-selector-bar">
             <button type="button" class="date-chip" (click)="setToday()">
               Today
@@ -946,9 +953,6 @@
               Tomorrow
             </button>
             <input type="date" class="date-input mono" [ngModel]="gameDate()" (ngModelChange)="gameDate.set($event)">
-            <button type="button" class="btn-broadcast-alert" (click)="broadcastGameAlert()" title="Send lock-screen push notification to all players about this session">
-              <span>📢</span> Alert All Players
-            </button>
           </div>
         </div>
 
@@ -1700,6 +1704,84 @@
 
         <div class="modal-footer" style="justify-content: flex-end;">
           <button type="button" class="btn btn-primary" (click)="showInstallModal.set(false)">Got It!</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================
+       MODAL 9: BROADCAST MATCH ALERT TO PLAYERS' PHONES (For Phani)
+       Allows choosing between: Match Scheduled / No Match Today / Custom Update
+       ======================================================================== -->
+  @if (showBroadcastModal()) {
+    <div class="modal-overlay animate-fade">
+      <div class="modal-card modal-broadcast-card">
+        <div class="modal-header">
+          <div class="modal-header-info">
+            <span class="badge badge-blue">📢 Lock-Screen Push Alert</span>
+            <h3 class="modal-title" style="margin-top: 4px;">Broadcast Alert to Players</h3>
+            <p class="modal-subtitle">Send instant lock-screen alerts to all players' phones with auto-login.</p>
+          </div>
+          <button class="modal-close" (click)="showBroadcastModal.set(false)">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Quick Status Tabs -->
+          <div class="broadcast-type-selector">
+            <button type="button" class="broadcast-type-tab" 
+              [class.is-active]="broadcastType() === 'match'"
+              (click)="selectBroadcastType('match')">
+              <span>🏸</span> Match Today
+            </button>
+            <button type="button" class="broadcast-type-tab" 
+              [class.is-active]="broadcastType() === 'no-match'"
+              (click)="selectBroadcastType('no-match')">
+              <span>❌</span> No Match (Rest Day)
+            </button>
+            <button type="button" class="broadcast-type-tab" 
+              [class.is-active]="broadcastType() === 'custom'"
+              (click)="selectBroadcastType('custom')">
+              <span>✏️</span> Custom
+            </button>
+          </div>
+
+          <!-- Alert Details Form -->
+          <div class="form-field" style="margin-top: 14px;">
+            <label class="field-label">Notification Title</label>
+            <input type="text" class="form-input" [ngModel]="broadcastCustomTitle()" (ngModelChange)="broadcastCustomTitle.set($event)" placeholder="e.g. 🏸 Badminton Match Alert (03-Nov-2026)!">
+          </div>
+
+          <div class="form-field">
+            <label class="field-label">Notification Message</label>
+            <textarea class="form-input" rows="3" [ngModel]="broadcastCustomBody()" (ngModelChange)="broadcastCustomBody.set($event)" placeholder="Write your message to players..."></textarea>
+          </div>
+
+          <!-- Notification Lock-Screen Preview -->
+          <div class="broadcast-preview-box">
+            <div class="preview-header">
+              <span class="preview-lbl">📱 Phone Lock-Screen Preview</span>
+              <span class="preview-badge">✨ Auto-Logs Player In</span>
+            </div>
+            <div class="phone-notification-mockup">
+              <div class="notif-mock-left">
+                <img src="assets/badminton-app-icon.png" alt="App" class="notif-mock-icon">
+              </div>
+              <div class="notif-mock-content">
+                <div class="notif-mock-top">
+                  <strong class="notif-mock-app">BADMINTON · Now</strong>
+                </div>
+                <strong class="notif-mock-title">{{ broadcastCustomTitle() || 'Notification Title' }}</strong>
+                <p class="notif-mock-body">{{ broadcastCustomBody() || 'Notification message will appear here...' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="showBroadcastModal.set(false)">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="broadcastSending()" (click)="executeBroadcastAlert()">
+            <span>🚀</span> {{ broadcastSending() ? 'Sending to Phones...' : 'Send Alert to All Players' }}
+          </button>
         </div>
       </div>
     </div>

@@ -31,6 +31,28 @@ export class App {
   isPushSupported = signal<boolean>(false);
 
   constructor() {
+    // Auto-Restore Session when opening via personalized Push Notification link
+    if (typeof window !== 'undefined') {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const authPlayerId = urlParams.get('authPlayer');
+        if (authPlayerId) {
+          this.clubService.quickRestore(authPlayerId).subscribe({
+            next: (res) => {
+              if (res.success && res.user) {
+                this.showToast(`🏸 Welcome back, ${res.user.name}!`);
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+              }
+            },
+            error: (e) => console.log('[QuickRestore Error]', e)
+          });
+        }
+      } catch (e) {
+        console.error('[URL Param Check Error]', e);
+      }
+    }
+
     // Check Web Push Support
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'Notification' in window) {
       this.isPushSupported.set(true);
@@ -1080,20 +1102,60 @@ export class App {
     });
   }
 
-  broadcastGameAlert(): void {
-    const venue = this.gameVenue();
-    const date = this.gameDate();
-    const share = this.perPlayerShare();
+  // Broadcast Modal State (Alerting Players about Match Schedules, Cancellations, or Updates)
+  showBroadcastModal = signal<boolean>(false);
+  broadcastType = signal<'match' | 'no-match' | 'custom'>('match');
+  broadcastCustomTitle = signal<string>('');
+  broadcastCustomBody = signal<string>('');
+  broadcastSending = signal<boolean>(false);
+
+  openBroadcastModal(): void {
+    this.broadcastType.set('match');
+    this.broadcastCustomTitle.set(`🏸 Badminton Match Alert (${this.gameDate()})!`);
+    this.broadcastCustomBody.set(`Session at ${this.gameVenue()}! Court share approx ₹${Math.round(Number(this.perPlayerShare()))}. Tap to view details.`);
+    this.showBroadcastModal.set(true);
+  }
+
+  selectBroadcastType(type: 'match' | 'no-match' | 'custom'): void {
+    this.broadcastType.set(type);
+    if (type === 'match') {
+      this.broadcastCustomTitle.set(`🏸 Badminton Match Alert (${this.gameDate()})!`);
+      this.broadcastCustomBody.set(`Session at ${this.gameVenue()}! Court share approx ₹${Math.round(Number(this.perPlayerShare()))}. Tap to view details.`);
+    } else if (type === 'no-match') {
+      this.broadcastCustomTitle.set(`📢 No Badminton Match Today (${this.gameDate()})`);
+      this.broadcastCustomBody.set(`Notice: No match scheduled for today (${this.gameDate()}). Rest day! Next session will be announced soon.`);
+    } else {
+      this.broadcastCustomTitle.set(`🏸 Smash Club Update (${this.gameDate()})`);
+      this.broadcastCustomBody.set('');
+    }
+  }
+
+  executeBroadcastAlert(): void {
+    const title = this.broadcastCustomTitle().trim();
+    const body = this.broadcastCustomBody().trim();
+    if (!title || !body) {
+      this.showToast('Please enter both title and message body.');
+      return;
+    }
+    this.broadcastSending.set(true);
     this.clubService.sendTestPush({
-      title: `🏸 Badminton Match Alert (${date})!`,
-      body: `Session at ${venue}! Court share approx ₹${Math.round(Number(share))}. Tap to view details.`
+      title,
+      body
     }).subscribe({
-      next: () => {
-        this.showToast(`📢 Match alert sent to all players on their phones!`);
+      next: (res: any) => {
+        this.broadcastSending.set(false);
+        this.showBroadcastModal.set(false);
+        const count = res?.result?.sent || 0;
+        this.showToast(`📢 Alert sent to ${count} player phone(s)!`);
       },
       error: () => {
-        this.showToast('Failed to broadcast match alert.');
+        this.broadcastSending.set(false);
+        this.showToast('Failed to broadcast alert. Please try again.');
       }
     });
+  }
+
+  broadcastGameAlert(): void {
+    this.openBroadcastModal();
   }
 }

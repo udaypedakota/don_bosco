@@ -299,15 +299,6 @@ async function sendPushNotification(query, payload) {
       return { sent: 0, total: 0 };
     }
 
-    const payloadStr = JSON.stringify({
-      title: payload.title || '🏸 Smash Club',
-      body: payload.body || '',
-      icon: payload.icon || '/assets/badminton-app-icon.png',
-      badge: '/assets/badminton-app-icon.png',
-      tag: payload.tag || 'smash-alert-' + Date.now(),
-      url: payload.url || '/'
-    });
-
     const seenEndpoints = new Set();
     const pushOptions = {
       TTL: 86400,
@@ -321,8 +312,26 @@ async function sendPushNotification(query, payload) {
       const sub = subRecord.subscription || subRecord;
       if (!sub || !sub.endpoint || seenEndpoints.has(sub.endpoint)) continue;
       seenEndpoints.add(sub.endpoint);
+
+      // Tailor target URL for this specific subscriber so tapping the alert restores their session
+      let targetUrl = payload.url || '/';
+      const pId = subRecord.playerId;
+      if (pId && pId !== 'anonymous') {
+        const sep = targetUrl.includes('?') ? '&' : '?';
+        targetUrl = `${targetUrl}${sep}authPlayer=${encodeURIComponent(pId)}`;
+      }
+
+      const playerPayloadStr = JSON.stringify({
+        title: payload.title || '🏸 Smash Club',
+        body: payload.body || '',
+        icon: payload.icon || '/assets/badminton-app-icon.png',
+        badge: '/assets/badminton-app-icon.png',
+        tag: payload.tag || 'smash-alert-' + Date.now(),
+        url: targetUrl
+      });
+
       try {
-        await webpush.sendNotification(sub, payloadStr, pushOptions);
+        await webpush.sendNotification(sub, playerPayloadStr, pushOptions);
         sentCount++;
       } catch (err) {
         console.error('[WebPush] Error delivering to endpoint:', sub.endpoint?.slice(0, 35), err.statusCode || err.message);
@@ -604,6 +613,37 @@ app.post('/api/auth/login', async (req, res) => {
       name: user.name,
       phone: user.phone,
       role: user.role,
+      balance: user.balance || 0
+    }
+  });
+});
+
+// POST /api/auth/quick-restore (Seamless auth when opening via push notification)
+app.post('/api/auth/quick-restore', async (req, res) => {
+  const { playerId } = req.body;
+  if (!playerId) {
+    return res.status(400).json({ error: 'Player ID is required' });
+  }
+
+  let user = null;
+  if (mongoDb) {
+    user = await mongoDb.collection('players').findOne({ id: playerId });
+  } else {
+    user = (localStore.players || []).find(p => p.id === playerId);
+  }
+
+  if (!user) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  res.json({
+    success: true,
+    user: {
+      id: user.id,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      avatar: user.avatar,
       balance: user.balance || 0
     }
   });
