@@ -1145,6 +1145,25 @@
   font-weight: 800;
   font-size: 0.9rem;
   color: var(--text-main);
+  flex-shrink: 0;
+}
+
+.player-avatar-circle-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.player-toggle-btn.is-selected .player-avatar-circle-img {
+  border: 2px solid var(--blue-primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+.player-avatar-circle.emoji-circle {
+  font-size: 1.35rem;
 }
 
 .player-toggle-btn.is-selected .player-avatar-circle {
@@ -1284,11 +1303,33 @@
   justify-content: center;
   font-weight: 800;
   font-size: 0.88rem;
+  flex-shrink: 0;
 }
 
 .table-avatar.admin-avatar {
   background: var(--yellow-soft);
   color: #B45309;
+}
+
+.table-avatar.emoji-avatar {
+  font-size: 1.35rem;
+  background: #F1F5F9;
+  border: 1px solid var(--border-light);
+}
+
+.table-avatar-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--blue-border);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  flex-shrink: 0;
+}
+
+.table-avatar-img.admin-border {
+  border: 2px solid #F59E0B;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
 }
 
 .table-sub {
@@ -3266,7 +3307,8 @@
     padding: 8px 2px !important;
     overflow: hidden !important;
   }
-  .player-avatar-circle {
+  .player-avatar-circle,
+  .player-avatar-circle-img {
     width: 32px !important;
     height: 32px !important;
     font-size: 0.74rem !important;

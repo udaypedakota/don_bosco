@@ -260,7 +260,19 @@
             @for (claim of clubService.pendingPayments(); track claim.id) {
               <div class="pending-claim-item">
                 <div class="claim-left">
-                  <div class="player-avatar-circle">{{ claim.playerName.slice(0, 2).toUpperCase() }}</div>
+                  @let claimPlayer = getPlayerByName(claim.playerName);
+                  @let cAvatar = claimPlayer?.avatar;
+                  @if (cAvatar) {
+                    @if (cAvatar.startsWith('data:') || cAvatar.startsWith('http')) {
+                      <img [src]="cAvatar" [alt]="claim.playerName" class="player-avatar-circle-img">
+                    } @else {
+                      <div class="player-avatar-circle emoji-circle">
+                        {{ cAvatar }}
+                      </div>
+                    }
+                  } @else {
+                    <div class="player-avatar-circle">{{ claim.playerName.slice(0, 2).toUpperCase() }}</div>
+                  }
                   <div class="claim-details">
                     <strong class="claim-name">{{ claim.playerName }}</strong>
                     @if (claim.notes) {
@@ -391,9 +403,19 @@
           <div class="players-toggle-grid">
             @for (player of clubService.players(); track player.id) {
               <div class="player-toggle-btn" [class.is-selected]="isAttendeeSelected(player.id)" (click)="toggleAttendee(player.id)">
-                <div class="player-avatar-circle" [class.admin-circle]="player.role === 'admin'">
-                  {{ player.name.slice(0, 2).toUpperCase() }}
-                </div>
+                @if (player.avatar) {
+                  @if (player.avatar.startsWith('data:') || player.avatar.startsWith('http')) {
+                    <img [src]="player.avatar" [alt]="player.name" class="player-avatar-circle-img">
+                  } @else {
+                    <div class="player-avatar-circle emoji-circle" [class.admin-circle]="player.role === 'admin'">
+                      {{ player.avatar }}
+                    </div>
+                  }
+                } @else {
+                  <div class="player-avatar-circle" [class.admin-circle]="player.role === 'admin'">
+                    {{ player.name.slice(0, 2).toUpperCase() }}
+                  </div>
+                }
                 <div class="player-btn-name">{{ player.name }}</div>
                 <div class="check-bubble">
                   {{ isAttendeeSelected(player.id) ? '✓' : '+' }}
@@ -481,9 +503,19 @@
                 <tr>
                   <td>
                     <div class="table-user-cell">
-                      <div class="table-avatar" [class.admin-avatar]="player.role === 'admin'">
-                        {{ player.name.slice(0, 2).toUpperCase() }}
-                      </div>
+                      @if (player.avatar) {
+                        @if (player.avatar.startsWith('data:') || player.avatar.startsWith('http')) {
+                          <img [src]="player.avatar" [alt]="player.name" class="table-avatar-img" [class.admin-border]="player.role === 'admin'">
+                        } @else {
+                          <div class="table-avatar emoji-avatar" [class.admin-avatar]="player.role === 'admin'">
+                            {{ player.avatar }}
+                          </div>
+                        }
+                      } @else {
+                        <div class="table-avatar" [class.admin-avatar]="player.role === 'admin'">
+                          {{ player.name.slice(0, 2).toUpperCase() }}
+                        </div>
+                      }
                       <div>
                         <strong>{{ player.name }}</strong>
                         <div class="table-sub">{{ player.totalGames }} games played</div>
@@ -981,9 +1013,19 @@
           <div class="players-toggle-grid">
             @for (player of clubService.players(); track player.id) {
               <div class="player-toggle-btn" [class.is-selected]="isAttendeeSelected(player.id)" (click)="toggleAttendee(player.id)">
-                <div class="player-avatar-circle" [class.admin-circle]="player.role === 'admin'">
-                  {{ player.name.slice(0, 2).toUpperCase() }}
-                </div>
+                @if (player.avatar) {
+                  @if (player.avatar.startsWith('data:') || player.avatar.startsWith('http')) {
+                    <img [src]="player.avatar" [alt]="player.name" class="player-avatar-circle-img">
+                  } @else {
+                    <div class="player-avatar-circle emoji-circle" [class.admin-circle]="player.role === 'admin'">
+                      {{ player.avatar }}
+                    </div>
+                  }
+                } @else {
+                  <div class="player-avatar-circle" [class.admin-circle]="player.role === 'admin'">
+                    {{ player.name.slice(0, 2).toUpperCase() }}
+                  </div>
+                }
                 <div class="player-btn-name">{{ player.name }}</div>
                 <div class="check-bubble">
                   {{ isAttendeeSelected(player.id) ? '✓' : '+' }}
@@ -1453,9 +1495,24 @@
     <div class="modal-overlay animate-fade">
       <div class="modal-card modal-breakdown-card">
         <div class="modal-header">
-          <div class="modal-header-info">
-            <span class="badge badge-yellow">🏸 Player Settlement Ledger</span>
-            <h3 class="modal-title" style="margin-top: 4px;">{{ player.name }}'s Game Payments</h3>
+          <div class="modal-header-info" style="display: flex; align-items: center; gap: 12px;">
+            @if (player.avatar) {
+              @if (player.avatar.startsWith('data:') || player.avatar.startsWith('http')) {
+                <img [src]="player.avatar" [alt]="player.name" class="table-avatar-img" [class.admin-border]="player.role === 'admin'">
+              } @else {
+                <div class="table-avatar emoji-avatar" [class.admin-avatar]="player.role === 'admin'">
+                  {{ player.avatar }}
+                </div>
+              }
+            } @else {
+              <div class="table-avatar" [class.admin-avatar]="player.role === 'admin'">
+                {{ player.name.slice(0, 2).toUpperCase() }}
+              </div>
+            }
+            <div>
+              <span class="badge badge-yellow">🏸 Player Settlement Ledger</span>
+              <h3 class="modal-title" style="margin-top: 2px;">{{ player.name }}'s Game Payments</h3>
+            </div>
           </div>
           <button class="modal-close" (click)="showBreakdownModal.set(false)">✕</button>
         </div>

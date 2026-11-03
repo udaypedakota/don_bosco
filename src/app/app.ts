@@ -975,6 +975,12 @@ export class App {
     return p ? p.name : id;
   }
 
+  getPlayerByName(name: string): Player | undefined {
+    if (!name) return undefined;
+    const lower = name.trim().toLowerCase();
+    return this.clubService.players().find(p => p.name.trim().toLowerCase() === lower || p.id === name);
+  }
+
   // ==========================================================================
   // WEB PUSH NOTIFICATIONS REGISTRATION & CONTROLS
   // ==========================================================================
