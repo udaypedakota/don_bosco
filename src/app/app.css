@@ -5211,3 +5211,274 @@
 .celebration-canvas.is-active {
   display: block;
 }
+
+/* ==========================================================================
+   WHATSAPP MATCH SHARE & PLAYER PROFILE MODAL
+   ========================================================================== */
+.split-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+.split-actions-bar .btn {
+  flex: 1;
+}
+
+.btn-whatsapp-share {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #FFFFFF !important;
+  font-weight: 700;
+  border: none;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.btn-whatsapp-share:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45);
+  background: linear-gradient(135deg, #2ae06d 0%, #139686 100%);
+}
+.btn-whatsapp-share:active {
+  transform: translateY(0);
+}
+
+.mp-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-mp-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  border: 1px solid rgba(37, 211, 102, 0.45);
+  background: rgba(37, 211, 102, 0.12);
+  color: #128C7E;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-mp-whatsapp:hover {
+  background: #25D366;
+  color: #FFFFFF;
+  border-color: #25D366;
+  transform: scale(1.04);
+}
+
+.clickable {
+  cursor: pointer !important;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.mp-mini-avatar.clickable:hover {
+  transform: scale(1.22);
+  z-index: 10;
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+}
+.table-user-cell.clickable {
+  transition: transform 0.15s ease;
+}
+.table-user-cell.clickable:hover {
+  transform: translateX(4px);
+}
+
+/* Mini Player Profile Modal */
+.mini-player-modal-card {
+  max-width: 420px;
+  width: 90%;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.3);
+  background: #FFFFFF;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  padding: 0 !important;
+}
+
+.mini-profile-header {
+  position: relative;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  padding: 22px 20px 18px;
+  color: #FFFFFF;
+}
+
+.mini-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+.mini-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.mini-profile-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mini-profile-avatar-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.mini-profile-avatar-init {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+.mini-profile-avatar-init.admin-init {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.mini-profile-info-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.mini-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.mini-player-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.mini-phone-text {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  letter-spacing: 0.3px;
+}
+
+.mini-profile-body {
+  padding: 18px 20px;
+  background: #F8FAFC;
+}
+
+.mini-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mini-stat-box {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.mini-stat-lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.5px;
+}
+
+.mini-stat-val {
+  font-size: 0.92rem;
+  color: #1E293B;
+}
+
+.mini-upi-pill {
+  margin-top: 12px;
+  background: #EFF6FF;
+  border: 1px dashed #3B82F6;
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+.mini-upi-lbl {
+  color: #1E40AF;
+  font-weight: 600;
+}
+
+.mini-profile-footer {
+  padding: 14px 20px;
+  background: #FFFFFF;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mini-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  padding: 7px 12px;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.btn-whatsapp-direct {
+  background: #25D366;
+  color: #FFFFFF !important;
+  border: none;
+}
+.btn-whatsapp-direct:hover {
+  background: #1eb855;
+  color: #FFFFFF !important;
+}
+
+@media (max-width: 640px) {
+  .split-actions-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .split-actions-bar .btn {
+    width: 100%;
+  }
+}

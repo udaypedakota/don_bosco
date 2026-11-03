@@ -496,6 +496,61 @@ export class App implements OnDestroy {
     this.showBreakdownModal.set(true);
   }
 
+  // Player Detail Popover Inspection Modal
+  inspectedPlayer = signal<Player | null>(null);
+
+  openPlayerDetailModal(playerOrId: string | Player): void {
+    if (typeof playerOrId === 'string') {
+      const p = this.getPlayerById(playerOrId);
+      if (p) this.inspectedPlayer.set(p);
+    } else {
+      this.inspectedPlayer.set(playerOrId);
+    }
+  }
+
+  shareGameToWhatsApp(game?: Game | null): void {
+    const targetGame = game || this.activeCourtSession();
+    if (!targetGame) {
+      this.showToast('No active match available to share.');
+      return;
+    }
+
+    const attendeeNames = targetGame.attendees
+      .map(id => this.getPlayerName(id))
+      .filter(n => !!n)
+      .join(', ');
+
+    const dateStr = this.formatDisplayDate(targetGame.date);
+    const timeStr = targetGame.timeSlot || '08:00 PM – 10:00 PM';
+    const totalCost = Math.round(targetGame.totalExpense);
+    const perHead = Math.round(targetGame.perPlayerShare);
+    const booker = targetGame.paidByPlayerName || 'Phani';
+
+    const text = 
+`🏸 *SMASH CLUB — MATCH UPDATE* 🏸
+
+📍 *Venue:* ${targetGame.venue}
+⏰ *Time:* ${timeStr}
+📅 *Date:* ${dateStr}
+💰 *Court Total:* ₹${totalCost}
+💵 *Per Player Share:* ₹${perHead}
+
+👥 *Confirmed Players (${targetGame.attendees.length}):*
+${attendeeNames}
+
+👑 *Booked by:* ${booker}
+
+👉 *Login & Check Your Balance:*
+https://smash-club-two.vercel.app`;
+
+    const encoded = encodeURIComponent(text);
+    const url = `https://api.whatsapp.com/send?text=${encoded}`;
+
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
+    }
+  }
+
   getPlayerGamesStats(player: Player) {
     const games = this.clubService.games().filter(g => g.attendees.includes(player.id));
     let paidCount = 0;

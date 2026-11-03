@@ -327,8 +327,13 @@
                 <span class="mp-pulse-dot"></span>
                 <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "LATEST COURT MATCH" }}</strong>
               </div>
-              <div class="mp-venue-chip">
-                <span>📍</span> {{ match.venue }}
+              <div class="mp-top-actions">
+                <div class="mp-venue-chip">
+                  <span>📍</span> {{ match.venue }}
+                </div>
+                <button type="button" class="btn-mp-whatsapp" (click)="shareGameToWhatsApp(match)" title="Share this match to WhatsApp Group">
+                  <span>💬</span> Share
+                </button>
               </div>
             </div>
 
@@ -366,9 +371,9 @@
                     @let pAvatar = p?.avatar;
                     @let pName = p?.name || pId;
                     @if (pAvatar && (pAvatar.startsWith('data:') || pAvatar.startsWith('http'))) {
-                      <img [src]="pAvatar" [alt]="pName" class="mp-mini-avatar" [title]="pName">
+                      <img [src]="pAvatar" [alt]="pName" class="mp-mini-avatar clickable" [title]="'Tap to view ' + pName + '\'s profile'" (click)="openPlayerDetailModal(pId); $event.stopPropagation()">
                     } @else {
-                      <div class="mp-mini-avatar mp-avatar-init" [title]="pName">
+                      <div class="mp-mini-avatar mp-avatar-init clickable" [title]="'Tap to view ' + pName + '\'s profile'" (click)="openPlayerDetailModal(pId); $event.stopPropagation()">
                         {{ pName.slice(0, 2).toUpperCase() }}
                       </div>
                     }
@@ -528,9 +533,14 @@
             </div>
           </div>
 
-          <button class="btn btn-primary btn-lg" (click)="saveGameAndSplit()">
-            <span>💾</span> Save Game & Split Expenses
-          </button>
+          <div class="split-actions-bar">
+            <button class="btn btn-primary btn-lg" (click)="saveGameAndSplit()">
+              <span>💾</span> Save Game & Split Expenses
+            </button>
+            <button type="button" class="btn btn-whatsapp-share btn-lg" (click)="shareGameToWhatsApp()">
+              <span>💬</span> Share to WhatsApp
+            </button>
+          </div>
         </div>
       </section>
 
@@ -590,7 +600,7 @@
                 @let pStats = getPlayerGamesStats(player);
                 <tr>
                   <td>
-                    <div class="table-user-cell">
+                    <div class="table-user-cell clickable" (click)="openPlayerDetailModal(player)" title="Click to view player details">
                       @if (player.avatar) {
                         @if (player.avatar.startsWith('data:') || player.avatar.startsWith('http')) {
                           <img [src]="player.avatar" [alt]="player.name" class="table-avatar-img" [class.admin-border]="player.role === 'admin'">
@@ -1099,8 +1109,13 @@
                   <span class="mp-pulse-dot"></span>
                   <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "LATEST COURT MATCH" }}</strong>
                 </div>
-                <div class="mp-venue-chip">
-                  <span>📍</span> {{ match.venue }}
+                <div class="mp-top-actions">
+                  <div class="mp-venue-chip">
+                    <span>📍</span> {{ match.venue }}
+                  </div>
+                  <button type="button" class="btn-mp-whatsapp" (click)="shareGameToWhatsApp(match)" title="Share this match to WhatsApp Group">
+                    <span>💬</span> Share
+                  </button>
                 </div>
               </div>
 
@@ -1138,9 +1153,9 @@
                       @let pAvatar = p?.avatar;
                       @let pName = p?.name || pId;
                       @if (pAvatar && (pAvatar.startsWith('data:') || pAvatar.startsWith('http'))) {
-                        <img [src]="pAvatar" [alt]="pName" class="mp-mini-avatar" [title]="pName">
+                        <img [src]="pAvatar" [alt]="pName" class="mp-mini-avatar clickable" [title]="'Tap to view ' + pName + '\'s profile'" (click)="openPlayerDetailModal(pId); $event.stopPropagation()">
                       } @else {
-                        <div class="mp-mini-avatar mp-avatar-init" [title]="pName">
+                        <div class="mp-mini-avatar mp-avatar-init clickable" [title]="'Tap to view ' + pName + '\'s profile'" (click)="openPlayerDetailModal(pId); $event.stopPropagation()">
                           {{ pName.slice(0, 2).toUpperCase() }}
                         </div>
                       }
@@ -2139,6 +2154,82 @@
           <button type="button" class="btn btn-secondary" (click)="showBroadcastModal.set(false)">Cancel</button>
           <button type="button" class="btn btn-primary" [disabled]="broadcastSending()" (click)="executeBroadcastAlert()">
             <span>🚀</span> {{ broadcastSending() ? 'Sending to Phones...' : 'Send Alert to All Players' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL: PLAYER MINI PROFILE DETAILS POPOVER -->
+  @if (inspectedPlayer(); as p) {
+    @let pStats = getPlayerGamesStats(p);
+    <div class="modal-overlay animate-fade" (click)="inspectedPlayer.set(null)">
+      <div class="modal-card mini-player-modal-card" (click)="$event.stopPropagation()">
+        <div class="mini-profile-header">
+          <button type="button" class="modal-close mini-close-btn" (click)="inspectedPlayer.set(null)" title="Close">✕</button>
+          <div class="mini-profile-avatar-row">
+            @if (p.avatar && (p.avatar.startsWith('data:') || p.avatar.startsWith('http'))) {
+              <img [src]="p.avatar" [alt]="p.name" class="mini-profile-avatar-img" [class.admin-border]="p.role === 'admin'">
+            } @else {
+              <div class="mini-profile-avatar-init" [class.admin-init]="p.role === 'admin'">
+                {{ p.name.slice(0, 2).toUpperCase() }}
+              </div>
+            }
+            <div class="mini-profile-info-col">
+              <div class="mini-name-row">
+                <h3 class="mini-player-name">{{ p.name }}</h3>
+                <span class="badge" [class.badge-blue]="p.role === 'admin'" [class.badge-green]="p.role !== 'admin'">
+                  {{ p.role === 'admin' ? '👑 Admin' : '🏸 Member' }}
+                </span>
+              </div>
+              <span class="mini-phone-text mono">📱 +91 {{ p.phone }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-profile-body">
+          <div class="mini-stats-grid">
+            <div class="mini-stat-box">
+              <span class="mini-stat-lbl">Badminton Skill</span>
+              <strong class="mini-stat-val text-blue">🏸 {{ p.skill || 'Intermediate' }}</strong>
+            </div>
+            <div class="mini-stat-box">
+              <span class="mini-stat-lbl">Playing Hand</span>
+              <strong class="mini-stat-val">✋ {{ p.hand || 'Right-handed' }}</strong>
+            </div>
+            <div class="mini-stat-box">
+              <span class="mini-stat-lbl">Matches Attended</span>
+              <strong class="mini-stat-val mono">{{ pStats.totalGames }} Games</strong>
+            </div>
+            <div class="mini-stat-box">
+              <span class="mini-stat-lbl">Account Balance</span>
+              @if (p.role === 'admin') {
+                <strong class="mini-stat-val text-green mono">👑 Court Booker</strong>
+              } @else if (p.balance < 0) {
+                <strong class="mini-stat-val text-red mono">⚠️ Owes ₹{{ -p.balance }}</strong>
+              } @else {
+                <strong class="mini-stat-val text-green mono">✓ All Settled (₹0)</strong>
+              }
+            </div>
+          </div>
+
+          @if (p.upiId) {
+            <div class="mini-upi-pill">
+              <span class="mini-upi-lbl">Personal UPI ID:</span>
+              <strong class="mono text-blue">{{ p.upiId }}</strong>
+            </div>
+          }
+        </div>
+
+        <div class="mini-profile-footer">
+          <a [href]="'tel:+91' + p.phone" class="btn btn-secondary btn-sm mini-contact-btn">
+            <span>📞</span> Call
+          </a>
+          <a [href]="'https://wa.me/91' + p.phone" target="_blank" class="btn btn-whatsapp-direct btn-sm mini-contact-btn">
+            <span>💬</span> WhatsApp
+          </a>
+          <button type="button" class="btn btn-primary btn-sm" (click)="inspectedPlayer.set(null)" style="margin-left: auto;">
+            Done
           </button>
         </div>
       </div>
