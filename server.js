@@ -309,13 +309,20 @@ async function sendPushNotification(query, payload) {
     });
 
     const seenEndpoints = new Set();
+    const pushOptions = {
+      TTL: 86400,
+      urgency: 'high',
+      headers: {
+        'Urgency': 'high'
+      }
+    };
     let sentCount = 0;
     for (const subRecord of subs) {
       const sub = subRecord.subscription || subRecord;
       if (!sub || !sub.endpoint || seenEndpoints.has(sub.endpoint)) continue;
       seenEndpoints.add(sub.endpoint);
       try {
-        await webpush.sendNotification(sub, payloadStr);
+        await webpush.sendNotification(sub, payloadStr, pushOptions);
         sentCount++;
       } catch (err) {
         console.error('[WebPush] Error delivering to endpoint:', sub.endpoint?.slice(0, 35), err.statusCode || err.message);
