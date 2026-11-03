@@ -3325,9 +3325,9 @@
   }
 
   .main-layout {
-    padding-top: 16px;
-    padding-bottom: 40px;
-    gap: 18px;
+    padding-top: 24px !important;
+    padding-bottom: 40px !important;
+    gap: 20px !important;
   }
 
   /* Admin Section */
@@ -3553,12 +3553,19 @@
     color: #FFFFFF !important;
   }
 
+  /* Main Layout Spacing on Mobile - Clear breathing margin between header and top card */
+  .main-layout {
+    padding-top: 26px !important;
+    padding-bottom: 40px !important;
+    gap: 18px !important;
+  }
+
   /* Login Page Mobile (iPhone & Android <= 640px) - STRICT 100vw CONSTRAINTS */
   .login-page-wrapper {
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
-    padding: 12px 10px !important;
+    padding: 18px 10px !important;
     margin: 0 !important;
     overflow-x: hidden !important;
     display: flex !important;
