@@ -1035,9 +1035,11 @@ export class App {
     const games = this.clubService.games();
     if (games.length === 0) return null;
     const todayStr = this.getTodayDateString();
-    // 1. Look for game today
-    const todayGame = games.find(g => g.date === todayStr);
-    if (todayGame) return todayGame;
+    // 1. Look for game today (prefer real game with confirmed attendees)
+    const todayGames = games.filter(g => g.date === todayStr);
+    if (todayGames.length > 0) {
+      return todayGames.reduce((prev, curr) => (curr.attendees?.length || 0) >= (prev.attendees?.length || 0) ? curr : prev);
+    }
     // 2. Look for any upcoming game (today or future)
     const upcoming = games.filter(g => g.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date));
     if (upcoming.length > 0) return upcoming[0];
