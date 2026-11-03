@@ -28,6 +28,7 @@ export interface Game {
   splitType: 'equal' | 'fixed' | 'percentage';
   attendees: string[]; // player IDs
   perPlayerShare: number;
+  timeSlot?: string;
   status?: 'paid' | 'unpaid';
   notes?: string;
 }

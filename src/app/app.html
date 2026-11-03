@@ -194,7 +194,7 @@
               <div class="form-field">
                 <label class="field-label">Player Password</label>
                 <div class="password-input-wrap">
-                  <input [type]="showPassword() ? 'text' : 'password'" class="form-input mono" [placeholder]="loginIdentifier().toLowerCase() === 'phani' ? 'Enter Phani password manually' : 'e.g. uday@123'" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="playerPassword" autocomplete="current-password">
+                  <input [type]="showPassword() ? 'text' : 'password'" class="form-input mono" [placeholder]="loginIdentifier().toLowerCase() === 'phani' ? 'Enter Phani admin password' : 'Enter password (e.g. uday@123)'" [ngModel]="loginPassword()" (ngModelChange)="loginPassword.set($event)" name="playerPassword" autocomplete="current-password" required>
                   <button type="button" class="btn-toggle-eye" (click)="togglePasswordVisibility()" [title]="showPassword() ? 'Hide password' : 'Show password'" aria-label="Toggle password visibility">
                     @if (showPassword()) {
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-svg">
@@ -318,6 +318,76 @@
         </div>
       }
 
+      <!-- PREMIUM TODAY'S COURT MATCH PASS CARD (For Admin & Players) -->
+      @if (activeCourtSession(); as match) {
+        <div class="match-pass-card animate-fade">
+          <div class="mp-inner">
+            <div class="mp-top-bar">
+              <div class="mp-status-pill" [class.is-today]="isTodayCourtSession()">
+                <span class="mp-pulse-dot"></span>
+                <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "LATEST COURT MATCH" }}</strong>
+              </div>
+              <div class="mp-venue-chip">
+                <span>📍</span> {{ match.venue }}
+              </div>
+            </div>
+
+            <div class="mp-content-grid">
+              <!-- Big Time Display -->
+              <div class="mp-time-block">
+                <span class="mp-micro-label">COURT TIMING</span>
+                <div class="mp-time-highlight">
+                  <span class="mp-clock-icon">⏰</span>
+                  <span class="mp-time-text mono">{{ match.timeSlot || '08:00 PM – 10:00 PM' }}</span>
+                </div>
+                <span class="mp-session-type">🏸 Badminton Match Session</span>
+              </div>
+
+              <!-- Date & Split Details -->
+              <div class="mp-meta-block">
+                <div class="mp-meta-item">
+                  <span class="mp-micro-label">MATCH DATE</span>
+                  <strong class="mp-meta-val mono">📅 {{ formatDisplayDate(match.date) }}</strong>
+                </div>
+                <div class="mp-meta-item">
+                  <span class="mp-micro-label">COURT SHARE</span>
+                  <strong class="mp-meta-val mono text-blue">₹{{ round(match.perPlayerShare) }} <small class="text-muted">/ player</small></strong>
+                </div>
+              </div>
+
+              <!-- Confirmed Attendees -->
+              <div class="mp-attendees-block">
+                <div class="mp-attendees-top">
+                  <span class="mp-micro-label">CONFIRMED PLAYERS ({{ match.attendees.length }})</span>
+                </div>
+                <div class="mp-avatar-cluster">
+                  @for (pId of match.attendees; track pId) {
+                    @let p = getPlayerById(pId);
+                    @let pAvatar = p?.avatar;
+                    @let pName = p?.name || pId;
+                    @if (pAvatar && (pAvatar.startsWith('data:') || pAvatar.startsWith('http'))) {
+                      <img [src]="pAvatar" [alt]="pName" class="mp-mini-avatar" [title]="pName">
+                    } @else {
+                      <div class="mp-mini-avatar mp-avatar-init" [title]="pName">
+                        {{ pName.slice(0, 2).toUpperCase() }}
+                      </div>
+                    }
+                  }
+                </div>
+                <div class="mp-attendee-sub">
+                  {{ getAttendeeNamesSummary(match.attendees) }}
+                </div>
+              </div>
+            </div>
+
+            <div class="mp-bottom-bar">
+              <span class="mp-booker-credit">👑 Booked upfront by {{ match.paidByPlayerName || 'Phani' }} · Court Total: ₹{{ round(match.totalExpense) }}</span>
+              <span class="mp-callout-badge">🏸 Booking Confirmed · See You on Court!</span>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- 1. DYNAMIC COURT SPLIT HERO (Today, Tomorrow, Any Date) -->
       <section class="bright-card hero-split-card">
         <div class="card-title-row">
@@ -377,6 +447,18 @@
               </div>
 
               <input type="text" class="form-input" placeholder="e.g. Donbosco (Moti Nagar)" [ngModel]="gameVenue()" (ngModelChange)="gameVenue.set($event)">
+            </div>
+
+            <div class="form-field" style="margin-top: 10px;">
+              <label class="field-label">Court Timing / Slot</label>
+              <div class="venue-presets-chips">
+                @for (slot of timeSlotPresets; track slot) {
+                  <button type="button" class="venue-preset-chip" [class.active]="gameTimeSlot() === slot" (click)="setTimeSlot(slot)">
+                    ⏰ {{ slot }}
+                  </button>
+                }
+              </div>
+              <input type="text" class="form-input mono" placeholder="e.g. 08:00 PM – 10:00 PM" [ngModel]="gameTimeSlot()" (ngModelChange)="gameTimeSlot.set($event)">
             </div>
 
             <div class="form-field" style="margin-top: 10px;">
@@ -807,6 +889,76 @@
           </div>
         }
 
+        <!-- PREMIUM TODAY'S COURT MATCH PASS CARD (For Players) -->
+        @if (activeCourtSession(); as match) {
+          <div class="match-pass-card animate-fade">
+            <div class="mp-inner">
+              <div class="mp-top-bar">
+                <div class="mp-status-pill" [class.is-today]="isTodayCourtSession()">
+                  <span class="mp-pulse-dot"></span>
+                  <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "LATEST COURT MATCH" }}</strong>
+                </div>
+                <div class="mp-venue-chip">
+                  <span>📍</span> {{ match.venue }}
+                </div>
+              </div>
+
+              <div class="mp-content-grid">
+                <!-- Big Time Display -->
+                <div class="mp-time-block">
+                  <span class="mp-micro-label">COURT TIMING</span>
+                  <div class="mp-time-highlight">
+                    <span class="mp-clock-icon">⏰</span>
+                    <span class="mp-time-text mono">{{ match.timeSlot || '08:00 PM – 10:00 PM' }}</span>
+                  </div>
+                  <span class="mp-session-type">🏸 Badminton Match Session</span>
+                </div>
+
+                <!-- Date & Split Details -->
+                <div class="mp-meta-block">
+                  <div class="mp-meta-item">
+                    <span class="mp-micro-label">MATCH DATE</span>
+                    <strong class="mp-meta-val mono">📅 {{ formatDisplayDate(match.date) }}</strong>
+                  </div>
+                  <div class="mp-meta-item">
+                    <span class="mp-micro-label">COURT SHARE</span>
+                    <strong class="mp-meta-val mono text-blue">₹{{ round(match.perPlayerShare) }} <small class="text-muted">/ player</small></strong>
+                  </div>
+                </div>
+
+                <!-- Confirmed Attendees -->
+                <div class="mp-attendees-block">
+                  <div class="mp-attendees-top">
+                    <span class="mp-micro-label">CONFIRMED PLAYERS ({{ match.attendees.length }})</span>
+                  </div>
+                  <div class="mp-avatar-cluster">
+                    @for (pId of match.attendees; track pId) {
+                      @let p = getPlayerById(pId);
+                      @let pAvatar = p?.avatar;
+                      @let pName = p?.name || pId;
+                      @if (pAvatar && (pAvatar.startsWith('data:') || pAvatar.startsWith('http'))) {
+                        <img [src]="pAvatar" [alt]="pName" class="mp-mini-avatar" [title]="pName">
+                      } @else {
+                        <div class="mp-mini-avatar mp-avatar-init" [title]="pName">
+                          {{ pName.slice(0, 2).toUpperCase() }}
+                        </div>
+                      }
+                    }
+                  </div>
+                  <div class="mp-attendee-sub">
+                    {{ getAttendeeNamesSummary(match.attendees) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="mp-bottom-bar">
+                <span class="mp-booker-credit">👑 Booked upfront by {{ match.paidByPlayerName || 'Phani' }} · Court Total: ₹{{ round(match.totalExpense) }}</span>
+                <span class="mp-callout-badge">🏸 Booking Confirmed · See You on Court!</span>
+              </div>
+            </div>
+          </div>
+        }
+
         <!-- Player Personal Lifetime / Monthly Stats Bar (Item 1 & 2) -->
         <div class="player-personal-stats-bar">
           <div class="pps-box">
@@ -993,6 +1145,18 @@
               </div>
 
               <input type="text" class="form-input" placeholder="e.g. Donbosco (Moti Nagar)" [ngModel]="gameVenue()" (ngModelChange)="gameVenue.set($event)">
+            </div>
+
+            <div class="form-field" style="margin-top: 10px;">
+              <label class="field-label">Court Timing / Slot</label>
+              <div class="venue-presets-chips">
+                @for (slot of timeSlotPresets; track slot) {
+                  <button type="button" class="venue-preset-chip" [class.active]="gameTimeSlot() === slot" (click)="setTimeSlot(slot)">
+                    ⏰ {{ slot }}
+                  </button>
+                }
+              </div>
+              <input type="text" class="form-input mono" placeholder="e.g. 08:00 PM – 10:00 PM" [ngModel]="gameTimeSlot()" (ngModelChange)="gameTimeSlot.set($event)">
             </div>
 
             <div class="form-field" style="margin-top: 10px;">

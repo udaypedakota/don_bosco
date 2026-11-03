@@ -117,6 +117,13 @@ export class App {
   gameDate = signal<string>(new Date().toISOString().split('T')[0]);
   gameVenue = signal<string>('Donbosco (Moti Nagar)');
   courtVenues = ['Donbosco (Moti Nagar)', 'AG Sports Club (Miyapur)'];
+  gameTimeSlot = signal<string>('08:00 PM – 10:00 PM');
+  timeSlotPresets = [
+    '06:00 AM – 08:00 AM',
+    '07:00 AM – 09:00 AM',
+    '06:00 PM – 08:00 PM',
+    '08:00 PM – 10:00 PM'
+  ];
   gameCourtRent = signal<number>(1200);
   gameShuttleCost = signal<number>(0);
   gamePaidBy = signal<string>('p-phani');
@@ -724,7 +731,15 @@ export class App {
       return;
     }
 
-    this.clubService.login(id, this.loginPassword().trim(), this.loginRole()).subscribe({
+    const pwd = this.loginPassword().trim();
+    if (!pwd) {
+      this.loginError.set(id.toLowerCase() === 'phani'
+        ? 'Please enter Phani\'s admin password'
+        : 'Password is required to sign in');
+      return;
+    }
+
+    this.clubService.login(id, pwd, this.loginRole()).subscribe({
       next: (res) => {
         if (res.success) {
           this.showToast(`✨ Welcome, ${res.user.name}!`);
@@ -772,6 +787,10 @@ export class App {
     this.gameVenue.set(venue);
   }
 
+  setTimeSlot(slot: string): void {
+    this.gameTimeSlot.set(slot);
+  }
+
   toggleAttendee(playerId: string): void {
     const current = this.gameAttendees();
     if (current.includes(playerId)) {
@@ -807,6 +826,7 @@ export class App {
     this.clubService.addGame({
       venue: this.gameVenue(),
       date: this.gameDate(),
+      timeSlot: this.gameTimeSlot(),
       courtRent: Number(this.gameCourtRent()),
       shuttleCost: Number(this.gameShuttleCost()),
       paidByPlayerId: this.gamePaidBy() || this.currentUser()?.id || 'p-admin',
@@ -1001,6 +1021,53 @@ export class App {
     if (!name) return undefined;
     const lower = name.trim().toLowerCase();
     return this.clubService.players().find(p => p.name.trim().toLowerCase() === lower || p.id === name);
+  }
+
+  getPlayerById(id: string): Player | undefined {
+    return this.clubService.players().find(p => p.id === id);
+  }
+
+  getTodayDateString(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  activeCourtSession = computed(() => {
+    const games = this.clubService.games();
+    if (games.length === 0) return null;
+    const todayStr = this.getTodayDateString();
+    // 1. Look for game today
+    const todayGame = games.find(g => g.date === todayStr);
+    if (todayGame) return todayGame;
+    // 2. Look for any upcoming game (today or future)
+    const upcoming = games.filter(g => g.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date));
+    if (upcoming.length > 0) return upcoming[0];
+    // 3. Fallback to the latest game session
+    return games[0];
+  });
+
+  isTodayCourtSession = computed(() => {
+    const sess = this.activeCourtSession();
+    if (!sess) return false;
+    return sess.date === this.getTodayDateString();
+  });
+
+  getAttendeeNamesSummary(attendeeIds?: string[]): string {
+    if (!attendeeIds || attendeeIds.length === 0) return '';
+    return attendeeIds.map(id => this.getPlayerName(id)).join(', ');
+  }
+
+  formatDisplayDate(dateStr?: string): string {
+    if (!dateStr) return '';
+    try {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+        return d.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+      }
+      return dateStr;
+    } catch {
+      return dateStr;
+    }
   }
 
   // ==========================================================================

@@ -587,22 +587,36 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(403).json({ error: 'This account does not have Admin access. Please login as Player.' });
   }
 
-  // Password validation
-  if (role === 'admin') {
-    if (!password || (user.password && user.password !== password)) {
-      return res.status(401).json({ error: 'Incorrect admin password' });
+  // Password validation - STRICTLY REQUIRED FOR EVERYONE
+  const cleanPassword = (password || '').trim();
+  if (!cleanPassword) {
+    return res.status(400).json({ error: 'Password is required to sign in' });
+  }
+
+  // Admin Account (Phani) Security:
+  // If attempting to log in as Phani (admin or player mode), Phani's admin password is MANDATORY!
+  const isPhaniAccount = user.role === 'admin' || user.id === 'p-admin' || user.name.toLowerCase() === 'phani';
+  if (isPhaniAccount) {
+    if (!user.password || user.password !== cleanPassword) {
+      return res.status(401).json({ error: 'Incorrect password for Phani (Admin)' });
     }
   } else {
-    const defaultGenPassword = `${user.name.trim().toLowerCase().replace(/\s+/g, '')}@123`;
-    const isAravindAlias = user.name.toLowerCase().includes('aravind') || user.name.toLowerCase().includes('arvind');
-    const isPasswordValid = 
-      !user.password ||
-      user.password === password ||
-      defaultGenPassword === password ||
-      (isAravindAlias && (password === 'aravind@123' || password === 'arvind@123'));
+    // Non-admin trying to sign in as admin
+    if (role === 'admin') {
+      return res.status(403).json({ error: 'This account does not have Admin access. Please login as Player.' });
+    }
 
-    if (password && !isPasswordValid) {
-      return res.status(401).json({ error: 'Incorrect password' });
+    // Regular Player Password validation
+    const cleanName = user.name.trim().toLowerCase().replace(/\s+/g, '');
+    const defaultGenPassword = `${cleanName}@123`;
+    const isAravindAlias = cleanName.includes('aravind') || cleanName.includes('arvind');
+    const isPasswordValid = 
+      (user.password && user.password === cleanPassword) ||
+      cleanPassword === defaultGenPassword ||
+      (isAravindAlias && (cleanPassword === 'aravind@123' || cleanPassword === 'arvind@123'));
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Incorrect password. Please check and try again.' });
     }
   }
 
@@ -798,7 +812,7 @@ app.get('/api/games', async (req, res) => {
 
 // POST /api/games (Record Game for Today, Tomorrow, etc.)
 app.post('/api/games', async (req, res) => {
-  const { venue, date, courtRent, shuttleCost, attendees, paidByPlayerId, notes } = req.body;
+  const { venue, date, courtRent, shuttleCost, attendees, paidByPlayerId, notes, timeSlot } = req.body;
   const cRent = parseFloat(courtRent) || 0;
   const sCost = parseFloat(shuttleCost) || 0;
   const total = cRent + sCost;
@@ -822,6 +836,7 @@ app.post('/api/games', async (req, res) => {
   const newGame = {
     id: 'g-' + Date.now(),
     date: date || new Date().toISOString().split('T')[0],
+    timeSlot: timeSlot || '08:00 PM – 10:00 PM',
     venue: venue || 'Donbosco (Moti Nagar)',
     courtRent: cRent,
     shuttleCost: sCost,
