@@ -34,22 +34,18 @@
           <span class="cloud-ico">☁️</span>
         </div>
 
-        @if (currentUser() && isAdmin() && pendingClaimsCount() > 0) {
-          <span class="badge badge-yellow header-alert-chip" title="Pending player payment claims awaiting your approval">
-            🔔 {{ pendingClaimsCount() }} New Request{{ pendingClaimsCount() > 1 ? 's' : '' }}
-          </span>
-        }
-
-        <!-- Compact Notification Bell Button (Only 🔔) -->
+        <!-- Compact Notification Bell Button with Counter Badge (No Wide Text) -->
         @if (currentUser() && isPushSupported()) {
           <button type="button" class="btn-notification-bell" 
             [class.is-active]="pushPermission() === 'granted'" 
             (click)="togglePushNotifications()" 
             [disabled]="pushLoading()"
-            [title]="pushPermission() === 'granted' ? 'Phone alerts active (Tap for test alert)' : 'Tap to enable phone lock-screen push alerts'"
+            [title]="isAdmin() && pendingClaimsCount() > 0 ? (pendingClaimsCount() + ' Pending Payment Claim(s) Awaiting Approval') : (pushPermission() === 'granted' ? 'Phone alerts active (Tap for test alert)' : 'Tap to enable phone lock-screen push alerts')"
             aria-label="Toggle Phone Notifications">
             <span class="bell-ico">🔔</span>
-            @if (pushPermission() === 'granted') {
+            @if (isAdmin() && pendingClaimsCount() > 0) {
+              <span class="bell-count-badge" title="{{ pendingClaimsCount() }} pending player claim(s)">{{ pendingClaimsCount() }}</span>
+            } @else if (pushPermission() === 'granted') {
               <span class="bell-ping-dot" title="Active"></span>
             }
           </button>
@@ -319,7 +315,7 @@
             <p class="card-caption">All recorded games and player shares save directly to MongoDB Atlas cloud database!</p>
           </div>
 
-          <!-- Date Selector Buttons -->
+          <!-- Date Selector Buttons & Match Alert Broadcast -->
           <div class="date-selector-bar">
             <button type="button" class="date-chip" (click)="setToday()">
               Today
@@ -328,6 +324,9 @@
               Tomorrow
             </button>
             <input type="date" class="date-input mono" [ngModel]="gameDate()" (ngModelChange)="gameDate.set($event)">
+            <button type="button" class="btn-broadcast-alert" (click)="broadcastGameAlert()" title="Send lock-screen push notification to all players about this session">
+              <span>📢</span> Alert All Players
+            </button>
           </div>
         </div>
 
@@ -906,7 +905,7 @@
             <p class="card-caption">Booked a court at Donbosco or AG Sports Club? Record the session here and the fee will be split automatically across all attendees!</p>
           </div>
 
-          <!-- Date Selector Buttons -->
+          <!-- Date Selector Buttons & Match Alert Broadcast -->
           <div class="date-selector-bar">
             <button type="button" class="date-chip" (click)="setToday()">
               Today
@@ -915,6 +914,9 @@
               Tomorrow
             </button>
             <input type="date" class="date-input mono" [ngModel]="gameDate()" (ngModelChange)="gameDate.set($event)">
+            <button type="button" class="btn-broadcast-alert" (click)="broadcastGameAlert()" title="Send lock-screen push notification to all players about this session">
+              <span>📢</span> Alert All Players
+            </button>
           </div>
         </div>
 

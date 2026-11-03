@@ -1073,4 +1073,21 @@ export class App {
       }
     });
   }
+
+  broadcastGameAlert(): void {
+    const venue = this.gameVenue();
+    const date = this.gameDate();
+    const share = this.perPlayerShare();
+    this.clubService.sendTestPush({
+      title: `🏸 Badminton Match Alert (${date})!`,
+      body: `Session at ${venue}! Court share approx ₹${Math.round(Number(share))}. Tap to view details.`
+    }).subscribe({
+      next: () => {
+        this.showToast(`📢 Match alert sent to all players on their phones!`);
+      },
+      error: () => {
+        this.showToast('Failed to broadcast match alert.');
+      }
+    });
+  }
 }

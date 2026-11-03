@@ -2781,6 +2781,17 @@
     width: 7px !important;
     height: 7px !important;
   }
+  .btn-notification-bell .bell-count-badge {
+    top: -5px !important;
+    right: -5px !important;
+    min-width: 15px !important;
+    height: 15px !important;
+    font-size: 0.6rem !important;
+    padding: 0 3px !important;
+  }
+  .header-alert-chip {
+    display: none !important;
+  }
 
   /* User Session Pill - Compact & Fully Visible on Mobile */
   .user-pill {
@@ -3776,6 +3787,63 @@
   border: 2px solid #FFFFFF;
   box-shadow: 0 0 0 1.5px rgba(16, 185, 129, 0.4);
   animation: pulseGreen 2s infinite;
+}
+
+.btn-notification-bell .bell-count-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #DC2626;
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.45);
+  border: 1.5px solid #FFFFFF;
+  animation: pulseBadge 1.8s infinite;
+  line-height: 1;
+}
+
+@keyframes pulseBadge {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.btn-broadcast-alert {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1.5px solid #93C5FD;
+  color: #1D4ED8;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-broadcast-alert:hover {
+  background: #2563EB;
+  color: #FFFFFF;
+  border-color: #2563EB;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 @keyframes pulseGreen {

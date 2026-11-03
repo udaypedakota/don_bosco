@@ -308,10 +308,12 @@ async function sendPushNotification(query, payload) {
       url: payload.url || '/'
     });
 
+    const seenEndpoints = new Set();
     let sentCount = 0;
     for (const subRecord of subs) {
       const sub = subRecord.subscription || subRecord;
-      if (!sub || !sub.endpoint) continue;
+      if (!sub || !sub.endpoint || seenEndpoints.has(sub.endpoint)) continue;
+      seenEndpoints.add(sub.endpoint);
       try {
         await webpush.sendNotification(sub, payloadStr);
         sentCount++;
