@@ -1544,13 +1544,78 @@
   flex-direction: column;
   gap: 4px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pps-box:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
   border-color: #BFDBFE;
+}
+
+.pps-clickable {
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.pps-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+  border-color: #93C5FD;
+}
+
+.pps-clickable:active {
+  transform: translateY(0);
+}
+
+.pps-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.pps-active-badge {
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.pps-active-badge.badge-green {
+  background: #F0FDF4;
+  color: #15803D;
+  border-color: #BBF7D0;
+}
+
+.pps-active-badge.badge-red {
+  background: #FEF2F2;
+  color: #DC2626;
+  border-color: #FECACA;
+}
+
+.pps-clickable.is-active-filter {
+  border-color: #2563EB !important;
+  background: #F8FAFC !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25), 0 4px 14px rgba(37, 99, 235, 0.1) !important;
+}
+
+.pps-clickable.is-active-filter.is-unpaid-active {
+  border-color: #DC2626 !important;
+  background: #FFFBFB !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22), 0 4px 14px rgba(220, 38, 38, 0.1) !important;
+}
+
+.pps-clickable.is-active-filter.is-paid-active {
+  border-color: #16A34A !important;
+  background: #FBFCFA !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.22), 0 4px 14px rgba(22, 163, 74, 0.1) !important;
 }
 
 .pps-box.has-due {
@@ -1577,6 +1642,103 @@
   font-size: 0.74rem;
   color: #94A3B8;
   font-weight: 600;
+}
+
+/* Player Interactive Filter Tabs */
+.player-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.player-tab-pill {
+  border: 1.5px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #64748B;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.player-tab-pill:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #1E293B;
+}
+
+.player-tab-pill.active {
+  background: #2563EB;
+  color: #FFFFFF;
+  border-color: #2563EB;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.player-tab-pill.has-alert {
+  border-color: #FCA5A5;
+  color: #DC2626;
+}
+
+.player-tab-pill.has-alert.active {
+  background: #DC2626;
+  color: #FFFFFF;
+  border-color: #DC2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+/* Clean Empty State */
+.clean-empty-state {
+  text-align: center;
+  padding: 32px 20px;
+  background: #F8FAFC;
+  border: 1.5px dashed #CBD5E1;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.ces-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.ces-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.ces-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748B;
+  max-width: 380px;
+}
+
+.btn-outline-blue {
+  background: #FFFFFF;
+  border: 1.5px solid #2563EB;
+  color: #2563EB;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.btn-outline-blue:hover {
+  background: #2563EB;
+  color: #FFFFFF;
 }
 
 /* Admin Game Filter Pills */
@@ -2396,14 +2558,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 18px;
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
   gap: 16px;
-  flex-wrap: wrap;
 }
 
 .session-card:hover {
@@ -3758,43 +3919,82 @@
     margin-top: 12px !important;
   }
 
-  /* Game Sessions List on Mobile */
+  /* Game Sessions List on Mobile - Sleek, Compact Rows */
   .my-sessions-panel {
-    padding: 14px 10px !important;
-  }
-  .session-card {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 10px !important;
     padding: 12px 10px !important;
   }
-  .session-venue {
-    font-size: 0.95rem !important;
+  .panel-heading-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
   }
-  .session-date {
-    font-size: 0.76rem !important;
-  }
-  .session-action-group {
-    width: 100% !important;
-  }
-  .unpaid-action-wrap {
+  .player-filter-tabs {
     width: 100% !important;
     display: flex !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .player-filter-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+  .player-tab-pill {
+    white-space: nowrap !important;
+    font-size: 0.78rem !important;
+    padding: 5px 11px !important;
+  }
+  .session-card {
+    flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 8px !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+  }
+  .session-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .session-venue {
+    font-size: 0.92rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .session-date {
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .session-action-group {
+    width: auto !important;
+    flex-shrink: 0 !important;
+  }
+  .unpaid-action-wrap {
+    width: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .share-badge-unpaid {
+    font-size: 0.74rem !important;
+    padding: 3px 6px !important;
   }
   .btn-pay-game {
-    flex: 1 !important;
-    justify-content: center !important;
-    padding: 8px 12px !important;
-    font-size: 0.84rem !important;
+    flex: none !important;
+    padding: 5px 10px !important;
+    font-size: 0.76rem !important;
   }
   .status-pill {
-    width: 100% !important;
+    width: auto !important;
+    display: inline-flex !important;
     justify-content: center !important;
-    font-size: 0.8rem !important;
-    padding: 6px 10px !important;
+    font-size: 0.76rem !important;
+    padding: 4px 10px !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
   }
 
   /* Modals on Mobile */

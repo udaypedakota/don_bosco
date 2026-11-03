@@ -215,8 +215,30 @@ export class App {
     return this.clubService.games().filter(g => g.attendees.includes(u.id));
   });
 
+  // Player Portal Interactive Filter Tabs ('attended' | 'unpaid' | 'paid')
+  playerSelectedTab = signal<'attended' | 'unpaid' | 'paid'>('attended');
+
+  setPlayerTab(tab: 'attended' | 'unpaid' | 'paid'): void {
+    this.playerSelectedTab.set(tab);
+  }
+
   unpaidGamesList = computed(() => {
     return this.myAttendedGames().filter(g => this.getGameStatusForPlayer(g).status === 'unpaid');
+  });
+
+  paidGamesList = computed(() => {
+    return this.myAttendedGames().filter(g => this.getGameStatusForPlayer(g).status === 'paid');
+  });
+
+  playerFilteredGames = computed(() => {
+    const tab = this.playerSelectedTab();
+    if (tab === 'unpaid') {
+      return this.unpaidGamesList();
+    }
+    if (tab === 'paid') {
+      return this.paidGamesList();
+    }
+    return this.myAttendedGames();
   });
 
   isGameFullySettled(game: Game): boolean {
