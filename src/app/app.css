@@ -1527,183 +1527,276 @@
   font-weight: 600;
 }
 
-/* Player Personal Lifetime / Monthly Stats Bar */
-.player-personal-stats-bar {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.pps-box {
-  background: #FFFFFF;
-  border: 1.5px solid #E2E8F0;
-  border-radius: 14px;
-  padding: 14px 18px;
+/* ==========================================================================
+   3 DEDICATED EXPANDABLE MATCH BOXES FOR PLAYERS
+   Box 1: All Matches (click to view all matches inside)
+   Box 2: Unpaid Matches (click to view unpaid matches & dues inside)
+   Box 3: Paid Matches (click to view paid matches inside)
+   ========================================================================== */
+.player-match-boxes {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 16px;
+  margin-top: 18px;
 }
 
-.pps-box:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
-  border-color: #BFDBFE;
+.pm-box {
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
-.pps-clickable {
-  cursor: pointer;
-  position: relative;
-  user-select: none;
+.pm-box:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
-.pps-clickable:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
-  border-color: #93C5FD;
+.pm-box.is-expanded {
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.08);
 }
 
-.pps-clickable:active {
-  transform: translateY(0);
+.pm-box.all-matches-box.is-expanded {
+  border-color: #3B82F6;
 }
 
-.pps-head-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.pps-active-badge {
-  font-size: 0.66rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: var(--radius-full);
-  background: #EFF6FF;
-  color: #2563EB;
-  border: 1px solid #BFDBFE;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.pps-active-badge.badge-green {
-  background: #F0FDF4;
-  color: #15803D;
+.pm-box.unpaid-matches-box {
   border-color: #BBF7D0;
 }
 
-.pps-active-badge.badge-red {
-  background: #FEF2F2;
-  color: #DC2626;
+.pm-box.unpaid-matches-box.has-dues {
   border-color: #FECACA;
+  background: #FFFDFD;
 }
 
-.pps-clickable.is-active-filter {
-  border-color: #2563EB !important;
-  background: #F8FAFC !important;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25), 0 4px 14px rgba(37, 99, 235, 0.1) !important;
+.pm-box.unpaid-matches-box.is-expanded {
+  border-color: #10B981;
 }
 
-.pps-clickable.is-active-filter.is-unpaid-active {
-  border-color: #DC2626 !important;
-  background: #FFFBFB !important;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.22), 0 4px 14px rgba(220, 38, 38, 0.1) !important;
+.pm-box.unpaid-matches-box.has-dues.is-expanded {
+  border-color: #EF4444;
+  box-shadow: 0 10px 28px rgba(239, 68, 68, 0.1);
 }
 
-.pps-clickable.is-active-filter.is-paid-active {
-  border-color: #16A34A !important;
-  background: #FBFCFA !important;
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.22), 0 4px 14px rgba(22, 163, 74, 0.1) !important;
+.pm-box.paid-matches-box.is-expanded {
+  border-color: #10B981;
 }
 
-.pps-box.has-due {
-  background: #FFFDF7;
-  border-color: #FDE68A;
-}
-
-.pps-lbl {
-  font-size: 0.74rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #64748B;
-}
-
-.pps-val {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #0F172A;
-  font-family: var(--font-mono, monospace);
-}
-
-.pps-sub {
-  font-size: 0.74rem;
-  color: #94A3B8;
-  font-weight: 600;
-}
-
-/* Player Interactive Filter Tabs */
-.player-filter-tabs {
+/* Header of each box */
+.pm-box-header {
+  padding: 16px 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  gap: 14px;
+  background: #FFFFFF;
+  transition: background 0.18s ease;
+}
+
+.pm-box-header:hover {
+  background: #F8FAFC;
+}
+
+.pm-box.has-dues .pm-box-header:hover {
+  background: #FEF2F2;
+}
+
+.pmb-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pmb-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.pmb-icon-badge.pmb-blue {
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+  border: 1.5px solid #BFDBFE;
+}
+
+.pmb-icon-badge.pmb-red {
+  background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+  border: 1.5px solid #FECACA;
+}
+
+.pmb-icon-badge.pmb-green {
+  background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+  border: 1.5px solid #BBF7D0;
+}
+
+.pmb-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pmb-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.player-tab-pill {
-  border: 1.5px solid #E2E8F0;
-  background: #FFFFFF;
-  color: #64748B;
-  padding: 6px 14px;
+.pmb-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+
+.pmb-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  display: inline-flex;
+}
+
+.pmb-badge-blue {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+}
+
+.pmb-badge-red {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+.pmb-badge-green {
+  background: #F0FDF4;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.pmb-subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748B;
+  display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
-.player-tab-pill:hover {
-  background: #F8FAFC;
-  border-color: #CBD5E1;
-  color: #1E293B;
+.pmb-dot {
+  color: #94A3B8;
+  font-weight: bold;
 }
 
-.player-tab-pill.active {
-  background: #2563EB;
+.pmb-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-box-toggle {
+  background: #F1F5F9;
+  border: 1.5px solid #CBD5E1;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-box-toggle:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.btn-box-toggle.active {
+  background: #0F172A;
   color: #FFFFFF;
-  border-color: #2563EB;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  border-color: #0F172A;
 }
 
-.player-tab-pill.has-alert {
+.btn-box-toggle.btn-box-due {
+  background: #FEF2F2;
   border-color: #FCA5A5;
   color: #DC2626;
 }
 
-.player-tab-pill.has-alert.active {
+.btn-box-toggle.btn-box-due:hover {
+  background: #FEE2E2;
+}
+
+.btn-box-toggle.btn-box-due.active {
   background: #DC2626;
-  color: #FFFFFF;
   border-color: #DC2626;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+  color: #FFFFFF;
+}
+
+/* Box Body */
+.pm-box-body {
+  padding: 16px 20px 20px;
+  border-top: 1px solid #F1F5F9;
+  background: #FAFAFC;
+  animation: pmbFadeIn 0.22s ease-out;
+}
+
+@keyframes pmbFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.unpaid-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+.unpaid-pane-title {
+  margin: 0 0 12px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1E293B;
+}
+
+.pmb-upi-box {
+  margin: 0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 /* Clean Empty State */
 .clean-empty-state {
   text-align: center;
   padding: 32px 20px;
-  background: #F8FAFC;
+  background: #FFFFFF;
   border: 1.5px dashed #CBD5E1;
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  margin: 12px 0;
+  margin: 8px 0;
 }
 
 .ces-icon {
@@ -1739,6 +1832,34 @@
 .btn-outline-blue:hover {
   background: #2563EB;
   color: #FFFFFF;
+}
+
+@media (max-width: 900px) {
+  .unpaid-split-grid {
+    grid-template-columns: 1fr;
+  }
+  .pm-box-header {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .pmb-icon-badge {
+    width: 38px;
+    height: 38px;
+    font-size: 1.15rem;
+  }
+  .pmb-title {
+    font-size: 0.94rem;
+  }
+  .pmb-subtitle {
+    font-size: 0.74rem;
+  }
+  .btn-box-toggle {
+    font-size: 0.74rem;
+    padding: 6px 10px;
+  }
+  .pm-box-body {
+    padding: 12px 10px 16px;
+  }
 }
 
 /* Admin Game Filter Pills */

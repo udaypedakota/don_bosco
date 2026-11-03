@@ -215,6 +215,24 @@ export class App {
     return this.clubService.games().filter(g => g.attendees.includes(u.id));
   });
 
+  // Player Portal Expandable Boxes ('all', 'unpaid', 'paid')
+  openedBoxes = signal<{ all: boolean; unpaid: boolean; paid: boolean }>({
+    all: false,
+    unpaid: false,
+    paid: false
+  });
+
+  togglePlayerBox(box: 'all' | 'unpaid' | 'paid'): void {
+    this.openedBoxes.update(s => ({
+      ...s,
+      [box]: !s[box]
+    }));
+  }
+
+  isBoxOpen(box: 'all' | 'unpaid' | 'paid'): boolean {
+    return this.openedBoxes()[box];
+  }
+
   // Player Portal Interactive Filter Tabs ('attended' | 'unpaid' | 'paid')
   playerSelectedTab = signal<'attended' | 'unpaid' | 'paid'>('attended');
 

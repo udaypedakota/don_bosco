@@ -956,215 +956,270 @@
           </div>
         }
 
-        <!-- Player Personal Lifetime / Monthly Stats Bar (Interactive Filters) -->
-        <div class="player-personal-stats-bar">
-          <div class="pps-box pps-clickable" 
-               [class.is-active-filter]="playerSelectedTab() === 'attended'" 
-               (click)="setPlayerTab('attended')">
-            <div class="pps-head-row">
-              <span class="pps-lbl">Matches Attended</span>
-              @if (playerSelectedTab() === 'attended') {
-                <span class="pps-active-badge">Active</span>
-              }
-            </div>
-            <strong class="pps-val">{{ myPlayerStats().totalGames }} Games</strong>
-            <small class="pps-sub">{{ myPlayerStats().paidCount }} Settled · {{ myPlayerStats().unpaidCount }} Due</small>
-          </div>
+        <!-- ===================================================================
+             PLAYER 3 DEDICATED EXPANDABLE MATCH BOXES (As Requested by User)
+             Box 1: All Matches (click to view all matches inside)
+             Box 2: Unpaid Matches (click to view unpaid matches & dues inside)
+             Box 3: Paid Matches (click to view paid matches inside)
+             =================================================================== -->
+        <div class="player-match-boxes">
 
-          <div class="pps-box pps-clickable" 
-               [class.is-active-filter]="playerSelectedTab() === 'attended'" 
-               (click)="setPlayerTab('attended')">
-            <div class="pps-head-row">
-              <span class="pps-lbl">Total Match Expense</span>
-            </div>
-            <strong class="pps-val">₹{{ myPlayerStats().totalBill }}</strong>
-            <small class="pps-sub">Your Total Court Share</small>
-          </div>
-
-          <div class="pps-box pps-clickable" 
-               [class.is-active-filter]="playerSelectedTab() === 'paid'"
-               [class.is-paid-active]="playerSelectedTab() === 'paid'" 
-               (click)="setPlayerTab('paid')">
-            <div class="pps-head-row">
-              <span class="pps-lbl">Total Paid Amount</span>
-              @if (playerSelectedTab() === 'paid') {
-                <span class="pps-active-badge badge-green">Viewing Settled</span>
-              }
-            </div>
-            <strong class="pps-val text-green">₹{{ myPlayerStats().paidAmount }}</strong>
-            <small class="pps-sub">Settled via UPI</small>
-          </div>
-
-          <div class="pps-box pps-clickable" 
-               [class.has-due]="myPlayerStats().dueAmount > 0"
-               [class.is-active-filter]="playerSelectedTab() === 'unpaid'"
-               [class.is-unpaid-active]="playerSelectedTab() === 'unpaid'"
-               (click)="setPlayerTab('unpaid')">
-            <div class="pps-head-row">
-              <span class="pps-lbl">Account Standing</span>
-              @if (playerSelectedTab() === 'unpaid') {
-                <span class="pps-active-badge" [class.badge-red]="myPlayerStats().dueAmount > 0" [class.badge-green]="myPlayerStats().dueAmount === 0">
-                  {{ myPlayerStats().dueAmount > 0 ? 'Viewing Dues' : 'Zero Dues' }}
-                </span>
-              }
-            </div>
-            <strong class="pps-val" [class.text-red]="myPlayerStats().dueAmount > 0" [class.text-green]="myPlayerStats().dueAmount === 0">
-              {{ myPlayerStats().dueAmount > 0 ? '₹' + myPlayerStats().dueAmount + ' Due' : 'All Settled (₹0)' }}
-            </strong>
-            <small class="pps-sub">{{ myPlayerStats().dueAmount > 0 ? 'Tap to view dues & pay UPI' : 'No dues pending' }}</small>
-          </div>
-        </div>
-
-        <!-- UPI QR Scanner & Attended Sessions -->
-        <div class="player-content-grid" [class.no-dues-grid]="playerSelectedTab() !== 'unpaid' || (myPlayerRecord()?.balance || 0) >= 0 || myPendingPayment()">
-          @if (playerSelectedTab() === 'unpaid' && (myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
-            <!-- ONLY SHOW SCANNER & PAYMENT BOX IF IN UNPAID TAB AND PLAYER HAS UNPAID DUES -->
-            <div class="upi-box">
-              <div class="upi-card-head">
-                <span class="badge badge-blue">PhonePe · SBI (9738)</span>
-                <button type="button" class="copy-upi-btn mono" (click)="copyUpiId('8801147452@ybl')" title="Click to copy UPI ID">
-                  8801147452@ybl 📋
-                </button>
-              </div>
-
-              <!-- Real PhonePe Scanner QR Code -->
-              <div class="real-qr-card">
-                <div class="qr-bank-tag">
-                  <span class="sbi-dot"></span> State Bank of India - 9738 · Phani
-                </div>
-                <div class="qr-image-frame">
-                  <img src="assets/phani-qr.png" alt="Phani PhonePe QR Code" class="phani-qr-scanner-img">
-                </div>
-                <div class="upi-id-badge-row">
-                  <span class="upi-label">UPI ID:</span>
-                  <span class="upi-val mono">8801147452@ybl</span>
-                  <button type="button" class="btn-copy-chip" (click)="copyUpiId('8801147452@ybl')">Copy</button>
-                </div>
-              </div>
-
-              <p class="qr-hint">Scan with PhonePe, Google Pay, or Paytm</p>
-
-              <div class="direct-upi-actions" style="margin-top: 14px; width: 100%;">
-                <a [href]="getPhonePeIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-phonepe btn-block">
-                  <span>🟣</span> Pay ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} on PhonePe
-                </a>
-                <div class="alt-upi-row">
-                  <a [href]="getGPayIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-gpay flex-1">
-                    <span>🔵</span> GPay
-                  </a>
-                  <a [href]="getPaytmIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-paytm flex-1">
-                    <span>🔷</span> Paytm
-                  </a>
-                </div>
-              </div>
-              <button class="btn btn-yellow btn-block" style="margin-top: 10px;" (click)="showClaimModal.set(true)">
-                <span>✓</span> I Have Paid ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} via UPI
-              </button>
-            </div>
-          } @else if (playerSelectedTab() === 'unpaid' && myPendingPayment()) {
-            <!-- Payment Reported: Verification Pending from Phani -->
-            <div class="upi-box pending-verification-box">
-              <div class="pending-verify-inner">
-                <div class="pv-icon-glow">⏳</div>
-                <h4 class="pv-title">Payment Verification Pending</h4>
-                <div class="pv-amount mono">₹{{ round(myPendingPayment()?.amount) }}</div>
-                <div class="badge badge-yellow pv-badge">Awaiting Phani's Approval</div>
-                <p class="pv-desc">
-                  You reported this UPI payment. Once Phani verifies and approves it on Admin dashboard, your dues will be settled automatically.
-                </p>
-              </div>
-            </div>
-          }
-
-          <!-- Sessions Attended by this player -->
-          <div class="my-sessions-panel">
-            <div class="panel-heading-row">
-              <div class="panel-heading-left">
-                <h3 class="panel-heading">
-                  @if (playerSelectedTab() === 'unpaid') {
-                    <span>⚠️ Unpaid Match Sessions</span>
-                  } @else if (playerSelectedTab() === 'paid') {
-                    <span>✓ Settled Match Sessions</span>
-                  } @else {
-                    <span>🏸 Sessions You Attended</span>
-                  }
-                  <span class="heading-count mono">({{ playerFilteredGames().length }})</span>
-                </h3>
-              </div>
-
-              <!-- Interactive Filter Tabs -->
-              <div class="player-filter-tabs">
-                <button type="button" 
-                        class="player-tab-pill" 
-                        [class.active]="playerSelectedTab() === 'attended'"
-                        (click)="setPlayerTab('attended')">
-                  <span>🏸 All Matches ({{ myAttendedGames().length }})</span>
-                </button>
-                <button type="button" 
-                        class="player-tab-pill" 
-                        [class.active]="playerSelectedTab() === 'unpaid'"
-                        [class.has-alert]="unpaidGamesList().length > 0"
-                        (click)="setPlayerTab('unpaid')">
-                  <span>⚠️ Unpaid ({{ unpaidGamesList().length }})</span>
-                </button>
-                <button type="button" 
-                        class="player-tab-pill" 
-                        [class.active]="playerSelectedTab() === 'paid'"
-                        (click)="setPlayerTab('paid')">
-                  <span>✓ Settled ({{ paidGamesList().length }})</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="sessions-feed">
-              @for (game of playerFilteredGames(); track game.id) {
-                @let gStatus = getGameStatusForPlayer(game);
-                <div class="session-card" [class.is-paid]="gStatus.status === 'paid'" [class.is-pending]="gStatus.status === 'pending'">
-                  <div class="session-info">
-                    <strong class="session-venue">{{ game.venue }}</strong>
-                    <div class="muted-text mono session-date">
-                      📅 {{ game.date }} · Court Fee: ₹{{ game.totalExpense }} ({{ game.attendees.length }} players)
-                    </div>
+          <!-- BOX 1: ALL MATCHES -->
+          <div class="pm-box all-matches-box" [class.is-expanded]="isBoxOpen('all')">
+            <div class="pm-box-header" (click)="togglePlayerBox('all')">
+              <div class="pmb-left">
+                <div class="pmb-icon-badge pmb-blue">🏸</div>
+                <div class="pmb-text">
+                  <div class="pmb-title-row">
+                    <h3 class="pmb-title">All Matches Attended</h3>
+                    <span class="pmb-badge pmb-badge-blue mono">{{ myAttendedGames().length }} Games</span>
                   </div>
+                  <div class="pmb-subtitle">
+                    <span>Total Court Share: <strong>₹{{ myPlayerStats().totalBill }}</strong></span>
+                    <span class="pmb-dot">·</span>
+                    <span>{{ myPlayerStats().paidCount }} Settled</span>
+                    <span class="pmb-dot">·</span>
+                    <span>{{ myPlayerStats().unpaidCount }} Due</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pmb-right">
+                <button type="button" class="btn-box-toggle" [class.active]="isBoxOpen('all')">
+                  <span>{{ isBoxOpen('all') ? 'Hide Matches ▴' : 'Click to View Matches ▾' }}</span>
+                </button>
+              </div>
+            </div>
 
-                  <!-- Game Status & Action (Pay Per Game) -->
-                  <div class="session-action-group">
-                    @if (gStatus.status === 'paid') {
-                      <div class="status-pill status-paid mono">
-                        <span class="pill-check">✓</span> Settled (₹{{ round(game.perPlayerShare) }})
+            <!-- Content of Box 1: All Matches List -->
+            @if (isBoxOpen('all')) {
+              <div class="pm-box-body">
+                <div class="sessions-feed">
+                  @for (game of myAttendedGames(); track game.id) {
+                    @let gStatus = getGameStatusForPlayer(game);
+                    <div class="session-card" [class.is-paid]="gStatus.status === 'paid'" [class.is-pending]="gStatus.status === 'pending'">
+                      <div class="session-info">
+                        <strong class="session-venue">{{ game.venue }}</strong>
+                        <div class="muted-text mono session-date">
+                          📅 {{ game.date }} · Court Fee: ₹{{ game.totalExpense }} ({{ game.attendees.length }} players)
+                        </div>
                       </div>
-                    } @else if (gStatus.status === 'pending') {
-                      <div class="status-pill status-pending mono" title="Awaiting Phani's approval">
-                        <span class="pill-clock">⏳</span> Verification Pending (₹{{ round(game.perPlayerShare) }})
+
+                      <div class="session-action-group">
+                        @if (gStatus.status === 'paid') {
+                          <div class="status-pill status-paid mono">
+                            <span class="pill-check">✓</span> Settled (₹{{ round(game.perPlayerShare) }})
+                          </div>
+                        } @else if (gStatus.status === 'pending') {
+                          <div class="status-pill status-pending mono" title="Awaiting Phani's approval">
+                            <span class="pill-clock">⏳</span> Verification Pending (₹{{ round(game.perPlayerShare) }})
+                          </div>
+                        } @else {
+                          <div class="unpaid-action-wrap">
+                            <span class="share-badge-unpaid mono">Share: ₹{{ round(game.perPlayerShare) }}</span>
+                            <button class="btn btn-sm btn-pay-game" (click)="openGamePayment(game); $event.stopPropagation()">
+                              <span>⚡</span> Pay ₹{{ round(game.perPlayerShare) }}
+                            </button>
+                          </div>
+                        }
                       </div>
+                    </div>
+                  }
+                  @if (myAttendedGames().length === 0) {
+                    <p class="muted-text text-center" style="padding: 16px 0;">No attended matches recorded yet.</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- BOX 2: UNPAID MATCHES -->
+          <div class="pm-box unpaid-matches-box" [class.has-dues]="unpaidGamesList().length > 0" [class.is-expanded]="isBoxOpen('unpaid')">
+            <div class="pm-box-header" (click)="togglePlayerBox('unpaid')">
+              <div class="pmb-left">
+                <div class="pmb-icon-badge" [class.pmb-red]="unpaidGamesList().length > 0" [class.pmb-green]="unpaidGamesList().length === 0">
+                  {{ unpaidGamesList().length > 0 ? '⚠️' : '✓' }}
+                </div>
+                <div class="pmb-text">
+                  <div class="pmb-title-row">
+                    <h3 class="pmb-title">Unpaid Matches & Dues</h3>
+                    @if (unpaidGamesList().length > 0) {
+                      <span class="pmb-badge pmb-badge-red mono">₹{{ myPlayerStats().dueAmount }} Due · {{ unpaidGamesList().length }} Matches</span>
                     } @else {
-                      <div class="unpaid-action-wrap">
-                        <span class="share-badge-unpaid mono">Share: ₹{{ round(game.perPlayerShare) }}</span>
-                        <button class="btn btn-sm btn-pay-game" (click)="openGamePayment(game)">
-                          <span>⚡</span> Pay ₹{{ round(game.perPlayerShare) }}
-                        </button>
-                      </div>
+                      <span class="pmb-badge pmb-badge-green mono">All Settled (₹0 Due)</span>
+                    }
+                  </div>
+                  <div class="pmb-subtitle">
+                    @if (unpaidGamesList().length > 0) {
+                      <span class="text-red"><strong>{{ unpaidGamesList().length }} match share{{ unpaidGamesList().length > 1 ? 's' : '' }} pending</strong> · Click to view & pay via UPI</span>
+                    } @else {
+                      <span class="text-green">All your match shares are fully paid up! Zero dues pending.</span>
                     }
                   </div>
                 </div>
-              }
-
-              @if (playerSelectedTab() === 'unpaid' && unpaidGamesList().length === 0) {
-                <div class="clean-empty-state">
-                  <div class="ces-icon">🎉</div>
-                  <h4 class="ces-title">All Settled! No Unpaid Dues</h4>
-                  <p class="ces-desc">Awesome! You have fully paid for all {{ myAttendedGames().length }} matches attended via UPI.</p>
-                  <button type="button" class="btn btn-sm btn-outline-blue" (click)="setPlayerTab('attended')">
-                    🏸 View All Attended Matches
-                  </button>
-                </div>
-              } @else if (playerFilteredGames().length === 0) {
-                <div class="clean-empty-state">
-                  <p class="muted-text">No matches found in this category.</p>
-                </div>
-              }
+              </div>
+              <div class="pmb-right">
+                <button type="button" class="btn-box-toggle" [class.active]="isBoxOpen('unpaid')" [class.btn-box-due]="unpaidGamesList().length > 0">
+                  <span>{{ isBoxOpen('unpaid') ? 'Hide Dues ▴' : (unpaidGamesList().length > 0 ? 'Click to View & Pay Dues ▾' : 'Click to View ▾') }}</span>
+                </button>
+              </div>
             </div>
+
+            <!-- Content of Box 2: Unpaid Matches List + UPI QR Scanner if dues exist -->
+            @if (isBoxOpen('unpaid')) {
+              <div class="pm-box-body">
+                @if (unpaidGamesList().length > 0) {
+                  <div class="unpaid-split-grid">
+                    <!-- Unpaid Sessions Feed -->
+                    <div class="unpaid-feed-pane">
+                      <h4 class="unpaid-pane-title">Pending Sessions ({{ unpaidGamesList().length }})</h4>
+                      <div class="sessions-feed">
+                        @for (game of unpaidGamesList(); track game.id) {
+                          @let gStatus = getGameStatusForPlayer(game);
+                          <div class="session-card is-pending-game">
+                            <div class="session-info">
+                              <strong class="session-venue">{{ game.venue }}</strong>
+                              <div class="muted-text mono session-date">
+                                📅 {{ game.date }} · Court Fee: ₹{{ game.totalExpense }} ({{ game.attendees.length }} players)
+                              </div>
+                            </div>
+                            <div class="session-action-group">
+                              @if (gStatus.status === 'pending') {
+                                <div class="status-pill status-pending mono" title="Awaiting Phani's approval">
+                                  <span class="pill-clock">⏳</span> Verification Pending
+                                </div>
+                              } @else {
+                                <div class="unpaid-action-wrap">
+                                  <span class="share-badge-unpaid mono">Share: ₹{{ round(game.perPlayerShare) }}</span>
+                                  <button class="btn btn-sm btn-pay-game" (click)="openGamePayment(game); $event.stopPropagation()">
+                                    <span>⚡</span> Pay ₹{{ round(game.perPlayerShare) }}
+                                  </button>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- PhonePe UPI QR Scanner Card -->
+                    @if ((myPlayerRecord()?.balance || 0) < 0 && !myPendingPayment()) {
+                      <div class="upi-box pmb-upi-box">
+                        <div class="upi-card-head">
+                          <span class="badge badge-blue">PhonePe · SBI (9738)</span>
+                          <button type="button" class="copy-upi-btn mono" (click)="copyUpiId('8801147452@ybl')" title="Click to copy UPI ID">
+                            8801147452@ybl 📋
+                          </button>
+                        </div>
+
+                        <!-- Real PhonePe Scanner QR Code -->
+                        <div class="real-qr-card">
+                          <div class="qr-bank-tag">
+                            <span class="sbi-dot"></span> State Bank of India - 9738 · Phani
+                          </div>
+                          <div class="qr-image-frame">
+                            <img src="assets/phani-qr.png" alt="Phani PhonePe QR Code" class="phani-qr-scanner-img">
+                          </div>
+                          <div class="upi-id-badge-row">
+                            <span class="upi-label">UPI ID:</span>
+                            <span class="upi-val mono">8801147452@ybl</span>
+                            <button type="button" class="btn-copy-chip" (click)="copyUpiId('8801147452@ybl')">Copy</button>
+                          </div>
+                        </div>
+
+                        <p class="qr-hint">Scan with PhonePe, Google Pay, or Paytm</p>
+
+                        <div class="direct-upi-actions" style="margin-top: 14px; width: 100%;">
+                          <a [href]="getPhonePeIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-phonepe btn-block">
+                            <span>🟣</span> Pay Total ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} on PhonePe
+                          </a>
+                          <div class="alt-upi-row">
+                            <a [href]="getGPayIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-gpay flex-1">
+                              <span>🔵</span> GPay
+                            </a>
+                            <a [href]="getPaytmIntentUrl(round(-(myPlayerRecord()?.balance || 0)))" class="btn btn-paytm flex-1">
+                              <span>🔷</span> Paytm
+                            </a>
+                          </div>
+                        </div>
+                        <button class="btn btn-yellow btn-block" style="margin-top: 10px;" (click)="showClaimModal.set(true)">
+                          <span>✓</span> I Have Paid ₹{{ round(-(myPlayerRecord()?.balance || 0)) }} via UPI
+                        </button>
+                      </div>
+                    } @else if (myPendingPayment()) {
+                      <div class="upi-box pending-verification-box pmb-upi-box">
+                        <div class="pending-verify-inner">
+                          <div class="pv-icon-glow">⏳</div>
+                          <h4 class="pv-title">Payment Verification Pending</h4>
+                          <div class="pv-amount mono">₹{{ round(myPendingPayment()?.amount) }}</div>
+                          <div class="badge badge-yellow pv-badge">Awaiting Phani's Approval</div>
+                          <p class="pv-desc">
+                            You reported this UPI payment. Once Phani verifies and approves it on Admin dashboard, your dues will be settled automatically.
+                          </p>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <!-- Zero Dues Clean Celebratory State (e.g. Srinvas) -->
+                  <div class="clean-empty-state">
+                    <div class="ces-icon">🎉</div>
+                    <h4 class="ces-title">All Settled! Zero Pending Dues</h4>
+                    <p class="ces-desc">Awesome! You have no unpaid matches. All {{ myAttendedGames().length }} games you attended are fully settled via UPI.</p>
+                  </div>
+                }
+              </div>
+            }
           </div>
+
+          <!-- BOX 3: PAID MATCHES -->
+          <div class="pm-box paid-matches-box" [class.is-expanded]="isBoxOpen('paid')">
+            <div class="pm-box-header" (click)="togglePlayerBox('paid')">
+              <div class="pmb-left">
+                <div class="pmb-icon-badge pmb-green">✅</div>
+                <div class="pmb-text">
+                  <div class="pmb-title-row">
+                    <h3 class="pmb-title">Paid / Settled Matches</h3>
+                    <span class="pmb-badge pmb-badge-green mono">{{ paidGamesList().length }} Games Settled</span>
+                  </div>
+                  <div class="pmb-subtitle">
+                    <span>Total Settled via UPI: <strong>₹{{ myPlayerStats().paidAmount }}</strong> ({{ paidGamesList().length }} matches)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pmb-right">
+                <button type="button" class="btn-box-toggle" [class.active]="isBoxOpen('paid')">
+                  <span>{{ isBoxOpen('paid') ? 'Hide Paid Matches ▴' : 'Click to View Paid Matches ▾' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Content of Box 3: Paid Matches List -->
+            @if (isBoxOpen('paid')) {
+              <div class="pm-box-body">
+                <div class="sessions-feed">
+                  @for (game of paidGamesList(); track game.id) {
+                    <div class="session-card is-paid">
+                      <div class="session-info">
+                        <strong class="session-venue">{{ game.venue }}</strong>
+                        <div class="muted-text mono session-date">
+                          📅 {{ game.date }} · Court Fee: ₹{{ game.totalExpense }} ({{ game.attendees.length }} players)
+                        </div>
+                      </div>
+                      <div class="session-action-group">
+                        <div class="status-pill status-paid mono">
+                          <span class="pill-check">✓</span> Settled (₹{{ round(game.perPlayerShare) }})
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  @if (paidGamesList().length === 0) {
+                    <p class="muted-text text-center" style="padding: 16px 0;">No paid matches yet.</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
         </div>
       </section>
     </main>
