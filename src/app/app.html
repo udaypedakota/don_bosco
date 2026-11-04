@@ -318,14 +318,14 @@
         </div>
       }
 
-      <!-- PREMIUM TODAY'S COURT MATCH PASS CARD (For Admin & Players) -->
+      <!-- PREMIUM TODAY'S / UPCOMING COURT MATCH PASS CARD (For Admin & Players) -->
       @if (activeCourtSession(); as match) {
         <div class="match-pass-card animate-fade">
           <div class="mp-inner">
             <div class="mp-top-bar">
-              <div class="mp-status-pill" [class.is-today]="isTodayCourtSession()">
+              <div class="mp-status-pill" [class.is-today]="isTodayCourtSession()" [class.is-upcoming]="isUpcomingCourtSession()">
                 <span class="mp-pulse-dot"></span>
-                <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "LATEST COURT MATCH" }}</strong>
+                <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "UPCOMING MATCH" }}</strong>
               </div>
               <div class="mp-top-actions">
                 <div class="mp-venue-chip">
@@ -387,14 +387,30 @@
 
             <div class="mp-bottom-bar">
               <span class="mp-booker-credit">👑 Booked upfront by {{ match.paidByPlayerName || 'Phani' }} · Court Total: ₹{{ round(match.totalExpense) }}</span>
-              <span class="mp-callout-badge">🏸 Booking Confirmed · See You on Court!</span>
+              <span class="mp-callout-badge">
+                {{ isTodayCourtSession() ? "🏸 Booking Confirmed · See You on Court Today!" : "🏸 Upcoming Match · See You on Court!" }}
+              </span>
             </div>
           </div>
+        </div>
+      } @else {
+        <!-- Sleek Rest Day / No Match Strip for Admin -->
+        <div class="no-court-banner animate-fade">
+          <div class="no-court-left">
+            <span class="no-court-badge-icon">🏸</span>
+            <div class="no-court-info">
+              <strong class="no-court-title">No Match Scheduled Today (Rest Day)</strong>
+              <span class="no-court-desc">Court is free today. Next match pass will appear here once booked.</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm no-court-btn" (click)="scrollToBooking()">
+            <span>➕</span> Schedule Game
+          </button>
         </div>
       }
 
       <!-- 1. DYNAMIC COURT SPLIT HERO (Today, Tomorrow, Any Date) -->
-      <section class="bright-card hero-split-card">
+      <section id="courtBookingSection" class="bright-card hero-split-card">
         <div class="card-title-row">
           <div>
             <span class="badge badge-yellow">🏸 Court Session Booking</span>
@@ -1100,14 +1116,14 @@
         }
       </section>
 
-      <!-- PREMIUM TODAY'S COURT MATCH PASS CARD (For Players) -->
+      <!-- PREMIUM TODAY'S / UPCOMING COURT MATCH PASS CARD (For Players) -->
       @if (activeCourtSession(); as match) {
         <div class="match-pass-card animate-fade">
             <div class="mp-inner">
               <div class="mp-top-bar">
-                <div class="mp-status-pill" [class.is-today]="isTodayCourtSession()">
+                <div class="mp-status-pill" [class.is-today]="isTodayCourtSession()" [class.is-upcoming]="isUpcomingCourtSession()">
                   <span class="mp-pulse-dot"></span>
-                  <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "LATEST COURT MATCH" }}</strong>
+                  <strong>{{ isTodayCourtSession() ? "TODAY'S COURT MATCH" : "UPCOMING MATCH" }}</strong>
                 </div>
                 <div class="mp-top-actions">
                   <div class="mp-venue-chip">
@@ -1169,7 +1185,20 @@
 
               <div class="mp-bottom-bar">
                 <span class="mp-booker-credit">👑 Booked upfront by {{ match.paidByPlayerName || 'Phani' }} · Court Total: ₹{{ round(match.totalExpense) }}</span>
-                <span class="mp-callout-badge">🏸 Booking Confirmed · See You on Court!</span>
+                <span class="mp-callout-badge">
+                  {{ isTodayCourtSession() ? "🏸 Booking Confirmed · See You on Court Today!" : "🏸 Upcoming Match · See You on Court!" }}
+                </span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <!-- Sleek Rest Day / No Match Strip for Players -->
+          <div class="no-court-banner animate-fade">
+            <div class="no-court-left">
+              <span class="no-court-badge-icon">🏸</span>
+              <div class="no-court-info">
+                <strong class="no-court-title">No Match Scheduled Today (Rest Day)</strong>
+                <span class="no-court-desc">No court session booked for today. Enjoy your rest day! You'll receive an instant alert once the next match is scheduled.</span>
               </div>
             </div>
           </div>

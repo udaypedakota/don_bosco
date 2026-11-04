@@ -4930,9 +4930,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(16, 185, 129, 0.18);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #34D399;
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #60A5FA;
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -4942,9 +4942,15 @@
 }
 
 .mp-status-pill.is-today {
-  background: rgba(245, 158, 11, 0.2);
-  border-color: rgba(245, 158, 11, 0.5);
-  color: #FBBF24;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #34D399;
+}
+
+.mp-status-pill.is-upcoming {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #93C5FD;
 }
 
 .mp-pulse-dot {
@@ -4954,6 +4960,11 @@
   background: #10B981;
   box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   animation: pulseGreen 1.8s infinite;
+}
+
+.mp-status-pill.is-upcoming .mp-pulse-dot {
+  background: #3B82F6;
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
 }
 
 .mp-venue-chip {
@@ -5480,5 +5491,85 @@
   }
   .split-actions-bar .btn {
     width: 100%;
+  }
+}
+
+/* ==========================================================================
+   REST DAY / NO COURT SESSION BANNER
+   Compact, sleek status bar when no court match is scheduled for today
+   ========================================================================== */
+.no-court-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border: 1.5px dashed #CBD5E1;
+  border-radius: 16px;
+  padding: 12px 18px;
+  margin-bottom: 22px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.no-court-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.no-court-badge-icon {
+  font-size: 1.35rem;
+  background: #FFFFFF;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+  border: 1px solid #E2E8F0;
+}
+
+.no-court-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.no-court-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1E293B;
+  font-family: var(--font-heading);
+}
+
+.no-court-desc {
+  font-size: 0.8rem;
+  color: #64748B;
+  line-height: 1.3;
+}
+
+.no-court-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  padding: 7px 14px;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .no-court-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 14px;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .no-court-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

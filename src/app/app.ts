@@ -1180,29 +1180,42 @@ https://smash-club-two.vercel.app`;
   }
 
   getTodayDateString(): string {
-    return new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   activeCourtSession = computed(() => {
     const games = this.clubService.games();
     if (games.length === 0) return null;
     const todayStr = this.getTodayDateString();
+
     // 1. Look for game today (prefer real game with confirmed attendees)
     const todayGames = games.filter(g => g.date === todayStr);
     if (todayGames.length > 0) {
       return todayGames.reduce((prev, curr) => (curr.attendees?.length || 0) >= (prev.attendees?.length || 0) ? curr : prev);
     }
-    // 2. Look for any upcoming game (today or future)
-    const upcoming = games.filter(g => g.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date));
+
+    // 2. Look for upcoming game scheduled in future (date > todayStr)
+    const upcoming = games.filter(g => g.date > todayStr).sort((a, b) => a.date.localeCompare(b.date));
     if (upcoming.length > 0) return upcoming[0];
-    // 3. Fallback to the latest game session
-    return games[0];
+
+    // 3. Past games (date < todayStr) are completed and should NOT be shown as active/upcoming court matches!
+    return null;
   });
 
   isTodayCourtSession = computed(() => {
     const sess = this.activeCourtSession();
     if (!sess) return false;
     return sess.date === this.getTodayDateString();
+  });
+
+  isUpcomingCourtSession = computed(() => {
+    const sess = this.activeCourtSession();
+    if (!sess) return false;
+    return sess.date > this.getTodayDateString();
   });
 
   getAttendeeNamesSummary(attendeeIds?: string[]): string {
