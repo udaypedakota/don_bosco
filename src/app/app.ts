@@ -124,12 +124,31 @@ export class App implements OnDestroy {
   gameDate = signal<string>(new Date().toISOString().split('T')[0]);
   gameVenue = signal<string>('Donbosco (Moti Nagar)');
   courtVenues = ['Donbosco (Moti Nagar)', 'AG Sports Club (Miyapur)'];
-  gameTimeSlot = signal<string>('08:00 PM – 10:00 PM');
+  gameTimeSlot = signal<string>('09:00 PM – 11:00 PM');
   timeSlotPresets = [
     '06:00 AM – 08:00 AM',
     '07:00 AM – 09:00 AM',
     '06:00 PM – 08:00 PM',
-    '08:00 PM – 10:00 PM'
+    '07:00 PM – 09:00 PM',
+    '08:00 PM – 10:00 PM',
+    '09:00 PM – 11:00 PM',
+    '10:00 PM – 12:00 AM'
+  ];
+
+  // Dynamic 2-Hour / Custom Duration Time Slot Builder
+  selectedStartTime = signal<string>('09:00 PM');
+  selectedDurationHours = signal<number>(2); // Default: 2 Hours as requested
+  durationOptions = [
+    { label: '1 Hr', value: 1 },
+    { label: '1.5 Hrs', value: 1.5 },
+    { label: '⚡ 2 Hours (Standard)', value: 2 },
+    { label: '2.5 Hrs', value: 2.5 },
+    { label: '3 Hrs', value: 3 }
+  ];
+  startTimeOptions = [
+    '05:30 AM', '06:00 AM', '06:30 AM', '07:00 AM', '07:30 AM', '08:00 AM', '08:30 AM', '09:00 AM',
+    '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM',
+    '08:00 PM', '08:30 PM', '09:00 PM', '09:30 PM', '10:00 PM', '10:30 PM', '11:00 PM'
   ];
   gameCourtRent = signal<number>(1200);
   gameShuttleCost = signal<number>(0);
@@ -521,7 +540,7 @@ export class App implements OnDestroy {
       .join(', ');
 
     const dateStr = this.formatDisplayDate(targetGame.date);
-    const timeStr = targetGame.timeSlot || '08:00 PM – 10:00 PM';
+    const timeStr = targetGame.timeSlot || '09:00 PM – 11:00 PM';
     const totalCost = Math.round(targetGame.totalExpense);
     const perHead = Math.round(targetGame.perPlayerShare);
     const booker = targetGame.paidByPlayerName || 'Phani';
@@ -941,6 +960,51 @@ https://smash-club-two.vercel.app`;
 
   setTimeSlot(slot: string): void {
     this.gameTimeSlot.set(slot);
+    const parts = slot.split('–').map(s => s.trim());
+    if (parts.length === 2 && this.startTimeOptions.includes(parts[0])) {
+      this.selectedStartTime.set(parts[0]);
+    }
+  }
+
+  setStartTime(time: string): void {
+    this.selectedStartTime.set(time);
+    this.updateDynamicTimeSlot();
+  }
+
+  setDuration(hours: number): void {
+    this.selectedDurationHours.set(hours);
+    this.updateDynamicTimeSlot();
+  }
+
+  updateDynamicTimeSlot(): void {
+    const start = this.selectedStartTime();
+    const duration = this.selectedDurationHours();
+    const end = this.computeEndTime(start, duration);
+    if (end) {
+      this.gameTimeSlot.set(`${start} – ${end}`);
+    }
+  }
+
+  computeEndTime(timeStr: string, hours: number): string | null {
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return null;
+    let h = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const period = match[3].toUpperCase();
+    if (period === 'PM' && h !== 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    
+    let totalMinutes = h * 60 + m + Math.round(hours * 60);
+    totalMinutes = totalMinutes % (24 * 60);
+    
+    let endH = Math.floor(totalMinutes / 60);
+    const endM = totalMinutes % 60;
+    const endPeriod = endH >= 12 ? 'PM' : 'AM';
+    endH = endH % 12;
+    if (endH === 0) endH = 12;
+    
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(endH)}:${pad(endM)} ${endPeriod}`;
   }
 
   toggleAttendee(playerId: string): void {

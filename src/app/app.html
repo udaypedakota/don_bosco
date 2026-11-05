@@ -343,7 +343,7 @@
                 <span class="mp-micro-label">COURT TIMING</span>
                 <div class="mp-time-highlight">
                   <span class="mp-clock-icon">⏰</span>
-                  <span class="mp-time-text mono">{{ match.timeSlot || '08:00 PM – 10:00 PM' }}</span>
+                  <span class="mp-time-text mono">{{ match.timeSlot || '09:00 PM – 11:00 PM' }}</span>
                 </div>
                 <span class="mp-session-type">🏸 Badminton Match Session</span>
               </div>
@@ -471,15 +471,55 @@
             </div>
 
             <div class="form-field" style="margin-top: 10px;">
-              <label class="field-label">Court Timing / Slot</label>
-              <div class="venue-presets-chips">
+              <div class="timing-header-row">
+                <label class="field-label" style="margin-bottom: 0;">Court Timing / Slot</label>
+                <div class="duration-selector-inline">
+                  <span class="duration-lbl">Duration:</span>
+                  @for (opt of durationOptions; track opt.value) {
+                    <button type="button" class="duration-chip-btn" 
+                      [class.is-active]="selectedDurationHours() === opt.value" 
+                      (click)="setDuration(opt.value)">
+                      {{ opt.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Popular 2-Hour Presets (1-tap selection) -->
+              <div class="venue-presets-chips" style="margin-top: 8px;">
                 @for (slot of timeSlotPresets; track slot) {
-                  <button type="button" class="venue-preset-chip" [class.active]="gameTimeSlot() === slot" (click)="setTimeSlot(slot)">
-                    ⏰ {{ slot }}
+                  <button type="button" class="venue-preset-chip" 
+                    [class.active]="gameTimeSlot() === slot" 
+                    [class.popular-chip]="slot === '09:00 PM – 11:00 PM'"
+                    (click)="setTimeSlot(slot)">
+                    ⏰ {{ slot }} {{ slot === '09:00 PM – 11:00 PM' ? '🔥' : '' }}
                   </button>
                 }
               </div>
-              <input type="text" class="form-input mono" placeholder="e.g. 08:00 PM – 10:00 PM" [ngModel]="gameTimeSlot()" (ngModelChange)="gameTimeSlot.set($event)">
+
+              <!-- Dynamic Start Time Picker + Auto-calculated Slot -->
+              <div class="dynamic-time-row" style="margin-top: 10px;">
+                <div class="start-time-dropdown-wrap">
+                  <span class="sub-time-lbl">Start Time:</span>
+                  <select class="form-select start-time-select mono" 
+                    [ngModel]="selectedStartTime()" 
+                    (ngModelChange)="setStartTime($event)">
+                    @for (st of startTimeOptions; track st) {
+                      <option [value]="st">{{ st }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="slot-input-wrap">
+                  <span class="sub-time-lbl">Active Slot (Auto 2-Hr / Editable):</span>
+                  <input type="text" class="form-input mono slot-highlight-input" 
+                    placeholder="e.g. 09:00 PM – 11:00 PM" 
+                    [ngModel]="gameTimeSlot()" 
+                    (ngModelChange)="gameTimeSlot.set($event)">
+                </div>
+              </div>
+              <span class="field-hint" style="font-size: 0.76rem; color: #64748B; margin-top: 5px; display: block;">
+                💡 <strong>Always 2 Hours standard by default</strong> (e.g. 09:00 PM – 11:00 PM). Pick any start time or preset above!
+              </span>
             </div>
 
             <div class="form-field" style="margin-top: 10px;">
@@ -1141,7 +1181,7 @@
                   <span class="mp-micro-label">COURT TIMING</span>
                   <div class="mp-time-highlight">
                     <span class="mp-clock-icon">⏰</span>
-                    <span class="mp-time-text mono">{{ match.timeSlot || '08:00 PM – 10:00 PM' }}</span>
+                    <span class="mp-time-text mono">{{ match.timeSlot || '09:00 PM – 11:00 PM' }}</span>
                   </div>
                   <span class="mp-session-type">🏸 Badminton Match Session</span>
                 </div>

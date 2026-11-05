@@ -5573,3 +5573,126 @@
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   DYNAMIC 2-HOUR COURT TIMING SELECTOR
+   ========================================================================== */
+.timing-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.duration-selector-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.duration-lbl {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.duration-chip-btn {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.duration-chip-btn:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
+.duration-chip-btn.is-active {
+  background: #2563EB;
+  border-color: #2563EB;
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.venue-preset-chip.popular-chip {
+  border-color: #F59E0B;
+  background: rgba(245, 158, 11, 0.08);
+  font-weight: 800;
+}
+
+.venue-preset-chip.popular-chip.active {
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+  border-color: #1D4ED8 !important;
+  color: #FFFFFF !important;
+}
+
+.dynamic-time-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.start-time-dropdown-wrap {
+  width: 160px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-input-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sub-time-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.start-time-select {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: #FFFFFF;
+}
+
+.slot-highlight-input {
+  font-weight: 800;
+  color: #1E40AF !important;
+  background: #EFF6FF !important;
+  border-color: #93C5FD !important;
+}
+
+@media (max-width: 640px) {
+  .timing-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .dynamic-time-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .start-time-dropdown-wrap {
+    width: 100%;
+  }
+}

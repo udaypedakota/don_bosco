@@ -836,7 +836,7 @@ app.post('/api/games', async (req, res) => {
   const newGame = {
     id: 'g-' + Date.now(),
     date: date || new Date().toISOString().split('T')[0],
-    timeSlot: timeSlot || '08:00 PM – 10:00 PM',
+    timeSlot: timeSlot || '09:00 PM – 11:00 PM',
     venue: venue || 'Donbosco (Moti Nagar)',
     courtRent: cRent,
     shuttleCost: sCost,
