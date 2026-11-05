@@ -65,7 +65,7 @@ function createPaymentReceiptHtml({ playerName, amount, mode, utr, date, status,
             <!-- Top Branding Header -->
             <tr>
               <td style="padding: 30px 24px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); text-align: center;">
-                <div style="font-size: 32px; line-height: 1; margin-bottom: 8px;">🏸</div>
+                <img src="https://smash-club-two.vercel.app/assets/badminton-app-icon.png" width="56" height="56" alt="Smash Club" style="width: 56px; height: 56px; border-radius: 14px; display: inline-block; margin-bottom: 10px; border: 2px solid rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
                 <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 0.5px;">DON BOSCO SMASH CLUB</h1>
                 <p style="margin: 6px 0 0; color: #d1fae5; font-size: 13px; font-weight: 500;">Moti Nagar Badminton Arena, Hyderabad</p>
               </td>
@@ -179,7 +179,7 @@ function createPaymentRejectedHtml({ playerName, amount, mode, utr, date, reason
             <!-- Header -->
             <tr>
               <td style="padding: 28px 24px; background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); text-align: center;">
-                <div style="font-size: 32px; line-height: 1; margin-bottom: 8px;">🏸</div>
+                <img src="https://smash-club-two.vercel.app/assets/badminton-app-icon.png" width="56" height="56" alt="Smash Club" style="width: 56px; height: 56px; border-radius: 14px; display: inline-block; margin-bottom: 10px; border: 2px solid rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
                 <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800;">DON BOSCO SMASH CLUB</h1>
                 <p style="margin: 6px 0 0; color: #fee2e2; font-size: 13px;">Moti Nagar Badminton Arena, Hyderabad</p>
               </td>
